@@ -14,6 +14,7 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 final readonly class AutoAcceptProductReviewListener
 {
     private const GRAPH = 'sylius_product_review';
+
     private const TRANSITION = 'accept';
 
     public function __construct(

@@ -22,6 +22,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 final readonly class AdminLoginThroughShopListener
 {
     private const CSRF_PARAMETER = '_csrf_shop_security_token';
+
     private const CSRF_TOKEN_ID = 'shop_authenticate';
 
     public function __construct(
@@ -82,7 +83,7 @@ final readonly class AdminLoginThroughShopListener
         $event->setResponse(
             new RedirectResponse(
                 $this->urlGenerator->generate('sylius_admin_dashboard'),
-            )
+            ),
         );
     }
 }
