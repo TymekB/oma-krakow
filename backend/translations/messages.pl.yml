@@ -55,3 +55,9 @@ sylius:
         there_are_no_taxons_to_display: 'Brak kategorii do wyświetlenia'
         there_is_no_main_taxon_for_this_product: 'Brak kategorii głównej dla tego produktu'
         manage_product_positions_in_taxon: 'Zarządzaj pozycjami produktów w %taxon_name%'
+
+oma:
+    google_login:
+        button: 'Kontynuuj z Google'
+        or: 'albo'
+        failed: 'Logowanie przez Google nie powiodło się. Spróbuj ponownie.'

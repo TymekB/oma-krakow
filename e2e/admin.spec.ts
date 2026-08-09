@@ -46,6 +46,17 @@ test.describe('Panel admina', () => {
     await expect(page.getByRole('heading', { name: /Zamówienia/i }).first()).toBeVisible();
   });
 
+  test('kolumna Kanał znika przy jednym kanale', async ({ page }) => {
+    for (const url of ['/admin/orders/', '/admin/payments/', '/admin/shipments/']) {
+      await page.goto(url);
+
+      const headers = await page.locator('thead th').allTextContents();
+      const trimmed = headers.map((header) => header.trim());
+
+      expect(trimmed, `${url} nie pokazuje kolumny Kanał`).not.toContain('Kanał');
+    }
+  });
+
   test('metody płatności: Stripe jest na liście', async ({ page }) => {
     await page.goto('/admin/payment-methods/');
 

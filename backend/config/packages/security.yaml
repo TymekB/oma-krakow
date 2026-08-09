@@ -74,6 +74,8 @@ security:
             pattern: "%sylius.security.shop_regex%"
             provider: sylius_shop_user_provider
             user_checker: security.user_checker.chain.shop
+            custom_authenticator:
+                - App\Security\GoogleShopAuthenticator
             form_login:
                 success_handler: sylius.authentication.success_handler
                 failure_handler: sylius.authentication.failure_handler
@@ -114,6 +116,7 @@ security:
     access_control:
         - { path: "%sylius.security.admin_regex%/forgotten-password", role: PUBLIC_ACCESS }
         - { path: "%sylius.security.admin_regex%/login", role: PUBLIC_ACCESS }
+        - { path: "%sylius.security.shop_regex%/connect/google", role: PUBLIC_ACCESS }
         - { path: "%sylius.security.shop_regex%/login", role: PUBLIC_ACCESS }
         - { path: "%sylius.security.shop_regex%/register", role: PUBLIC_ACCESS }
         - { path: "%sylius.security.shop_regex%/verify", role: PUBLIC_ACCESS }

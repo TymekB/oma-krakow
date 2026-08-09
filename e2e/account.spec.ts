@@ -37,3 +37,22 @@ test.describe('Konto klienta', () => {
     await expect(page.locator('body')).toContainText(/nieprawidłow|invalid|błęd/i);
   });
 });
+
+test.describe('Logowanie Google', () => {
+  test('przycisk jest ukryty, dopóki brakuje credentiali', async ({ page }) => {
+    await page.goto('/sklep/login');
+
+    const configured = await page.getByRole('link', { name: /Kontynuuj z Google/i }).count();
+
+    if (configured === 0) {
+      const response = await page.request.get('/sklep/connect/google', { maxRedirects: 0 });
+      expect(response.status(), 'bez kluczy trasa ma zwracać 404, nie błąd serwera').toBe(404);
+
+      return;
+    }
+
+    const response = await page.request.get('/sklep/connect/google', { maxRedirects: 0 });
+    expect(response.status()).toBe(302);
+    expect(response.headers()['location']).toContain('accounts.google.com');
+  });
+});
