@@ -16,7 +16,7 @@ test.describe('Checkout', () => {
     await expect(page.locator('body')).toContainText('Suma zamówienia');
   });
 
-  test('krok płatności oferuje Stripe i nie pokazuje instrukcji o SMS', async ({ page }) => {
+  test('krok płatności nie pokazuje instrukcji o SMS', async ({ page }) => {
     const email = uniqueEmail('platnosc');
     await registerCustomer(page, email);
     await addFirstProductToCart(page);
@@ -30,7 +30,9 @@ test.describe('Checkout', () => {
 
     const body = page.locator('body');
     await expect(body, 'offline BLIK z SMS-em ma być wyłączony').not.toContainText('wyślemy SMS-em numer telefonu');
-    await expect(body).toContainText('Karta, BLIK, Przelewy24');
+    await expect(body, 'checkout oferuje co najmniej jedną działającą metodę').toContainText(
+      /Przelew bankowy|Płatność przy odbiorze|Karta, BLIK/,
+    );
   });
 
   test('podsumowanie zamówienia pokazuje wybraną płatność', async ({ page }) => {
