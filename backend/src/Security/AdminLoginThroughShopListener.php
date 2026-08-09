@@ -14,6 +14,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -25,6 +26,9 @@ final readonly class AdminLoginThroughShopListener
 
     private const CSRF_TOKEN_ID = 'shop_authenticate';
 
+    /**
+     * @param UserProviderInterface<UserInterface> $adminUserProvider
+     */
     public function __construct(
         #[Autowire(service: 'sylius.admin_user_provider.email_or_name_based')]
         private UserProviderInterface $adminUserProvider,
