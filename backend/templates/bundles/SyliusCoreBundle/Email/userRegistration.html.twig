@@ -1,0 +1,18 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'sylius.email.user_registration.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {{ oma.greeting('sylius.email.user_registration.welcome_to_our_store'|trans({}, null, localeCode)) }}
+    {{ oma.lead('sylius.email.user_registration.you_have_just_been_registered'|trans({}, null, localeCode) ~ ' ' ~ user.username ~ '.') }}
+
+    {% if sylius_bundle_loaded_checker('SyliusShopBundle') %}
+        <div style="text-align: center;">
+            {{ oma.button(url('sylius_shop_homepage', {'_locale': localeCode}), 'sylius.email.user_registration.start_shopping'|trans({}, null, localeCode)) }}
+        </div>
+    {% endif %}
+{% endblock %}

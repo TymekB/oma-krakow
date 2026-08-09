@@ -1,0 +1,2 @@
+sylius_mollie:
+    resource: "@SyliusMolliePlugin/config/routes.yaml"

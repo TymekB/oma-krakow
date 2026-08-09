@@ -1,0 +1,55 @@
+name: oma-shop
+
+services:
+  app:
+    build:
+      context: ./docker/frankenphp
+    ports:
+      - '8080:80'
+    volumes:
+      - ./:/app:cached
+      - ./docker/frankenphp/Caddyfile:/etc/frankenphp/Caddyfile:ro
+      - app_var:/app/var
+      - composer_cache:/root/.composer/cache
+      - caddy_data:/data
+    environment:
+      APP_ENV: ${OMA_ENV:-prod}
+      APP_DEBUG: ${OMA_DEBUG:-0}
+      APP_RUNTIME: Runtime\FrankenPhpSymfony\Runtime
+      FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG-}
+      DATABASE_URL: mysql://sylius:sylius@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
+      DEFAULT_URI: ${OMA_DEFAULT_URI:-http://localhost:8080}
+      MAILER_DSN: smtp://mailpit:1025
+      MESSENGER_TRANSPORT_DSN: sync://
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sylius_oma
+      MYSQL_USER: sylius
+      MYSQL_PASSWORD: sylius
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-uroot', '-proot']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '8025:8025'
+
+volumes:
+  mysql_data:
+  composer_cache:
+  caddy_data:
+  app_var:

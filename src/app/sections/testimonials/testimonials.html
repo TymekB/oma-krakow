@@ -1,0 +1,21 @@
+<section class="testimonials section" id="opinie">
+  <div class="shell">
+    <header class="testimonials__head">
+      <p class="eyebrow" [omaReveal]="0">Opinie</p>
+      <h2 class="title" [omaReveal]="60">Co mówią osoby,<br />które już tu były</h2>
+    </header>
+
+    <div class="testimonials__grid">
+      @for (testimonial of testimonials; track testimonial.author; let i = $index) {
+        <figure class="testimonials__card" [omaReveal]="i * 90">
+          <span class="testimonials__quote-mark" aria-hidden="true">”</span>
+          <blockquote>{{ testimonial.quote }}</blockquote>
+          <figcaption>
+            <span class="testimonials__author">{{ testimonial.author }}</span>
+            <span class="testimonials__context">{{ testimonial.context }}</span>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>

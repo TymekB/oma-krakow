@@ -1,0 +1,16 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'sylius.email.user.account_verification.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {{ oma.greeting('sylius.email.user.account_verification.greeting'|trans({}, null, localeCode), user.username) }}
+    {{ oma.lead('sylius.email.user.account_verification.strategy'|trans({}, null, localeCode)) }}
+
+    <div style="text-align: center;">
+        {{ oma.button(url('sylius_shop_user_verification', { 'token': user.emailVerificationToken, '_locale': localeCode }), 'sylius.email.user.account_verification.statement'|trans({}, null, localeCode)) }}
+    </div>
+{% endblock %}

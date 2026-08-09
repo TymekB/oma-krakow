@@ -1,0 +1,38 @@
+<footer class="footer grain-dark">
+  <div class="shell footer__grid">
+    <div class="footer__brand">
+      <span class="footer__wordmark">oma</span>
+      <p class="footer__claim">Fizjoterapia · ZOGA Face · ERT Marii Margo · Masaż</p>
+      <p class="footer__owner">{{ contact.owner }} — {{ contact.role }}</p>
+    </div>
+
+    <nav class="footer__col" aria-label="Oferta">
+      <h2>Oferta</h2>
+      @for (treatment of treatments; track treatment.slug) {
+        <a [href]="'#' + treatment.slug">{{ treatment.name }}</a>
+      }
+    </nav>
+
+    <nav class="footer__col" aria-label="Serwis">
+      <h2>Serwis</h2>
+      <a [href]="shopUrl">Sklep</a>
+      <a href="#o-mnie">O mnie</a>
+      <a href="#gabinet">Gabinet</a>
+      <a href="#cennik">Cennik</a>
+      <a href="#opinie">Opinie</a>
+    </nav>
+
+    <div class="footer__col">
+      <h2>Kontakt</h2>
+      <a [href]="contact.phoneHref">{{ contact.phone }}</a>
+      <a [href]="'mailto:' + contact.email">{{ contact.email }}</a>
+      <a [href]="contact.instagram" target="_blank" rel="noopener">{{ contact.instagramHandle }}</a>
+      <p class="footer__address">{{ contact.street }}, {{ contact.city }}</p>
+    </div>
+  </div>
+
+  <div class="shell footer__bottom">
+    <span>© {{ year }} OMA — {{ contact.owner }}</span>
+    <a href="#start">Wróć na górę ↑</a>
+  </div>
+</footer>

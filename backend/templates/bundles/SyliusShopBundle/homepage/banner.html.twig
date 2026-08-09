@@ -1,0 +1,46 @@
+<div class="mb-6" role="banner" aria-label="{{ 'sylius.ui.home'|trans }}">
+    <h1 class="visually-hidden">{{ sylius.channel.name }}</h1>
+    <div class="oma-banner">
+        <p class="oma-banner__eyebrow">Fizjoterapia · ZOGA Face · ERT Marii Margo · Masaż</p>
+        <p class="oma-banner__title">Sklep gabinetu <em>OMA</em></p>
+        <p class="oma-banner__lead">Olejki, kosmetyki i vouchery na zabiegi — te same, których używamy w gabinecie w Krakowie.</p>
+    </div>
+</div>
+
+<style>
+    .oma-banner {
+        background-color: #5a1f2c;
+        background-image: linear-gradient(rgba(59, 20, 29, .55), rgba(59, 20, 29, .55)), url('/assets/img/oma-texture.jpg');
+        background-size: cover;
+        background-position: center;
+        color: #faf6f1;
+        padding: clamp(2.5rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+        text-align: center;
+    }
+
+    .oma-banner__eyebrow {
+        margin: 0 0 1.25rem;
+        font-size: .7rem;
+        letter-spacing: .3em;
+        text-transform: uppercase;
+        color: rgba(250, 246, 241, .6);
+    }
+
+    .oma-banner__title {
+        margin: 0;
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: clamp(2rem, 5vw, 3.25rem);
+        line-height: 1.1;
+    }
+
+    .oma-banner__title em {
+        font-style: italic;
+        color: #c2909a;
+    }
+
+    .oma-banner__lead {
+        margin: 1.25rem auto 0;
+        max-width: 48ch;
+        color: rgba(250, 246, 241, .75);
+    }
+</style>

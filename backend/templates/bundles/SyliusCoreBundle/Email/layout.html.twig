@@ -1,0 +1,28 @@
+{% block body %}
+    {% autoescape false %}
+        {% set shop_url = sylius_bundle_loaded_checker('SyliusShopBundle') ? url('sylius_shop_homepage', {'_locale': localeCode}) : null %}
+
+        <div style="margin: 0; padding: 32px 16px; background: #f4f3f0; font-family: 'Jost', 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 300; font-size: 16px; line-height: 1.7; color: #2a2320;">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <div style="text-align: center; padding-bottom: 28px;">
+                    {% if shop_url %}<a href="{{ shop_url }}" style="text-decoration: none;">{% endif %}
+                        <span style="font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-size: 40px; line-height: 1; color: #5a1f2c;">oma</span>
+                        <span style="font-size: 11px; letter-spacing: 0.34em; text-transform: uppercase; color: #9c8d83; vertical-align: middle; padding-left: 8px;">Kraków</span>
+                    {% if shop_url %}</a>{% endif %}
+                </div>
+
+                <div style="background: #ffffff; border: 1px solid #dcd9d4; border-radius: 14px; padding: 40px 32px;">
+                    {% block content %}{% endblock %}
+                </div>
+
+                <div style="text-align: center; padding: 24px 8px 0; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8d83;">
+                    {% if shop_url %}
+                        <a href="{{ shop_url }}" style="color: #8a3746; text-decoration: none;">oma · gabinet kameralny</a>
+                    {% else %}
+                        oma · gabinet kameralny
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endautoescape %}
+{% endblock %}

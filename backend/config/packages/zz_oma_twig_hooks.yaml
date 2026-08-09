@@ -1,0 +1,26 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.product.create.content.form.side_navigation':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product.create.content.form.sections':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product.update.content.form.side_navigation':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product.update.content.form.sections':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product_variant.create.content.form.side_navigation':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product_variant.create.content.form.sections':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product_variant.update.content.form.side_navigation':
+            esd: { enabled: false }
+            mollie: { enabled: false }
+        'sylius_admin.product_variant.update.content.form.sections':
+            esd: { enabled: false }
+            mollie: { enabled: false }

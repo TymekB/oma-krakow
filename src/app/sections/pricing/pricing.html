@@ -1,0 +1,31 @@
+<section class="pricing section" id="cennik">
+  <div class="shell">
+    <header class="pricing__head">
+      <p class="eyebrow" [omaReveal]="0">Cennik</p>
+      <h2 class="title" [omaReveal]="60">Przejrzyste ceny,<br />bez ukrytych dopłat</h2>
+    </header>
+
+    <div class="pricing__groups">
+      @for (group of groups; track group.name; let i = $index) {
+        <div class="pricing__group" [omaReveal]="i * 90">
+          <h3 class="pricing__group-name">{{ group.name }}</h3>
+          <ul class="pricing__items">
+            @for (item of group.items; track item.name + item.duration) {
+              <li class="pricing__item">
+                <span class="pricing__item-name">{{ item.name }}</span>
+                <span class="pricing__item-dots" aria-hidden="true"></span>
+                <span class="pricing__item-duration">{{ item.duration }}</span>
+                <span class="pricing__item-price">{{ item.price }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <p class="pricing__note" [omaReveal]="120">
+      Pierwsza wizyta zawsze obejmuje wywiad i badanie. Terapie twarzy najlepiej działają w serii — pakiet ustalamy po
+      pierwszym spotkaniu. Płatność gotówką lub BLIK-iem na miejscu.
+    </p>
+  </div>
+</section>

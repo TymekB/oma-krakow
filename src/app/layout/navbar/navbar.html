@@ -1,0 +1,43 @@
+<header class="nav" [class.nav--solid]="scrolled() || menuOpen()">
+  <div class="nav__inner shell">
+    <a class="nav__brand" href="#start" (click)="closeMenu()" aria-label="OMA — strona główna">
+      <span class="nav__wordmark">oma</span>
+      <span class="nav__tag">Kraków</span>
+    </a>
+
+    <nav class="nav__links" aria-label="Menu główne">
+      @for (link of links; track link.href) {
+        <a class="nav__link" [href]="link.href">{{ link.label }}</a>
+      }
+    </nav>
+
+    <a class="btn btn--light nav__cta" href="#kontakt">Umów wizytę</a>
+
+    <button
+      class="nav__burger"
+      type="button"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="nav-mobile"
+      [attr.aria-label]="menuOpen() ? 'Zamknij menu' : 'Otwórz menu'"
+      (click)="toggleMenu()"
+    >
+      <span [class.nav__burger-line--a]="menuOpen()"></span>
+      <span [class.nav__burger-line--b]="menuOpen()"></span>
+    </button>
+  </div>
+
+  <div
+    class="nav__mobile"
+    id="nav-mobile"
+    [class.nav__mobile--open]="menuOpen()"
+    [attr.inert]="menuOpen() ? null : ''"
+  >
+    @for (link of links; track link.href) {
+      <a class="nav__mobile-link" [href]="link.href" (click)="closeMenu()">{{ link.label }}</a>
+    }
+    <a class="btn btn--light nav__mobile-cta" href="#kontakt" (click)="closeMenu()">Umów wizytę</a>
+    <a class="nav__mobile-ig" [href]="contact.instagram" target="_blank" rel="noopener">
+      {{ contact.instagramHandle }}
+    </a>
+  </div>
+</header>

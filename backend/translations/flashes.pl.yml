@@ -1,0 +1,3 @@
+sylius:
+    review:
+        wait_for_the_acceptation: 'Dziękujemy! Twoja opinia została opublikowana.'

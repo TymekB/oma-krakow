@@ -1,0 +1,47 @@
+<section class="about section" id="o-mnie">
+  <div class="shell about__grid">
+    <figure class="about__figure" [omaReveal]="0">
+      <img
+        src="assets/img/natalia.jpg"
+        alt="Natalia Podgórska — fizjoterapeutka, twórczyni OMA"
+        width="804"
+        height="922"
+        loading="lazy"
+      />
+      <figcaption>
+        <span class="about__name">{{ contact.owner }}</span>
+        <span class="about__role">{{ contact.role }}</span>
+      </figcaption>
+    </figure>
+
+    <div class="about__content">
+      <p class="eyebrow" [omaReveal]="0">Poznajmy się bliżej</p>
+      <h2 class="title" [omaReveal]="60">
+        OMA to gabinet,<br />
+        w którym dostajesz<br />
+        <em>cały mój czas</em>
+      </h2>
+      <hr class="rule" />
+
+      <p class="lead" [omaReveal]="120">
+        Jestem fizjoterapeutką. Przez lata pracy przekonałam się, że najwięcej zmienia nie kolejna technika, tylko uważne
+        spojrzenie na całego człowieka — na to, jak śpi, oddycha, siedzi i co nosi w napiętej żuchwie.
+      </p>
+
+      <p class="about__text" [omaReveal]="160">
+        Dlatego stworzyłam OMA — miejsce, w którym łączę fizjoterapię z terapią twarzy: ZOGA Face, metodą ERT Marii Margo
+        i masażem. Nie pracuję na gotowych protokołach. Każda wizyta zaczyna się od rozmowy i badania, a kończy
+        konkretnym planem na kolejne tygodnie.
+      </p>
+
+      <ul class="about__values">
+        @for (value of values; track value.title; let i = $index) {
+          <li [omaReveal]="200 + i * 60">
+            <h3>{{ value.title }}</h3>
+            <p>{{ value.text }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,2 @@
+sylius_adyen:
+    resource: "@SyliusAdyenPlugin/config/routes.yaml"

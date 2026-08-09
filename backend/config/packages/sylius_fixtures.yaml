@@ -1,0 +1,271 @@
+sylius_fixtures:
+    suites:
+        oma:
+            listeners:
+                orm_purger: ~
+                images_purger: ~
+                logger: ~
+
+            fixtures:
+                locale:
+                    options:
+                        locales:
+                            - 'pl_PL'
+
+                currency:
+                    options:
+                        currencies:
+                            - 'PLN'
+
+                geographical:
+                    options:
+                        countries:
+                            - 'PL'
+                        zones:
+                            PL:
+                                name: 'Polska'
+                                countries:
+                                    - 'PL'
+
+                menu_taxon:
+                    name: taxon
+                    options:
+                        custom:
+                            category:
+                                code: 'category'
+                                name: 'Kategorie'
+                                slug: 'kategorie'
+                                translations:
+                                    pl_PL:
+                                        name: 'Kategorie'
+                                        slug: 'kategorie'
+                                children:
+                                    -   code: 'pielegnacja'
+                                        name: 'Pielęgnacja'
+                                        translations:
+                                            pl_PL:
+                                                name: 'Pielęgnacja'
+                                                slug: 'pielegnacja'
+                                    -   code: 'aromaterapia'
+                                        name: 'Aromaterapia'
+                                        translations:
+                                            pl_PL:
+                                                name: 'Aromaterapia'
+                                                slug: 'aromaterapia'
+                                    -   code: 'vouchery'
+                                        name: 'Vouchery'
+                                        translations:
+                                            pl_PL:
+                                                name: 'Vouchery'
+                                                slug: 'vouchery'
+
+                tax_category:
+                    options:
+                        custom:
+                            standard:
+                                code: 'standard'
+                                name: 'VAT 23%'
+                            services:
+                                code: 'services'
+                                name: 'Usługi'
+
+                tax_rate:
+                    options:
+                        custom:
+                            vat_23:
+                                code: 'vat_23'
+                                name: 'VAT 23%'
+                                zone: 'PL'
+                                category: 'standard'
+                                amount: 0.23
+                            vat_services:
+                                code: 'vat_services'
+                                name: 'VAT 23% (usługi)'
+                                zone: 'PL'
+                                category: 'services'
+                                amount: 0.23
+
+                channel:
+                    options:
+                        custom:
+                            oma:
+                                name: 'OMA Sklep'
+                                code: 'OMA_WEB'
+                                hostname: 'localhost'
+                                enabled: true
+                                locales:
+                                    - 'pl_PL'
+                                default_locale: 'pl_PL'
+                                currencies:
+                                    - 'PLN'
+                                base_currency: 'PLN'
+                                default_tax_zone: 'PL'
+                                tax_calculation_strategy: 'order_items_based'
+                                menu_taxon: 'category'
+                                contact_email: 'kontakt@oma-fizjo.pl'
+                                contact_phone_number: '+48 000 000 000'
+                                shop_billing_data:
+                                    company: 'OMA Natalia Podgórska'
+                                    tax_id: '0000000000'
+                                    country_code: 'PL'
+                                    street: 'ul. Karmelicka 00/0'
+                                    city: 'Kraków'
+                                    postcode: '31-000'
+
+                payment_method:
+                    options:
+                        custom:
+                            blik:
+                                code: 'blik'
+                                name: 'BLIK — przelew na telefon'
+                                description: 'Szybki przelew BLIK na numer telefonu gabinetu.'
+                                instructions: 'Po złożeniu zamówienia wyślemy SMS-em numer telefonu do przelewu BLIK. Zamówienie realizujemy po zaksięgowaniu wpłaty.'
+                                enabled: true
+                                channels:
+                                    - 'OMA_WEB'
+                            bank_transfer:
+                                code: 'bank_transfer'
+                                name: 'Przelew bankowy'
+                                description: 'Tradycyjny przelew na konto gabinetu.'
+                                instructions: 'Dane do przelewu wyślemy w mailu z potwierdzeniem zamówienia.'
+                                enabled: true
+                                channels:
+                                    - 'OMA_WEB'
+                            cash_on_delivery:
+                                code: 'cash_on_delivery'
+                                name: 'Płatność przy odbiorze'
+                                description: 'Zapłać gotówką lub kartą przy odbiorze w gabinecie.'
+                                enabled: true
+                                channels:
+                                    - 'OMA_WEB'
+                            stripe:
+                                code: 'stripe'
+                                name: 'Karta, BLIK, Przelewy24, Apple Pay, Google Pay'
+                                description: 'Płatność online obsługiwana przez Stripe.'
+                                gatewayName: 'Stripe'
+                                gatewayFactory: 'stripe_checkout'
+                                usePayum: false
+                                gatewayConfig:
+                                    publishable_key: '%env(STRIPE_PUBLISHABLE_KEY)%'
+                                    secret_key: '%env(STRIPE_SECRET_KEY)%'
+                                    use_authorize: false
+                                    enable_express_checkout: true
+                                enabled: false
+                                channels:
+                                    - 'OMA_WEB'
+
+                shipping_category:
+                    options:
+                        custom:
+                            default:
+                                code: 'default'
+                                name: 'Standardowa'
+
+                shipping_method:
+                    options:
+                        custom:
+                            inpost_paczkomaty:
+                                code: 'inpost_paczkomaty'
+                                name: 'InPost Paczkomaty'
+                                description: 'Dostawa do wybranego paczkomatu InPost.'
+                                enabled: true
+                                zone: 'PL'
+                                calculator:
+                                    type: 'flat_rate'
+                                    configuration:
+                                        OMA_WEB:
+                                            amount: 1399
+                                channels:
+                                    - 'OMA_WEB'
+                            inpost_kurier:
+                                code: 'inpost_kurier'
+                                name: 'InPost Kurier'
+                                description: 'Przesyłka kurierska InPost pod wskazany adres.'
+                                enabled: true
+                                zone: 'PL'
+                                calculator:
+                                    type: 'flat_rate'
+                                    configuration:
+                                        OMA_WEB:
+                                            amount: 1799
+                                channels:
+                                    - 'OMA_WEB'
+                            personal_pickup:
+                                code: 'personal_pickup'
+                                name: 'Odbiór w gabinecie'
+                                description: 'Odbiór osobisty w gabinecie przy ul. Karmelickiej w Krakowie.'
+                                enabled: true
+                                zone: 'PL'
+                                calculator:
+                                    type: 'flat_rate'
+                                    configuration:
+                                        OMA_WEB:
+                                            amount: 0
+                                channels:
+                                    - 'OMA_WEB'
+
+                admin_user:
+                    options:
+                        custom:
+                            -   email: 'admin@oma-fizjo.pl'
+                                username: 'admin'
+                                password: 'oma2026!'
+                                enabled: true
+                                locale_code: 'pl_PL'
+                                first_name: 'Natalia'
+                                last_name: 'Podgórska'
+
+                product:
+                    options:
+                        custom:
+                            -   name: 'Olejek do ciała — bergamotka, lawenda, pomarańcza'
+                                code: 'OLEJEK_CIALO_BLP'
+                                slug: 'olejek-do-ciala-bergamotka-lawenda-pomarancza'
+                                short_description: 'Naturalny olejek do ciała używany podczas masażu w OMA.'
+                                description: 'Kompozycja bergamotki, lawendy i pomarańczy na bazie olejów tłoczonych na zimno. Dobrze się rozprowadza, nie klei i wchłania się bez tłustego filmu. Pojemność 100 ml.'
+                                enabled: true
+                                tracked: false
+                                tax_category: 'standard'
+                                channels:
+                                    - 'OMA_WEB'
+                                main_taxon: 'pielegnacja'
+                                taxons:
+                                    - 'pielegnacja'
+                                images:
+                                    -   path: '/app/assets/fixtures/olejek-do-ciala.jpg'
+                                        type: 'main'
+
+                            -   name: 'Olejek eteryczny — eukaliptus'
+                                code: 'OLEJEK_ETER_EUKALIPTUS'
+                                slug: 'olejek-eteryczny-eukaliptus'
+                                short_description: 'Olejek eteryczny do dyfuzora i inhalacji, 10 ml.'
+                                description: 'Czysty olejek eteryczny z liści eukaliptusa. Udrażnia, orzeźwia i dobrze sprawdza się jesienią oraz zimą — do dyfuzora, kąpieli lub inhalacji.'
+                                enabled: true
+                                tracked: false
+                                tax_category: 'standard'
+                                channels:
+                                    - 'OMA_WEB'
+                                main_taxon: 'aromaterapia'
+                                taxons:
+                                    - 'aromaterapia'
+                                images:
+                                    -   path: '/app/assets/fixtures/olejek-eteryczny.jpg'
+                                        type: 'main'
+
+                            -   name: 'Voucher — masaż relaksacyjny 60 min'
+                                code: 'VOUCHER_MASAZ_60'
+                                slug: 'voucher-masaz-relaksacyjny-60-min'
+                                short_description: 'Karta podarunkowa na masaż relaksacyjny w gabinecie OMA.'
+                                description: 'Voucher na godzinny masaż relaksacyjny w gabinecie OMA w Krakowie. Ważny 6 miesięcy od daty zakupu, do wykorzystania po wcześniejszym umówieniu terminu.'
+                                enabled: true
+                                tracked: false
+                                shipping_required: false
+                                tax_category: 'services'
+                                channels:
+                                    - 'OMA_WEB'
+                                main_taxon: 'vouchery'
+                                taxons:
+                                    - 'vouchery'
+                                images:
+                                    -   path: '/app/assets/fixtures/karta-podarunkowa.jpg'
+                                        type: 'main'

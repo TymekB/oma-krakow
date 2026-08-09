@@ -1,0 +1,102 @@
+<section class="contact section" id="kontakt">
+  <div class="shell contact__grid">
+    <div class="contact__info">
+      <p class="eyebrow" [omaReveal]="0">Kontakt</p>
+      <h2 class="title" [omaReveal]="60">Umówmy Twoją<br /><em>pierwszą wizytę</em></h2>
+      <hr class="rule" />
+
+      <p class="lead" [omaReveal]="120">
+        Najszybciej odpowiadam na Instagramie i telefonicznie. Napisz kilka słów o tym, co Cię do mnie sprowadza —
+        dobiorę terapię i termin.
+      </p>
+
+      <dl class="contact__details" [omaReveal]="160">
+        <div>
+          <dt>Gabinet</dt>
+          <dd>{{ contact.street }}<br />{{ contact.city }}</dd>
+        </div>
+        <div>
+          <dt>Telefon</dt>
+          <dd><a [href]="contact.phoneHref">{{ contact.phone }}</a></dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a [href]="'mailto:' + contact.email">{{ contact.email }}</a></dd>
+        </div>
+        <div>
+          <dt>Instagram</dt>
+          <dd>
+            <a [href]="contact.instagram" target="_blank" rel="noopener">{{ contact.instagramHandle }}</a>
+          </dd>
+        </div>
+      </dl>
+
+      <ul class="contact__hours" [omaReveal]="200">
+        @for (entry of contact.hours; track entry.day) {
+          <li>
+            <span>{{ entry.day }}</span>
+            <span>{{ entry.value }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div class="contact__form-wrap" [omaReveal]="120">
+      @if (sent()) {
+        <div class="contact__sent">
+          <h3>Dziękuję!</h3>
+          <p>
+            Otworzyłam Twój program pocztowy z gotową wiadomością. Jeśli nic się nie stało, napisz do mnie bezpośrednio
+            na <a [href]="'mailto:' + contact.email">{{ contact.email }}</a> lub przez Instagram.
+          </p>
+          <button class="btn btn--ghost" type="button" (click)="sent.set(false)">Wypełnij ponownie</button>
+        </div>
+      } @else {
+        <form class="contact__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <h3 class="contact__form-title">Formularz rezerwacji</h3>
+
+          <label class="contact__field">
+            <span>Imię</span>
+            <input type="text" formControlName="name" autocomplete="given-name" placeholder="Jak mam się do Ciebie zwracać?" />
+            @if (invalid('name')) {
+              <small class="contact__error">Podaj imię (min. 2 znaki).</small>
+            }
+          </label>
+
+          <label class="contact__field">
+            <span>Telefon</span>
+            <input type="tel" formControlName="phone" autocomplete="tel" placeholder="+48 000 000 000" />
+            @if (invalid('phone')) {
+              <small class="contact__error">Podaj poprawny numer telefonu.</small>
+            }
+          </label>
+
+          <label class="contact__field">
+            <span>Zabieg</span>
+            <select formControlName="treatment">
+              @for (treatment of treatments; track treatment.slug) {
+                <option [value]="treatment.name">{{ treatment.name }}</option>
+              }
+              <option value="Nie wiem — proszę o pomoc w wyborze">Nie wiem — proszę o pomoc w wyborze</option>
+            </select>
+          </label>
+
+          <label class="contact__field">
+            <span>Wiadomość</span>
+            <textarea
+              formControlName="message"
+              rows="4"
+              placeholder="Co Cię do mnie sprowadza? Jakie terminy Ci pasują?"
+            ></textarea>
+          </label>
+
+          <button class="btn contact__submit" type="submit">Wyślij zgłoszenie</button>
+
+          <p class="contact__consent">
+            Wysyłając formularz, zgadzasz się na kontakt w sprawie umówienia wizyty.
+          </p>
+        </form>
+      }
+    </div>
+  </div>
+</section>

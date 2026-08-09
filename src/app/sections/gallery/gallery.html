@@ -1,0 +1,22 @@
+<section class="gallery section" id="gabinet">
+  <div class="shell">
+    <header class="gallery__head">
+      <div>
+        <p class="eyebrow" [omaReveal]="0">Gabinet</p>
+        <h2 class="title" [omaReveal]="60">Miejsce, w którym ciało<br />samo zwalnia</h2>
+      </div>
+      <p class="lead" [omaReveal]="120">
+        Krakowska kamienica, parkiet w jodełkę, lniane zasłony i światło świec. Bez recepcji, bez kolejki, bez muzyki
+        z głośnika w tle — tylko Ty i godzina, którą sobie podarowałaś.
+      </p>
+    </header>
+
+    <div class="gallery__grid">
+      @for (photo of photos; track photo.src; let i = $index) {
+        <figure class="gallery__item" [class]="'gallery__item--' + photo.span" [omaReveal]="i * 70">
+          <img [src]="photo.src" [alt]="photo.alt" loading="lazy" />
+        </figure>
+      }
+    </div>
+  </div>
+</section>

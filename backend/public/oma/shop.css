@@ -1,0 +1,387 @@
+:root {
+  --oma-wine-900: #3b141d;
+  --oma-wine-800: #5a1f2c;
+  --oma-wine-700: #6e2937;
+  --oma-wine-600: #8a3746;
+  --oma-wine-300: #c2909a;
+  --oma-cream: #faf6f1;
+  --oma-paper: #f4f3f0;
+  --oma-paper-alt: #e8e6e2;
+  --oma-paper-line: #dcd9d4;
+  --oma-paper-line-strong: #c7c3bd;
+  --oma-sand-100: #f2eae1;
+  --oma-sand-200: #e5d9cb;
+  --oma-sand-300: #cfbdab;
+  --oma-ink: #2a2320;
+  --oma-ink-soft: #6f6259;
+  --oma-ink-faint: #9c8d83;
+  --oma-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --oma-body: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+
+  --bs-body-bg: var(--oma-paper);
+  --bs-body-color: var(--oma-ink);
+  --bs-body-font-family: var(--oma-body);
+  --bs-body-font-weight: 300;
+  --bs-primary: var(--oma-wine-800);
+  --bs-primary-rgb: 90, 31, 44;
+  --bs-link-color: var(--oma-wine-700);
+  --bs-link-hover-color: var(--oma-wine-600);
+  --bs-link-color-rgb: 110, 41, 55;
+  --bs-border-color: var(--oma-sand-200);
+  --bs-secondary-color: var(--oma-ink-soft);
+  --bs-emphasis-color: var(--oma-wine-800);
+  --bs-heading-color: var(--oma-wine-800);
+  --bs-border-radius: 0.75rem;
+  --bs-border-radius-lg: 1rem;
+}
+
+body {
+  background: var(--oma-paper);
+  color: var(--oma-ink);
+  font-family: var(--oma-body);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='3' stitchTiles='stitch' seed='11'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.58 0'/></filter><rect width='72' height='72' filter='url(%23n)'/></svg>");
+  background-size: 72px 72px;
+  background-repeat: repeat;
+}
+
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5 {
+  font-family: var(--oma-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--oma-wine-800);
+}
+
+a {
+  color: var(--oma-wine-700);
+}
+
+a:hover {
+  color: var(--oma-wine-600);
+}
+
+.bg-black,
+.bg-dark {
+  background: var(--oma-wine-800) !important;
+}
+
+.oma-topbar__message {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(250, 246, 241, 0.75);
+}
+
+header .bg-black a,
+.bg-black a {
+  color: rgba(250, 246, 241, 0.85);
+}
+
+.navbar,
+header .container,
+.sticky-top {
+  background-color: transparent;
+}
+
+header,
+main,
+footer {
+  background-color: transparent;
+}
+
+.navbar,
+.navbar-nav {
+  --bs-navbar-active-color: var(--oma-wine-700);
+  --bs-navbar-hover-color: var(--oma-wine-600);
+  --bs-navbar-brand-color: var(--oma-wine-800);
+  --bs-navbar-brand-hover-color: var(--oma-wine-700);
+  --bs-nav-link-hover-color: var(--oma-wine-600);
+  --bs-nav-link-color: var(--oma-ink);
+}
+
+.navbar .nav-link.active,
+.navbar .nav-link:hover,
+.navbar .nav-link:focus,
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link.show {
+  color: var(--oma-wine-700) !important;
+}
+
+.btn {
+  border-radius: 2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 0.8rem 1.9rem;
+  transition: background-color 0.35s ease, color 0.35s ease, transform 0.35s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary,
+.btn-dark {
+  --bs-btn-bg: var(--oma-wine-800);
+  --bs-btn-border-color: var(--oma-wine-800);
+  --bs-btn-hover-bg: var(--oma-wine-600);
+  --bs-btn-hover-border-color: var(--oma-wine-600);
+  --bs-btn-active-bg: var(--oma-wine-900);
+  --bs-btn-active-border-color: var(--oma-wine-900);
+  --bs-btn-color: var(--oma-cream);
+  --bs-btn-hover-color: var(--oma-cream);
+  --bs-btn-disabled-bg: var(--oma-sand-300);
+  --bs-btn-disabled-border-color: var(--oma-sand-300);
+}
+
+.btn-outline-primary,
+.btn-outline-dark,
+.btn-outline-secondary {
+  --bs-btn-color: var(--oma-wine-800);
+  --bs-btn-border-color: var(--oma-wine-800);
+  --bs-btn-hover-bg: var(--oma-wine-800);
+  --bs-btn-hover-border-color: var(--oma-wine-800);
+  --bs-btn-hover-color: var(--oma-cream);
+}
+
+.badge.bg-primary,
+.badge.text-bg-primary {
+  background: var(--oma-wine-800) !important;
+  color: var(--oma-cream) !important;
+}
+
+.card,
+.list-group-item {
+  background: transparent;
+  border-color: var(--oma-sand-200);
+}
+
+.bg-light,
+.bg-white,
+.bg-body-tertiary,
+.bg-body-secondary {
+  background-color: transparent !important;
+}
+
+.form-control,
+.form-select {
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--oma-sand-300);
+  border-radius: 0;
+  padding-inline: 0.15rem;
+  color: var(--oma-ink);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: transparent;
+  border-color: var(--oma-wine-700);
+  box-shadow: none;
+  color: var(--oma-ink);
+}
+
+.form-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--oma-ink-faint);
+}
+
+.form-check-input:checked {
+  background-color: var(--oma-wine-800) !important;
+  border-color: var(--oma-wine-800) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--oma-wine-600);
+  box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
+}
+
+.table-success,
+tr.table-success,
+tr.table-success > * {
+  --bs-table-bg: var(--oma-sand-200);
+  --bs-table-color: var(--oma-ink);
+  --bs-table-bg-state: var(--oma-sand-200);
+  --bs-table-color-state: var(--oma-ink);
+  --bs-table-accent-bg: var(--oma-sand-200);
+  background-color: var(--oma-sand-200) !important;
+  color: var(--oma-ink) !important;
+}
+
+.nav-pills {
+  --bs-nav-pills-link-active-bg: var(--oma-wine-800);
+  --bs-nav-pills-link-active-color: var(--oma-cream);
+}
+
+.border-top,
+.border-bottom,
+.border {
+  border-color: var(--oma-sand-200) !important;
+}
+
+[data-test-product-index] .card,
+.product-grid-item,
+.card.h-100 {
+  border: 0;
+}
+
+[data-test-product-index] img,
+.card img,
+main img.img-fluid {
+  border-radius: 0.75rem;
+}
+
+main a[data-test-product-name],
+[data-test-product-name] {
+  font-family: var(--oma-body);
+  font-size: 0.98rem;
+  color: var(--oma-ink);
+}
+
+[data-test-product-price],
+.product-price {
+  font-family: var(--oma-display);
+  font-size: 1.35rem;
+  color: var(--oma-wine-700);
+}
+
+.breadcrumb,
+.breadcrumb a {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--oma-ink-faint);
+}
+
+.pagination {
+  --bs-pagination-color: var(--oma-wine-700);
+  --bs-pagination-active-bg: var(--oma-wine-800);
+  --bs-pagination-active-border-color: var(--oma-wine-800);
+  --bs-pagination-border-color: var(--oma-sand-200);
+  --bs-pagination-bg: transparent;
+}
+
+.text-primary-emphasis {
+  color: var(--oma-wine-700) !important;
+}
+
+footer {
+  color: var(--oma-ink-soft);
+}
+
+.oma-footer__heading {
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--oma-wine-600);
+  margin-bottom: 1rem;
+}
+
+.oma-footer__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.oma-footer__list a {
+  color: var(--oma-ink-soft);
+  text-decoration: none;
+}
+
+.oma-footer__list a:hover {
+  color: var(--oma-wine-700);
+}
+
+.oma-footer__owner {
+  font-family: var(--oma-display);
+  font-size: 1.15rem;
+  color: var(--oma-wine-800);
+}
+
+.oma-footer__address,
+.oma-footer__copy,
+.oma-footer__note {
+  font-size: 0.85rem;
+  color: var(--oma-ink-faint);
+}
+
+.oma-footer__note {
+  margin-top: 1.25rem;
+}
+
+.oma-pay {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.oma-pay__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fff;
+  border: 1px solid var(--oma-sand-200);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.oma-pay__item span,
+.oma-pay__item strong {
+  font-weight: 500;
+}
+
+.oma-pay__item--p24 span {
+  color: #1a1a1a;
+}
+
+.oma-pay__item--p24 strong {
+  color: #d13239;
+}
+
+.oma-pay__item--payu span {
+  color: #1a1a1a;
+}
+
+.oma-pay__item--payu strong {
+  color: #a6c307;
+}
+
+.oma-pay__item--paynow span {
+  color: #1a1a1a;
+}
+
+.oma-pay__item--paynow strong {
+  color: #6b1f7c;
+}
+
+.oma-pay__item--gpay span,
+.oma-pay__item--apay span {
+  color: #1a1a1a;
+}
+
+.oma-pay__item--apay svg {
+  color: #1a1a1a;
+}

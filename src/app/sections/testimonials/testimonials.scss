@@ -1,0 +1,68 @@
+.testimonials {
+  background: var(--paper);
+
+  &__head {
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  &__card {
+    margin: 0;
+    position: relative;
+    padding: clamp(1.75rem, 3vw, 2.5rem);
+    background: var(--paper-alt);
+    border-radius: 1rem 1rem 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    blockquote {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-style: italic;
+      line-height: 1.45;
+      color: var(--ink);
+    }
+
+    figcaption {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      margin-top: auto;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--paper-line);
+    }
+  }
+
+  &__quote-mark {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    line-height: 0.5;
+    color: var(--wine-600);
+    opacity: 0.35;
+  }
+
+  &__author {
+    font-size: 1rem;
+    color: var(--wine-800);
+  }
+
+  &__context {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+}
+
+@media (max-width: 900px) {
+  .testimonials__grid {
+    grid-template-columns: 1fr;
+  }
+}

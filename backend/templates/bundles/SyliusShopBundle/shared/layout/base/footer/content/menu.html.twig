@@ -1,0 +1,23 @@
+<div class="col-12 col-lg-6 order-lg-2">
+    <div class="row">
+        <div class="col-12 col-md-6 mb-4">
+            <div class="oma-footer__heading">Sklep</div>
+            <ul class="oma-footer__list">
+                <li><a href="{{ path('sylius_shop_product_index', { slug: 'pielegnacja' }) }}">Pielęgnacja</a></li>
+                <li><a href="{{ path('sylius_shop_product_index', { slug: 'aromaterapia' }) }}">Aromaterapia</a></li>
+                <li><a href="{{ path('sylius_shop_product_index', { slug: 'vouchery' }) }}">Vouchery</a></li>
+                <li><a href="{{ path('sylius_shop_cart_summary') }}">Koszyk</a></li>
+            </ul>
+        </div>
+
+        <div class="col-12 col-md-6 mb-4">
+            <div class="oma-footer__heading">Gabinet</div>
+            <ul class="oma-footer__list">
+                <li><a href="/#o-mnie">O mnie</a></li>
+                <li><a href="/#gabinet">Gabinet</a></li>
+                <li><a href="/#cennik">Cennik zabiegów</a></li>
+                <li><a href="{{ path('sylius_shop_contact_request') }}">Kontakt</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+sylius:
+    menu:
+        admin:
+            main:
+                catalog:
+                    taxons: 'Kategorie'
+                    inventory: 'Magazyn'
+    form:
+        catalog_promotion:
+            scope:
+                for_taxons: 'Dla kategorii'
+        channel:
+            menu_taxon: 'Kategoria w menu'
+        promotion_filter:
+            taxons: 'Filtr kategorii'
+        promotion_rule:
+            has_taxon:
+                taxons: 'Kategorie'
+            total_of_items_from_taxon:
+                taxon: 'Kategoria'
+        product:
+            main_taxon: 'Kategoria główna'
+            slug: 'Slug'
+        taxon:
+            slug: 'Slug'
+        variant:
+            tracked_help: 'Jeśli ta opcja jest włączona, system będzie śledził stan magazynowy i zatrzyma sprzedaż produktu, gdy stan osiągnie 0.'
+    ui:
+        sylius_logo: 'OMA'
+        sylius_logo_aria: 'Logo OMA'
+        login_sylius_store: 'Logowanie <small>sklep OMA</small>'
+        notifications:
+            new_version_of_sylius_available: 'Dostępna jest nowa wersja systemu. Skontaktuj się z programistą, aby zaktualizować.'
+        there_is_a_new_version_of_sylius_available: 'Dostępna jest nowa wersja systemu'
+        taxon: 'Kategoria'
+        taxons: 'Kategorie'
+        taxonomy: 'Kategorie'
+        create_taxon: 'Utwórz kategorię'
+        edit_taxon: 'Edytuj kategorię'
+        editing_taxon: 'Edycja kategorii'
+        new_taxon: 'Nowa kategoria'
+        main_taxon: 'Kategoria główna'
+        no_main_taxon: 'brak kategorii głównej'
+        manage_taxons: 'Zarządzaj kategoriami'
+        select_taxon: 'Wybierz kategorię'
+        for_taxons: 'Dla kategorii'
+        product_taxon: 'Kategoria produktu'
+        product_taxons: 'Kategorie produktu'
+        products_categorized_under_taxon_taxon: 'Produkty <small>w kategorii "%taxon%"</small>'
+        taxon_navigation_desktop: 'Nawigacja kategorii (desktop)'
+        taxons_for_which_the_lowest_price_is_not_displayed: 'Kategorie, dla których najniższa cena nie jest wyświetlana'
+        there_are_no_taxons_for_this_product: 'Brak kategorii dla tego produktu'
+        there_are_no_taxons_to_display: 'Brak kategorii do wyświetlenia'
+        there_is_no_main_taxon_for_this_product: 'Brak kategorii głównej dla tego produktu'
+        manage_product_positions_in_taxon: 'Zarządzaj pozycjami produktów w %taxon_name%'

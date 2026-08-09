@@ -1,0 +1,34 @@
+{{ encore_entry_script_tags('app-admin-entry', null, 'app.admin') }}
+
+<script>
+    (function () {
+        const HINTS = {
+            slug: 'Slug to fragment adresu URL, pod którym strona jest dostępna w sklepie. Dla wartości „olejek-eukaliptus” adres to /sklep/produkty/olejek-eukaliptus. Używaj tylko małych liter, cyfr i myślników — bez spacji, polskich znaków i pełnych adresów http://.',
+            main_taxon: 'Kategoria główna służy do okruszków nawigacji i adresu produktu. Żeby produkt pojawił się na liście kategorii, zaznacz ją dodatkowo w drzewku „Kategorie”.',
+        };
+
+        function decorate() {
+            for (const [suffix, hint] of Object.entries(HINTS)) {
+                document.querySelectorAll('label[for$="_' + suffix + '"]').forEach((label) => {
+                    if (label.dataset.omaHint) {
+                        return;
+                    }
+                    label.dataset.omaHint = '1';
+
+                    const badge = document.createElement('span');
+                    badge.className = 'oma-hint';
+                    badge.textContent = '?';
+                    badge.dataset.hint = hint;
+                    badge.setAttribute('title', hint);
+                    badge.setAttribute('role', 'note');
+                    badge.setAttribute('aria-label', hint);
+                    label.appendChild(badge);
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', decorate);
+        document.addEventListener('live:render', decorate);
+        new MutationObserver(decorate).observe(document.documentElement, { childList: true, subtree: true });
+    })();
+</script>
