@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const webpack = require('webpack');
 
 const Encore = require('@symfony/webpack-encore');
 
@@ -8,6 +9,13 @@ const SyliusShop = require('@sylius-ui/shop');
 
 // Admin config
 const adminConfig = SyliusAdmin.getBaseWebpackConfig(path.resolve(__dirname));
+
+adminConfig.plugins.push(
+    new webpack.NormalModuleReplacementPlugin(
+        /[\\/]scripts[\\/]statistics_chart\.js$/,
+        path.resolve(__dirname, 'assets/admin/statistics_chart.js'),
+    ),
+);
 
 // Shop config
 const shopConfig = SyliusShop.getBaseWebpackConfig(path.resolve(__dirname));

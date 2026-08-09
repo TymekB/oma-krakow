@@ -41,3 +41,11 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    sylius.number_generator.sequential_order:
+        class: Sylius\Bundle\CoreBundle\Order\NumberGenerator\SequentialOrderNumberGenerator
+        arguments:
+            $sequenceRepository: '@sylius.repository.order_sequence'
+            $sequenceFactory: '@sylius.factory.order_sequence'
+            $sequenceManager: '@sylius.manager.order_sequence'
+            $numberLength: 4
