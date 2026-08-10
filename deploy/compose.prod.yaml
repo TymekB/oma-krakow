@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     ports:
       - '${OMA_PORT:-40197}:80'
-    mem_limit: ${OMA_APP_MEM:-600m}
+    mem_limit: ${OMA_APP_MEM:-700m}
     environment:
       <<: *app-env
       FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG:-}
@@ -44,7 +44,9 @@ services:
   worker:
     image: ${OMA_IMAGE:?OMA_IMAGE is required}
     restart: unless-stopped
-    mem_limit: ${OMA_WORKER_MEM:-180m}
+    mem_limit: ${OMA_WORKER_MEM:-240m}
+    healthcheck:
+      disable: true
     command:
       - php
       - bin/console
