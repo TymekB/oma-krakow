@@ -32,3 +32,28 @@ test.describe('Landing', () => {
     await expect(page).toHaveURL(/#cennik/);
   });
 });
+
+test.describe('Edycja landingu', () => {
+  test('gość nie widzi ikon edycji', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(1500);
+
+    await expect(page.locator('.editable__pencil')).toHaveCount(0);
+  });
+
+  test('endpoint treści jest publiczny i zwraca obiekt', async ({ page }) => {
+    const response = await page.request.get('/landing-content.json');
+
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toHaveProperty('values');
+  });
+
+  test('zapis treści bez zalogowania jest odrzucony', async ({ page }) => {
+    const response = await page.request.put('/admin/landing-content/hero.lead', {
+      data: { value: 'nieautoryzowana zmiana' },
+      maxRedirects: 0,
+    });
+
+    expect([302, 401, 403]).toContain(response.status());
+  });
+});

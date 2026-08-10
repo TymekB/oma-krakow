@@ -1,11 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { EditableDirective } from '../../core/editable.directive';
 import { RevealDirective } from '../../core/reveal.directive';
 import { CONTACT, TREATMENTS } from '../../core/site.data';
 
 @Component({
   selector: 'oma-contact',
-  imports: [ReactiveFormsModule, RevealDirective],
+  imports: [EditableDirective, ReactiveFormsModule, RevealDirective],
   templateUrl: './contact.html',
   styleUrl: './contact.scss',
 })

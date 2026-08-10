@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { EditableDirective } from '../../core/editable.directive';
 import { RevealDirective } from '../../core/reveal.directive';
 import { CONTACT, VALUES } from '../../core/site.data';
 
 @Component({
   selector: 'oma-about',
-  imports: [RevealDirective],
+  imports: [EditableDirective, RevealDirective],
   templateUrl: './about.html',
   styleUrl: './about.scss',
 })

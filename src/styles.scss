@@ -227,3 +227,41 @@ button {
     transition: none;
   }
 }
+
+.editable {
+  position: relative;
+}
+
+.editable__pencil {
+  position: absolute;
+  top: -0.35rem;
+  right: -1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--sand-300);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--wine-700);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.editable:hover .editable__pencil,
+.editable__pencil:focus-visible {
+  opacity: 1;
+}
+
+.editable__pencil:hover {
+  background: var(--wine-800);
+  color: var(--paper);
+}
+
+.editable--active {
+  outline: 2px dashed var(--wine-600);
+  outline-offset: 6px;
+  border-radius: 4px;
+}

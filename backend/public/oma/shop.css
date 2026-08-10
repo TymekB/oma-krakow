@@ -391,3 +391,17 @@ a.link-reset:hover,
 .oma-topbar a:hover {
   color: var(--oma-wine-600) !important;
 }
+
+@media (min-width: 992px) {
+  .navbar-nav .nav-link {
+    position: relative;
+  }
+
+  .navbar-nav .nav-link + .nav-link::before {
+    content: '·';
+    position: absolute;
+    left: -0.9rem;
+    color: var(--oma-ink-faint);
+    pointer-events: none;
+  }
+}
