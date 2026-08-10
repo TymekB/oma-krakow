@@ -1,0 +1,29 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'sylius.email.order_confirmation.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {{ oma.greeting('sylius.email.order_confirmation.your_order_number'|trans({}, null, localeCode)) }}
+
+    <div style="text-align: center; margin-bottom: 28px;">
+        <span style="display: inline-block; padding: 12px 26px; background: #f4f3f0; border: 1px solid #dcd9d4; border-radius: 8px; font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-size: 30px; line-height: 1; color: #5a1f2c;">{{ order.number }}</span>
+    </div>
+
+    {{ oma.lead('sylius.email.order_confirmation.has_been_successfully_placed'|trans({}, null, localeCode)) }}
+
+    {% if sylius_bundle_loaded_checker('SyliusShopBundle') %}
+        {% set url = sylius_channel_url(path('sylius_shop_order_show', {'tokenValue': order.tokenValue, '_locale': localeCode}), channel) %}
+
+        <div style="text-align: center; margin-bottom: 32px;">
+            {{ oma.button(url, 'sylius.email.order_confirmation.view_order_or_change_payment_method'|trans({}, null, localeCode)) }}
+        </div>
+    {% endif %}
+
+    <div style="text-align: center; color: #6f6259;">
+        {{ 'sylius.email.order_confirmation.thank_you'|trans({}, null, localeCode) }}
+    </div>
+{% endblock %}

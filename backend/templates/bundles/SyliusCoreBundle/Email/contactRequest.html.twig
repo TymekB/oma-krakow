@@ -1,0 +1,20 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {% include '@SyliusCore/Email/Blocks/ContactRequest/_subject.html.twig' %}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {% set label = 'color: #5a1f2c; font-weight: 500; letter-spacing: 0.04em;' %}
+
+    {{ oma.greeting('sylius.email.contact_request.message_from'|trans({}, null, localeCode)) }}
+
+    <div style="color: #6f6259;">
+        <div style="{{ label }}">{{ 'sylius.email.contact_request.message_from'|trans({}, null, localeCode) }}:</div>
+        <div style="margin-bottom: 20px; color: #2a2320;">{{ data.email }}</div>
+        <div style="{{ label }}">{{ 'sylius.email.contact_request.content'|trans({}, null, localeCode) }}:</div>
+        <div style="color: #2a2320;">{{ data.message|nl2br }}</div>
+    </div>
+{% endblock %}
