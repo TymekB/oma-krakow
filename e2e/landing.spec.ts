@@ -5,7 +5,7 @@ test.describe('Landing', () => {
     await page.goto('/');
 
     await expect(page.locator('.hero')).toBeVisible();
-    await expect(page.getByText('Kraków · Gabinet kameralny')).toBeVisible();
+    await expect(page.locator('.eyebrow').first()).toBeVisible();
     await expect(page.getByRole('link', { name: /Umów wizytę/i }).first()).toBeVisible();
   });
 

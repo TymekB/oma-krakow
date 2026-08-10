@@ -136,6 +136,13 @@ final readonly class LandingContentController
 
         $restored = $this->repository->replaceAll($revision->getSnapshot());
 
+        if ([] === $restored) {
+            return new JsonResponse([
+                'restored' => 0,
+                'message' => 'Ta wersja jest identyczna z obecną treścią strony.',
+            ]);
+        }
+
         $this->revisionRepository->record(
             $revision->getSnapshot(),
             $restored,

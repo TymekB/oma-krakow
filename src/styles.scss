@@ -239,10 +239,8 @@ button {
   box-shadow: 0 0 0 4px rgba(138, 55, 70, 0.07);
 }
 
-.editable--active,
-.editable--active:hover {
+.editable:focus {
   background: rgba(138, 55, 70, 0.05);
-  box-shadow: 0 0 0 4px rgba(138, 55, 70, 0.05);
   outline: 2px dashed var(--wine-600);
   outline-offset: 4px;
 }

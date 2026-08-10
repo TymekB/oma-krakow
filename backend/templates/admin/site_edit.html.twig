@@ -172,6 +172,18 @@
 
         .site-edit__revision button:hover { background: var(--wine-800); color: #fff; }
         .site-edit__empty { padding: 1.25rem; color: var(--ink-soft); font-size: 0.85rem; }
+
+        .site-edit__badge {
+            margin-left: 0.5rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 1rem;
+            background: var(--paper);
+            border: 1px solid var(--paper-line);
+            color: var(--ink-soft);
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -272,17 +284,20 @@
                 return;
             }
 
-            historyList.innerHTML = revisions.map((revision) => `
+            historyList.innerHTML = revisions.map((revision, index) => `
                 <div class="site-edit__revision">
                     <div class="site-edit__revision-meta">
-                        <div class="site-edit__revision-date">${revision.createdAt}</div>
+                        <div class="site-edit__revision-date">
+                            ${revision.createdAt}
+                            ${index === 0 ? '<span class="site-edit__badge">wersja aktualna</span>' : ''}
+                        </div>
                         <div class="site-edit__revision-info">
                             ${revision.reason === 'restore' ? 'przywrócenie' : 'edycja'} ·
                             ${revision.author} ·
                             zmienionych pól: ${revision.changedKeys.length}
                         </div>
                     </div>
-                    <button type="button" data-restore="${revision.id}">Przywróć</button>
+                    ${index === 0 ? '' : `<button type="button" data-restore="${revision.id}">Przywróć</button>`}
                 </div>
             `).join('');
         };
@@ -314,8 +329,14 @@
                 return;
             }
 
-            const { restored } = await response.json();
-            showToast(`Przywrócono wersję strony (pól: ${restored}).`);
+            const { restored, message } = await response.json();
+
+            if (restored === 0) {
+                showToast(message ?? 'Nic się nie zmieniło.', true);
+                return;
+            }
+
+            showToast(`Przywrócono wersję strony (zmienionych pól: ${restored}).`);
             frame.contentWindow.location.reload();
             void loadHistory();
         });
