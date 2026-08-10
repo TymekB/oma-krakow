@@ -53,6 +53,40 @@ zapisane są zaszyfrowane puste klucze. Żeby ją uruchomić: wpisz klucze testo
 w Stripe Dashboard dla PLN. Bramka jest ustawiona na `stripe_web_elements`, czyli osadzony
 Payment Element — kod BLIK wpisuje się na stronie sklepu, bez przekierowania.
 
+## Wdrożenie (produkcja)
+
+Produkcja stoi na VPS Mikrus (`matt197`) obok innych, niezależnych stacków — własny projekt
+Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. Port 80 na tym serwerze należy do
+innej aplikacji i nie jest ruszany.
+
+Adres: **https://shy-chicken9377.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
+
+Merge do `master` uruchamia `.github/workflows/deploy.yml`, który:
+
+1. buduje obraz z `deploy/Dockerfile` (composer bez dev, `yarn encore production`, build Angulara)
+   i wypycha go do `ghcr.io/tymekb/oma-krakow`,
+2. kopiuje `deploy/compose.prod.yaml` na serwer i wpisuje nowy tag obrazu do `/opt/oma-prod/.env`,
+3. odpala migracje Doctrine, podnosi stack (`--wait`) i robi smoke test `/`, `/sklep/`, `/admin/login`.
+
+Obraz jest self-contained: `vendor/`, assety Encore i landing są w nim wypalone, więc na serwerze
+nie ma kodu z repo ani bind-mountów. Trwałe dane to wolumeny: baza, `public/media`, klucze JWT
+i sesje.
+
+### Konfiguracja serwera
+
+Sekrety żyją **tylko** w `/opt/oma-prod/.env` (nie w CI, nie w repo) — `APP_SECRET`, hasła do bazy,
+`JWT_PASSPHRASE`, klucze Google/Stripe, `MAILER_DSN`. Po zmianie: `docker compose up -d`.
+
+Mikrus wystawia tylko porty `20197`/`30197` (oba zajęte), dlatego ruch wchodzi przez proxy webowe
+Mikrusa: `domena 40197` zarejestrowało subdomenę kierującą na port `40197`. TLS kończy się na
+Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd `TRUSTED_PROXIES`
+w `config/packages/prod/framework.yaml`.
+
+### Limity maszyny
+
+VPS ma 1 vCPU i 2 GB RAM dzielone z innymi stackami, bez swapa (LXC). Dlatego opcache/JIT są
+przykręcone w `deploy/php-prod.ini`, a MySQL w `deploy/mysql-oma.cnf`.
+
 ## Testy
 
 ```bash

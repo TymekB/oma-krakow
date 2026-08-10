@@ -28,7 +28,7 @@ if [ ! -f "$JWT_DIR/private.pem" ]; then
 fi
 
 if [ -z "$(ls -A "$CACHE_DIR" 2>/dev/null)" ]; then
-    php /app/bin/console cache:warmup --no-interaction || true
+    php -d memory_limit=-1 /app/bin/console cache:warmup --no-interaction || true
 fi
 
 exec "$@"

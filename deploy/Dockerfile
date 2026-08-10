@@ -51,9 +51,9 @@ RUN yarn install --frozen-lockfile --ignore-engines --non-interactive \
     && yarn encore production \
     && rm -rf node_modules
 
-RUN php bin/console sylius:install:assets --no-interaction \
-    && php bin/console cache:clear --no-interaction \
-    && php bin/console cache:warmup --no-interaction
+RUN php -d memory_limit=-1 bin/console sylius:install:assets --no-interaction \
+    && php -d memory_limit=-1 bin/console cache:clear --no-interaction \
+    && php -d memory_limit=-1 bin/console cache:warmup --no-interaction
 
 # Landing zastepuje zahashowane statyki z repo — inaczej w obrazie zostalyby
 # oba buildy, a index.html wskazuje tylko na najnowszy.
