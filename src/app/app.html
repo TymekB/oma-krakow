@@ -3,3 +3,7 @@
   <router-outlet />
 </main>
 <oma-footer />
+
+@if (canEdit()) {
+  <div class="edit-mode-badge">Tryb edycji — kliknij ołówek przy tekście</div>
+}

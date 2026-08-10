@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { LandingContentService } from './core/landing-content.service';
 import { Footer } from './layout/footer/footer';
 import { Navbar } from './layout/navbar/navbar';
 
@@ -9,4 +10,12 @@ import { Navbar } from './layout/navbar/navbar';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {}
+export class App {
+  private readonly content = inject(LandingContentService);
+
+  readonly canEdit = this.content.canEdit;
+
+  constructor() {
+    void this.content.load();
+  }
+}
