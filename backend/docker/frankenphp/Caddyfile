@@ -22,8 +22,6 @@
 	redir /pl_PL /sklep/ permanent
 	redir /pl_PL/ /sklep/ permanent
 
-	# Tylko pliki z hashem w nazwie - Encore nie hashuje nazw w dev,
-	# wiec /build/* nie moze byc immutable, bo przegladarka trzymalaby stary JS.
 	@immutable path /bundles/* /assets/img/* /main-*.js /chunk-*.js /styles-*.css /polyfills-*.js
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 

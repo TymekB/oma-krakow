@@ -26,7 +26,10 @@ services:
     restart: unless-stopped
     ports:
       - '${OMA_PORT:-40197}:80'
-    environment: *app-env
+    mem_limit: ${OMA_APP_MEM:-600m}
+    environment:
+      <<: *app-env
+      FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG:-}
     volumes: *app-volumes
     healthcheck:
       test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/']
@@ -41,6 +44,7 @@ services:
   worker:
     image: ${OMA_IMAGE:?OMA_IMAGE is required}
     restart: unless-stopped
+    mem_limit: ${OMA_WORKER_MEM:-180m}
     command:
       - php
       - bin/console
@@ -59,6 +63,7 @@ services:
   mysql:
     image: mysql:8.0
     restart: unless-stopped
+    mem_limit: ${OMA_DB_MEM:-380m}
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: ${OMA_DB_ROOT_PASSWORD:?OMA_DB_ROOT_PASSWORD is required}

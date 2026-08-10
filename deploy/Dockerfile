@@ -55,8 +55,6 @@ RUN php -d memory_limit=-1 bin/console sylius:install:assets --no-interaction \
     && php -d memory_limit=-1 bin/console cache:clear --no-interaction \
     && php -d memory_limit=-1 bin/console cache:warmup --no-interaction
 
-# Landing zastepuje zahashowane statyki z repo — inaczej w obrazie zostalyby
-# oba buildy, a index.html wskazuje tylko na najnowszy.
 COPY --from=landing /src/dist/oma/browser/ /landing/
 RUN find public -maxdepth 1 -type f \
         \( -name 'main-*.js' -o -name 'chunk-*.js' -o -name 'styles-*.css' \
@@ -73,7 +71,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY backend/docker/frankenphp/php.ini /usr/local/etc/php/conf.d/zz-oma.ini
-# Musi byc "zzz-", zeby wczytac sie PO zz-oma.ini i nadpisac limity opcache.
 COPY deploy/php-prod.ini /usr/local/etc/php/conf.d/zzz-oma-prod.ini
 COPY backend/docker/frankenphp/Caddyfile /etc/frankenphp/Caddyfile
 COPY deploy/entrypoint.sh /usr/local/bin/oma-entrypoint

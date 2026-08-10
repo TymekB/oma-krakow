@@ -8,7 +8,7 @@
 .nav {
   background-color: var(--wine-800);
   background-image: linear-gradient(rgba(90, 31, 44, 0.55), rgba(90, 31, 44, 0.55)),
-    url('/assets/img/oma-texture.jpg');
+    url('/assets/img/oma-texture.webp');
   background-size: cover;
   background-position: center;
   color: var(--cream);
@@ -16,7 +16,7 @@
 
   &--solid {
     background-image: linear-gradient(rgba(59, 20, 29, 0.72), rgba(59, 20, 29, 0.72)),
-      url('/assets/img/oma-texture.jpg');
+      url('/assets/img/oma-texture.webp');
     box-shadow: 0 12px 40px -24px rgba(0, 0, 0, 0.9);
   }
 

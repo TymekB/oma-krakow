@@ -3,8 +3,6 @@ parameters:
 
 framework:
     session:
-        # Domyslnie sesje ida do cache_dir, ktory jest wypalony w obrazie i ginie
-        # przy kazdym deployu — wylogowywaloby to wszystkich i gubilo koszyki.
         save_path: '%kernel.project_dir%/var/sessions'
     trusted_proxies: '%env(TRUSTED_PROXIES)%'
     trusted_headers: ['x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-port']

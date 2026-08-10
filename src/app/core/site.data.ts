@@ -71,7 +71,7 @@ export const TREATMENTS: readonly Treatment[] = [
     highlights: ['Badanie funkcjonalne', 'Terapia manualna', 'Plan ćwiczeń na dom'],
     duration: '60 min',
     price: 'od 200 zł',
-    image: 'assets/img/gabinet-1.jpg',
+    image: 'assets/img/gabinet-1.webp',
   },
   {
     slug: 'zoga-face',
@@ -84,7 +84,7 @@ export const TREATMENTS: readonly Treatment[] = [
     highlights: ['Napięcia żuchwy i bruksizm', 'Drenaż i mikrokrążenie', 'Rozluźnienie karku'],
     duration: '60 min',
     price: 'od 220 zł',
-    image: 'assets/img/gabinet-2.jpg',
+    image: 'assets/img/gabinet-2.webp',
   },
   {
     slug: 'ert-marii-margo',
@@ -97,7 +97,7 @@ export const TREATMENTS: readonly Treatment[] = [
     highlights: ['Praca wewnątrzustna', 'Owal twarzy i dekolt', 'Zalecana seria zabiegów'],
     duration: '75 min',
     price: 'od 260 zł',
-    image: 'assets/img/detale.jpg',
+    image: 'assets/img/detale.webp',
   },
   {
     slug: 'masaz',
@@ -110,7 +110,7 @@ export const TREATMENTS: readonly Treatment[] = [
     highlights: ['Relaksacyjny', 'Leczniczy', 'Tkanek głębokich'],
     duration: '60 / 90 min',
     price: 'od 180 zł',
-    image: 'assets/img/olejki.jpg',
+    image: 'assets/img/olejki.webp',
   },
 ];
 
@@ -182,9 +182,9 @@ export const TESTIMONIALS: readonly Testimonial[] = [
 ];
 
 export const GALLERY: readonly GalleryPhoto[] = [
-  { src: 'assets/img/gabinet-1.jpg', alt: 'Gabinet OMA — leżanka do terapii przy oknie', span: 'tall' },
-  { src: 'assets/img/gabinet-3.jpg', alt: 'Kącik z lustrem i kosmetykami w gabinecie OMA', span: 'square' },
-  { src: 'assets/img/olejki.jpg', alt: 'Olejki eteryczne i olejki do ciała używane podczas masażu', span: 'square' },
-  { src: 'assets/img/gabinet-2.jpg', alt: 'Strefa umywalki z bukietem kwiatów w gabinecie OMA', span: 'tall' },
-  { src: 'assets/img/detale.jpg', alt: 'Detale gabinetu — kwiaty, palo santo i karta z ćwiczeniem', span: 'wide' },
+  { src: 'assets/img/gabinet-1.webp', alt: 'Gabinet OMA — leżanka do terapii przy oknie', span: 'tall' },
+  { src: 'assets/img/gabinet-3.webp', alt: 'Kącik z lustrem i kosmetykami w gabinecie OMA', span: 'square' },
+  { src: 'assets/img/olejki.webp', alt: 'Olejki eteryczne i olejki do ciała używane podczas masażu', span: 'square' },
+  { src: 'assets/img/gabinet-2.webp', alt: 'Strefa umywalki z bukietem kwiatów w gabinecie OMA', span: 'tall' },
+  { src: 'assets/img/detale.webp', alt: 'Detale gabinetu — kwiaty, palo santo i karta z ćwiczeniem', span: 'wide' },
 ];
