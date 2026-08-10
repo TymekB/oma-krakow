@@ -148,14 +148,6 @@ sylius_fixtures:
                                 enabled: true
                                 channels:
                                     - 'OMA_WEB'
-                            blik:
-                                code: 'blik'
-                                name: 'BLIK — przelew na telefon'
-                                description: 'Szybki przelew BLIK na numer telefonu gabinetu.'
-                                instructions: 'Po złożeniu zamówienia wyślemy SMS-em numer telefonu do przelewu BLIK. Zamówienie realizujemy po zaksięgowaniu wpłaty.'
-                                enabled: true
-                                channels:
-                                    - 'OMA_WEB'
                             cash_on_delivery:
                                 code: 'cash_on_delivery'
                                 name: 'Płatność przy odbiorze'
@@ -218,7 +210,7 @@ sylius_fixtures:
                             personal_pickup:
                                 code: 'personal_pickup'
                                 name: 'Odbiór w gabinecie'
-                                description: 'Odbiór osobisty w gabinecie przy ul. Karmelickiej w Krakowie.'
+                                description: 'Odbiór osobisty w naszym gabinecie przy ul. Karmelickiej w Krakowie.'
                                 enabled: true
                                 zone: 'PL'
                                 calculator:
