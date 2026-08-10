@@ -146,8 +146,11 @@ limitem pamięci. Wcześniej robił to cron co 5 minut, bo na 1 vCPU stały work
 przeciążenia; tutaj kosztuje ~120 MB i nie ma powodu opóźniać promocji katalogowych o kilka minut.
 `remote-deploy.sh` kasuje starego `/etc/cron.d/oma-messenger`, jeśli został po poprzednim wdrożeniu.
 
-JIT (`tracing`, 64 MB) i `opcache` 256 MB są ustawione w `deploy/php-prod.ini`. `memory_limit` musi
-zostać na 512 MB — niżej `opcache.preload` nie wchodzi i kontener wpada w pętlę restartów.
+`opcache` ma 256 MB (`deploy/php-prod.ini`), ale **JIT zostaje wyłączony mimo wolnej pamięci** —
+zmierzony A/B na tym samym obrazie dał 31,2–32,5 rps z `jit=tracing` wobec 33,3–35,0 rps z `jit=off`.
+W worker mode gorące ścieżki i tak siedzą już w opcache, a JIT dokłada tylko narzut.
+`memory_limit` musi zostać na 512 MB — niżej `opcache.preload` nie wchodzi i kontener wpada
+w pętlę restartów.
 
 Do pomiarów: `bash /opt/oma-prod/bench.sh /sklep/ 24 2`.
 
