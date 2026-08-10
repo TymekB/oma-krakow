@@ -93,6 +93,85 @@
 
         .site-edit__btn--ghost { background: transparent; color: var(--wine-800); }
         .site-edit__btn--ghost:hover:not(:disabled) { background: var(--wine-800); color: var(--paper); }
+
+        .site-edit__toast {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 5.5rem;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.9rem 1.4rem;
+            border-radius: 0.75rem;
+            background: #1f7a5a;
+            color: #fff;
+            font-size: 0.9rem;
+            box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.45);
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .site-edit__toast--visible { opacity: 1; transform: none; }
+        .site-edit__toast--error { background: #a3242a; }
+
+        .site-edit__history {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 5.5rem;
+            z-index: 40;
+            width: min(26rem, calc(100vw - 3rem));
+            max-height: 60vh;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid var(--paper-line);
+            border-radius: 0.9rem;
+            box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .site-edit__history--open { display: block; }
+
+        .site-edit__history h2 {
+            margin: 0;
+            padding: 1rem 1.25rem;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.15rem;
+            color: var(--wine-800);
+            border-bottom: 1px solid var(--paper-line);
+        }
+
+        .site-edit__revision {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--paper-line);
+            font-size: 0.85rem;
+        }
+
+        .site-edit__revision:last-child { border-bottom: 0; }
+        .site-edit__revision-meta { flex: 1; }
+        .site-edit__revision-date { color: var(--ink); }
+        .site-edit__revision-info { color: var(--ink-soft); font-size: 0.78rem; }
+
+        .site-edit__revision button {
+            font: inherit;
+            cursor: pointer;
+            padding: 0.35rem 0.9rem;
+            border-radius: 1rem;
+            border: 1px solid var(--wine-800);
+            background: transparent;
+            color: var(--wine-800);
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .site-edit__revision button:hover { background: var(--wine-800); color: #fff; }
+        .site-edit__empty { padding: 1.25rem; color: var(--ink-soft); font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -104,8 +183,16 @@
 
     <iframe id="site-frame" class="site-edit__frame" src="/?edit=1" title="Podgląd strony"></iframe>
 
+    <div class="site-edit__history" id="history">
+        <h2>Historia zmian</h2>
+        <div id="history-list"><p class="site-edit__empty">Wczytywanie…</p></div>
+    </div>
+
+    <div class="site-edit__toast" id="toast"></div>
+
     <div class="site-edit__actions">
         <span class="site-edit__status" id="status">Brak zmian do zapisania.</span>
+        <button type="button" class="site-edit__btn site-edit__btn--ghost" id="history-toggle">Historia zmian</button>
         <button type="button" class="site-edit__btn site-edit__btn--ghost" id="discard" disabled>Odrzuć zmiany</button>
         <button type="button" class="site-edit__btn" id="save" disabled>Zapisz zmiany</button>
     </div>
@@ -140,6 +227,11 @@
                 status.textContent = message.ok ? 'Zapisano zmiany.' : 'Nie udało się zapisać zmian.';
                 saveButton.disabled = message.ok;
                 discardButton.disabled = message.ok;
+                showToast(message.ok ? 'Zapisano zmiany' : 'Nie udało się zapisać zmian', !message.ok);
+
+                if (message.ok && history.classList.contains('site-edit__history--open')) {
+                    void loadHistory();
+                }
             }
         });
 
@@ -150,6 +242,82 @@
 
         discardButton.addEventListener('click', () => {
             frame.contentWindow.postMessage({ type: 'oma:discard' }, window.location.origin);
+        });
+
+        const toast = document.getElementById('toast');
+        const history = document.getElementById('history');
+        const historyList = document.getElementById('history-list');
+        let toastTimer;
+
+        const showToast = (message, isError = false) => {
+            toast.textContent = message;
+            toast.classList.toggle('site-edit__toast--error', isError);
+            toast.classList.add('site-edit__toast--visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('site-edit__toast--visible'), 3500);
+        };
+
+        const loadHistory = async () => {
+            const response = await fetch('/admin/site/revisions', { credentials: 'include' });
+
+            if (!response.ok) {
+                historyList.innerHTML = '<p class="site-edit__empty">Nie udało się wczytać historii.</p>';
+                return;
+            }
+
+            const { revisions } = await response.json();
+
+            if (!revisions.length) {
+                historyList.innerHTML = '<p class="site-edit__empty">Brak zapisanych wersji. Pierwsza powstanie po zapisaniu zmian.</p>';
+                return;
+            }
+
+            historyList.innerHTML = revisions.map((revision) => `
+                <div class="site-edit__revision">
+                    <div class="site-edit__revision-meta">
+                        <div class="site-edit__revision-date">${revision.createdAt}</div>
+                        <div class="site-edit__revision-info">
+                            ${revision.reason === 'restore' ? 'przywrócenie' : 'edycja'} ·
+                            ${revision.author} ·
+                            zmienionych pól: ${revision.changedKeys.length}
+                        </div>
+                    </div>
+                    <button type="button" data-restore="${revision.id}">Przywróć</button>
+                </div>
+            `).join('');
+        };
+
+        document.getElementById('history-toggle').addEventListener('click', () => {
+            history.classList.toggle('site-edit__history--open');
+
+            if (history.classList.contains('site-edit__history--open')) {
+                void loadHistory();
+            }
+        });
+
+        historyList.addEventListener('click', async (event) => {
+            const button = event.target.closest('[data-restore]');
+
+            if (!button) {
+                return;
+            }
+
+            button.disabled = true;
+            const response = await fetch(`/admin/site/revisions/${button.dataset.restore}/restore`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+            button.disabled = false;
+
+            if (!response.ok) {
+                showToast('Nie udało się przywrócić wersji.', true);
+                return;
+            }
+
+            const { restored } = await response.json();
+            showToast(`Przywrócono wersję strony (pól: ${restored}).`);
+            frame.contentWindow.location.reload();
+            void loadHistory();
         });
     </script>
 </body>

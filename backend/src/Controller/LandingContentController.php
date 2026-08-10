@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Repository\LandingContentRepository;
+use App\Repository\LandingRevisionRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,7 @@ final readonly class LandingContentController
 
     public function __construct(
         private LandingContentRepository $repository,
+        private LandingRevisionRepository $revisionRepository,
         private Security $security,
     ) {
     }
@@ -88,6 +90,66 @@ final readonly class LandingContentController
             $this->repository->upsert($key, $value);
         }
 
+        $this->revisionRepository->record(
+            $this->repository->findAllAsMap(),
+            array_map(strval(...), array_keys($values)),
+            $this->currentAuthor(),
+            'edit',
+        );
+
         return new JsonResponse(['saved' => count($values)]);
+    }
+
+    #[Route('/admin/site/revisions', name: 'oma_landing_revisions', methods: ['GET'])]
+    public function revisions(): JsonResponse
+    {
+        if (!$this->security->isGranted(self::ADMIN_ROLE)) {
+            return new JsonResponse(['error' => 'Brak uprawnień.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $revisions = array_map(
+            static fn ($revision) => [
+                'id' => $revision->getId(),
+                'author' => $revision->getAuthor(),
+                'reason' => $revision->getReason(),
+                'changedKeys' => $revision->getChangedKeys(),
+                'createdAt' => $revision->getCreatedAt()->format('Y-m-d H:i'),
+            ],
+            $this->revisionRepository->findLatest(),
+        );
+
+        return new JsonResponse(['revisions' => $revisions]);
+    }
+
+    #[Route('/admin/site/revisions/{id}/restore', name: 'oma_landing_revision_restore', methods: ['POST'], requirements: ['id' => '\\d+'])]
+    public function restore(int $id): JsonResponse
+    {
+        if (!$this->security->isGranted(self::ADMIN_ROLE)) {
+            return new JsonResponse(['error' => 'Brak uprawnień.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $revision = $this->revisionRepository->find($id);
+
+        if (null === $revision) {
+            return new JsonResponse(['error' => 'Nie znaleziono wersji.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $restored = $this->repository->replaceAll($revision->getSnapshot());
+
+        $this->revisionRepository->record(
+            $revision->getSnapshot(),
+            $restored,
+            $this->currentAuthor(),
+            'restore',
+        );
+
+        return new JsonResponse(['restored' => count($restored)]);
+    }
+
+    private function currentAuthor(): string
+    {
+        $user = $this->security->getUser();
+
+        return null === $user ? 'system' : $user->getUserIdentifier();
     }
 }

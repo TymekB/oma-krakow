@@ -246,3 +246,7 @@ button {
   outline: 2px dashed var(--wine-600);
   outline-offset: 4px;
 }
+
+.edit-mode a {
+  cursor: text;
+}

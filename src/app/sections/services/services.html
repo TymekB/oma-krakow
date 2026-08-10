@@ -3,7 +3,7 @@
     <header class="services__head">
       <p class="eyebrow" omaEditable="services.eyebrow" [omaReveal]="0">Oferta</p>
       <h2 class="title" omaEditable="services.title" [omaReveal]="60">Cztery drogi do tego samego — <em>ulgi w ciele</em></h2>
-      <p class="lead services__intro" [omaReveal]="120">
+      <p class="lead services__intro" omaEditable="services.intro" [omaReveal]="120">
         Nie musisz wiedzieć, którą wybrać. Napisz, co Cię do mnie sprowadza, a dobierzemy terapię na pierwszej wizycie.
       </p>
     </header>
@@ -17,21 +17,21 @@
 
           <div class="services__body" [omaReveal]="90">
             <p class="services__index"><span>{{ treatment.index }}</span></p>
-            <h3 class="services__name">{{ treatment.name }}</h3>
-            <p class="services__summary">{{ treatment.summary }}</p>
-            <p class="services__description">{{ treatment.description }}</p>
+            <h3 class="services__name" [omaEditable]="'services.item.' + i + '.name'">{{ treatment.name }}</h3>
+            <p class="services__summary" [omaEditable]="'services.item.' + i + '.summary'">{{ treatment.summary }}</p>
+            <p class="services__description" [omaEditable]="'services.item.' + i + '.description'">{{ treatment.description }}</p>
 
             <ul class="services__highlights">
-              @for (highlight of treatment.highlights; track highlight) {
-                <li>{{ highlight }}</li>
+              @for (highlight of treatment.highlights; track highlight; let h = $index) {
+                <li [omaEditable]="'services.item.' + i + '.highlight.' + h">{{ highlight }}</li>
               }
             </ul>
 
             <div class="services__meta">
-              <span>{{ treatment.duration }}</span>
+              <span [omaEditable]="'services.item.' + i + '.duration'">{{ treatment.duration }}</span>
               <span class="services__dot" aria-hidden="true">·</span>
-              <span>{{ treatment.price }}</span>
-              <a class="services__link" href="#kontakt">Umów wizytę</a>
+              <span [omaEditable]="'services.item.' + i + '.price'">{{ treatment.price }}</span>
+              <a class="services__link" href="#kontakt" [omaEditable]="'services.item.' + i + '.cta'">Umów wizytę</a>
             </div>
           </div>
         </article>

@@ -53,10 +53,10 @@
         </div>
       } @else {
         <form class="contact__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-          <h3 class="contact__form-title">Formularz rezerwacji</h3>
+          <h3 class="contact__form-title" omaEditable="contact.form.title">Formularz rezerwacji</h3>
 
           <label class="contact__field">
-            <span>Imię</span>
+            <span omaEditable="contact.form.name">Imię</span>
             <input type="text" formControlName="name" autocomplete="given-name" placeholder="Jak mam się do Ciebie zwracać?" />
             @if (invalid('name')) {
               <small class="contact__error">Podaj imię (min. 2 znaki).</small>
@@ -64,7 +64,7 @@
           </label>
 
           <label class="contact__field">
-            <span>Telefon</span>
+            <span omaEditable="contact.form.phone">Telefon</span>
             <input type="tel" formControlName="phone" autocomplete="tel" placeholder="+48 000 000 000" />
             @if (invalid('phone')) {
               <small class="contact__error">Podaj poprawny numer telefonu.</small>
@@ -72,7 +72,7 @@
           </label>
 
           <label class="contact__field">
-            <span>Zabieg</span>
+            <span omaEditable="contact.form.treatment">Zabieg</span>
             <select formControlName="treatment">
               @for (treatment of treatments; track treatment.slug) {
                 <option [value]="treatment.name">{{ treatment.name }}</option>
@@ -82,7 +82,7 @@
           </label>
 
           <label class="contact__field">
-            <span>Wiadomość</span>
+            <span omaEditable="contact.form.message">Wiadomość</span>
             <textarea
               formControlName="message"
               rows="4"
@@ -90,9 +90,9 @@
             ></textarea>
           </label>
 
-          <button class="btn contact__submit" type="submit">Wyślij zgłoszenie</button>
+          <button class="btn contact__submit" type="submit" omaEditable="contact.form.submit">Wyślij zgłoszenie</button>
 
-          <p class="contact__consent">
+          <p class="contact__consent" omaEditable="contact.form.consent">
             Wysyłając formularz, zgadzasz się na kontakt w sprawie umówienia wizyty.
           </p>
         </form>

@@ -32,6 +32,44 @@ final class LandingContentRepository extends ServiceEntityRepository
         return $map;
     }
 
+    /**
+     * @param array<string, string> $snapshot
+     *
+     * @return list<string>
+     */
+    public function replaceAll(array $snapshot): array
+    {
+        $manager = $this->getEntityManager();
+        $changed = [];
+
+        foreach ($this->findAll() as $content) {
+            if (!array_key_exists($content->getKey(), $snapshot)) {
+                $changed[] = $content->getKey();
+                $manager->remove($content);
+            }
+        }
+
+        foreach ($snapshot as $key => $value) {
+            $content = $this->findOneBy(['key' => $key]);
+
+            if (null === $content) {
+                $manager->persist(new LandingContent($key, $value));
+                $changed[] = $key;
+
+                continue;
+            }
+
+            if ($content->getValue() !== $value) {
+                $content->changeValue($value);
+                $changed[] = $key;
+            }
+        }
+
+        $manager->flush();
+
+        return $changed;
+    }
+
     public function upsert(string $key, string $value): LandingContent
     {
         $content = $this->findOneBy(['key' => $key]);

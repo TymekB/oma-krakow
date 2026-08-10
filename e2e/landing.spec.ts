@@ -70,3 +70,17 @@ test.describe('Edycja landingu', () => {
     expect([302, 401, 403]).toContain(response.status());
   });
 });
+
+test.describe('Historia zmian strony', () => {
+  test('lista wersji wymaga admina', async ({ page }) => {
+    const response = await page.request.get('/admin/site/revisions', { maxRedirects: 0 });
+
+    expect([302, 401, 403]).toContain(response.status());
+  });
+
+  test('przywracanie wersji wymaga admina', async ({ page }) => {
+    const response = await page.request.post('/admin/site/revisions/1/restore', { maxRedirects: 0 });
+
+    expect([302, 401, 403]).toContain(response.status());
+  });
+});
