@@ -56,3 +56,20 @@ test.describe('Sklep', () => {
     await expect(page.getByRole('heading', { name: 'Aromaterapia' })).toBeVisible();
   });
 });
+
+test('akordeon szczegółów otwiera się i zamyka', async ({ page }) => {
+  await page.goto('/sklep/produkty/olejek-eteryczny-eukaliptus');
+
+  const toggle = page.locator('[data-bs-target="#details"]');
+  await expect(toggle).toBeVisible();
+
+  const initial = await toggle.getAttribute('aria-expanded');
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', initial === 'true' ? 'false' : 'true');
+
+  await page.waitForTimeout(200);
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', initial ?? 'true');
+});

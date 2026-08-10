@@ -24,6 +24,9 @@ adminConfig.plugins.push(
 // Shop config
 const shopConfig = SyliusShop.getBaseWebpackConfig(path.resolve(__dirname));
 
+shopConfig.output.filename = '[name].[contenthash:8].js';
+shopConfig.output.chunkFilename = '[name].[contenthash:8].js';
+
 // Shared controllers
 const common_controllers = path.resolve(__dirname, './assets/controllers.json');
 
@@ -47,7 +50,7 @@ Encore
     // .enableBuildNotifications()
 
     .enableSourceMaps(!Encore.isProduction())
-    .enableVersioning(Encore.isProduction())
+    .enableVersioning(true)
     .enableSassLoader()
     // .enableStimulusBridge(path.resolve(__dirname, './assets/shop/controllers.json'))
     // remove the following line if you don't want to add automatically controllers provided by plugins
@@ -81,7 +84,7 @@ Encore
     .disableSingleRuntimeChunk()
     .cleanupOutputBeforeBuild()
     .enableSourceMaps(!Encore.isProduction())
-    .enableVersioning(Encore.isProduction())
+    .enableVersioning(true)
     .enableSassLoader()
     //.enableStimulusBridge(path.resolve(__dirname, './assets/admin/controllers.json'))
     // remove the following line if you don't want to add automatically controllers provided by plugins

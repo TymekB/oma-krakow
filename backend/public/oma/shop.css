@@ -405,3 +405,13 @@ a.link-reset:hover,
     pointer-events: none;
   }
 }
+
+/* Bootstrap ignoruje klikniecia w trakcie animacji collapse — skracamy ja,
+   zeby sekcji nie dalo sie "zablokowac" szybkim klikiem. */
+.accordion-collapse.collapsing {
+  transition-duration: 0.12s;
+}
+
+.accordion-button::after {
+  transition-duration: 0.12s;
+}
