@@ -34,11 +34,24 @@ test.describe('Landing', () => {
 });
 
 test.describe('Edycja landingu', () => {
-  test('gość nie widzi ikon edycji', async ({ page }) => {
+  test('gość nie ma trybu edycji', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1500);
 
-    await expect(page.locator('.editable__pencil')).toHaveCount(0);
+    await expect(page.locator('.editable')).toHaveCount(0);
+  });
+
+  test('publiczny landing nie włącza edycji nawet z parametrem edit', async ({ page }) => {
+    await page.goto('/?edit=1');
+    await page.waitForTimeout(1500);
+
+    await expect(page.locator('.editable')).toHaveCount(0);
+  });
+
+  test('strona edycji wymaga zalogowanego admina', async ({ page }) => {
+    const response = await page.request.get('/admin/site/edit', { maxRedirects: 0 });
+
+    expect([302, 401, 403]).toContain(response.status());
   });
 
   test('endpoint treści jest publiczny i zwraca obiekt', async ({ page }) => {

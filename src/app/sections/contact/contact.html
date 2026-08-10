@@ -12,30 +12,30 @@
 
       <dl class="contact__details" [omaReveal]="160">
         <div>
-          <dt>Gabinet</dt>
-          <dd>{{ contact.street }}<br />{{ contact.city }}</dd>
+          <dt omaEditable="contact.label.address">Gabinet</dt>
+          <dd><span omaEditable="contact.street">{{ contact.street }}</span><br /><span omaEditable="contact.city">{{ contact.city }}</span></dd>
         </div>
         <div>
-          <dt>Telefon</dt>
-          <dd><a [href]="contact.phoneHref">{{ contact.phone }}</a></dd>
+          <dt omaEditable="contact.label.phone">Telefon</dt>
+          <dd><a [href]="contact.phoneHref" omaEditable="contact.phone">{{ contact.phone }}</a></dd>
         </div>
         <div>
-          <dt>E-mail</dt>
-          <dd><a [href]="'mailto:' + contact.email">{{ contact.email }}</a></dd>
+          <dt omaEditable="contact.label.email">E-mail</dt>
+          <dd><a [href]="'mailto:' + contact.email" omaEditable="contact.email">{{ contact.email }}</a></dd>
         </div>
         <div>
-          <dt>Instagram</dt>
+          <dt omaEditable="contact.label.instagram">Instagram</dt>
           <dd>
-            <a [href]="contact.instagram" target="_blank" rel="noopener">{{ contact.instagramHandle }}</a>
+            <a [href]="contact.instagram" target="_blank" rel="noopener" omaEditable="contact.instagram">{{ contact.instagramHandle }}</a>
           </dd>
         </div>
       </dl>
 
       <ul class="contact__hours" [omaReveal]="200">
-        @for (entry of contact.hours; track entry.day) {
+        @for (entry of contact.hours; track entry.day; let i = $index) {
           <li>
-            <span>{{ entry.day }}</span>
-            <span>{{ entry.value }}</span>
+            <span [omaEditable]="'contact.hours.' + i + '.day'">{{ entry.day }}</span>
+            <span [omaEditable]="'contact.hours.' + i + '.value'">{{ entry.value }}</span>
           </li>
         }
       </ul>

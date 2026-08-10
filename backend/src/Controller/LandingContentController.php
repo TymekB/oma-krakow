@@ -56,4 +56,38 @@ final readonly class LandingContentController
 
         return new JsonResponse(['key' => $content->getKey(), 'value' => $content->getValue()]);
     }
+
+    #[Route('/admin/landing-content', name: 'oma_landing_content_save_all', methods: ['PUT'])]
+    public function saveAll(Request $request): JsonResponse
+    {
+        if (!$this->security->isGranted(self::ADMIN_ROLE)) {
+            return new JsonResponse(['error' => 'Brak uprawnień.'], Response::HTTP_FORBIDDEN);
+        }
+
+        /**
+         * @var array{values?: mixed} $payload
+         */
+        $payload = json_decode($request->getContent(), true) ?? [];
+        $values = $payload['values'] ?? null;
+
+        if (!is_array($values)) {
+            return new JsonResponse(['error' => 'Nieprawidłowa treść.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        foreach ($values as $key => $value) {
+            if (!is_string($key) || 1 !== preg_match('/^[a-z0-9._-]{1,128}$/', $key)) {
+                return new JsonResponse(['error' => sprintf('Nieprawidłowy klucz: %s', (string) $key)], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            if (!is_string($value) || mb_strlen($value) > self::MAX_VALUE_LENGTH) {
+                return new JsonResponse(['error' => sprintf('Nieprawidłowa treść dla klucza: %s', $key)], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+        }
+
+        foreach ($values as $key => $value) {
+            $this->repository->upsert($key, $value);
+        }
+
+        return new JsonResponse(['saved' => count($values)]);
+    }
 }

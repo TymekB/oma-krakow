@@ -13,8 +13,6 @@ import { Navbar } from './layout/navbar/navbar';
 export class App {
   private readonly content = inject(LandingContentService);
 
-  readonly canEdit = this.content.canEdit;
-
   constructor() {
     void this.content.load();
   }

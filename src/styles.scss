@@ -229,58 +229,20 @@ button {
 }
 
 .editable {
-  position: relative;
+  cursor: text;
+  border-radius: 3px;
+  transition: background 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
-.editable__pencil {
-  position: absolute;
-  top: 0.1rem;
-  right: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border: 1px solid var(--wine-600);
-  border-radius: 50%;
-  background: var(--paper);
-  color: var(--wine-700);
-  opacity: 0.55;
-  transition: opacity 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease);
+.editable:hover {
+  background: rgba(138, 55, 70, 0.07);
+  box-shadow: 0 0 0 4px rgba(138, 55, 70, 0.07);
 }
 
-.editable:hover .editable__pencil,
-.editable__pencil:focus-visible {
-  opacity: 1;
-}
-
-.editable__pencil:hover {
-  background: var(--wine-800);
-  color: var(--paper);
-}
-
-.editable--active {
+.editable--active,
+.editable--active:hover {
+  background: rgba(138, 55, 70, 0.05);
+  box-shadow: 0 0 0 4px rgba(138, 55, 70, 0.05);
   outline: 2px dashed var(--wine-600);
-  outline-offset: 6px;
-  border-radius: 4px;
-}
-
-.edit-mode-badge {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 10000;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.1rem;
-  border-radius: 2rem;
-  background: var(--wine-800);
-  color: var(--paper);
-  font-size: 0.68rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  box-shadow: var(--shadow-soft);
-  pointer-events: none;
+  outline-offset: 4px;
 }

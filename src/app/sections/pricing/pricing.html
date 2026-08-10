@@ -8,14 +8,14 @@
     <div class="pricing__groups">
       @for (group of groups; track group.name; let i = $index) {
         <div class="pricing__group" [omaReveal]="i * 90">
-          <h3 class="pricing__group-name">{{ group.name }}</h3>
+          <h3 class="pricing__group-name" [omaEditable]="'pricing.group.' + i + '.name'">{{ group.name }}</h3>
           <ul class="pricing__items">
-            @for (item of group.items; track item.name + item.duration) {
+            @for (item of group.items; track item.name + item.duration; let j = $index) {
               <li class="pricing__item">
-                <span class="pricing__item-name">{{ item.name }}</span>
+                <span class="pricing__item-name" [omaEditable]="'pricing.group.' + i + '.item.' + j + '.name'">{{ item.name }}</span>
                 <span class="pricing__item-dots" aria-hidden="true"></span>
-                <span class="pricing__item-duration">{{ item.duration }}</span>
-                <span class="pricing__item-price">{{ item.price }}</span>
+                <span class="pricing__item-duration" [omaEditable]="'pricing.group.' + i + '.item.' + j + '.duration'">{{ item.duration }}</span>
+                <span class="pricing__item-price" [omaEditable]="'pricing.group.' + i + '.item.' + j + '.price'">{{ item.price }}</span>
               </li>
             }
           </ul>
@@ -23,7 +23,7 @@
       }
     </div>
 
-    <p class="pricing__note" [omaReveal]="120">
+    <p class="pricing__note" omaEditable="pricing.note" [omaReveal]="120">
       Pierwsza wizyta zawsze obejmuje wywiad i badanie. Terapie twarzy najlepiej działają w serii — pakiet ustalamy po
       pierwszym spotkaniu. Płatność gotówką lub BLIK-iem na miejscu.
     </p>

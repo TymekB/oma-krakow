@@ -59,6 +59,7 @@ sylius:
 oma:
     ui:
         view_site: 'Zobacz stronę'
+        site_edit: 'Edycja strony'
     google_login:
         button: 'Kontynuuj z Google'
         or: 'albo'

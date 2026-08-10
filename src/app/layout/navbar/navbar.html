@@ -1,17 +1,17 @@
 <header class="nav" [class.nav--solid]="scrolled() || menuOpen()">
   <div class="nav__inner shell">
     <a class="nav__brand" href="#start" (click)="closeMenu()" aria-label="OMA — strona główna">
-      <span class="nav__wordmark">oma</span>
-      <span class="nav__tag">Kraków</span>
+      <span class="nav__wordmark" omaEditable="nav.wordmark">oma</span>
+      <span class="nav__tag" omaEditable="nav.tag">Kraków</span>
     </a>
 
     <nav class="nav__links" aria-label="Menu główne">
-      @for (link of links; track link.href) {
-        <a class="nav__link" [href]="link.href">{{ link.label }}</a>
+      @for (link of links; track link.href; let i = $index) {
+        <a class="nav__link" [href]="link.href" [omaEditable]="'nav.link.' + i">{{ link.label }}</a>
       }
     </nav>
 
-    <a class="btn btn--light nav__cta" href="#kontakt">Umów wizytę</a>
+    <a class="btn btn--light nav__cta" href="#kontakt" omaEditable="nav.cta">Umów wizytę</a>
 
     <button
       class="nav__burger"

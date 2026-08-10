@@ -1,0 +1,8 @@
+<div>
+    <div>
+        <strong>{{ data.product.name }}</strong>
+    </div>
+    {% if data.name is not null and data.name is not empty %}
+        <div class="text-muted small">{{ data.name }}</div>
+    {% endif %}
+</div>

@@ -1,4 +1,5 @@
 import { Component, HostListener, signal } from '@angular/core';
+import { EditableDirective } from '../../core/editable.directive';
 import { CONTACT, SHOP_URL } from '../../core/site.data';
 
 interface NavLink {
@@ -9,6 +10,7 @@ interface NavLink {
 
 @Component({
   selector: 'oma-navbar',
+  imports: [EditableDirective],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
