@@ -20,7 +20,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_MEMORY_LIMIT=-1 \
     SERVER_NAME=:80
 
-RUN install-php-extensions intl pdo_mysql zip gd exif opcache apcu bcmath sodium
+RUN install-php-extensions intl pdo_mysql zip gd exif opcache apcu bcmath sodium amqp
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

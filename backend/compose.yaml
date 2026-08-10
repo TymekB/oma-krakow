@@ -1,5 +1,20 @@
 name: oma-shop
 
+x-app-env: &app-env
+  APP_ENV: ${OMA_ENV:-prod}
+  APP_DEBUG: ${OMA_DEBUG:-0}
+  APP_RUNTIME: Runtime\FrankenPhpSymfony\Runtime
+  DATABASE_URL: mysql://sylius:sylius@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
+  DEFAULT_URI: ${OMA_DEFAULT_URI:-http://localhost:8080}
+  GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
+  GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
+  MAILER_DSN: smtp://mailpit:1025
+  MESSENGER_TRANSPORT_DSN: amqp://guest:guest@rabbitmq:5672/%2f/messages
+  SYLIUS_MESSENGER_TRANSPORT_MAIN_DSN: amqp://guest:guest@rabbitmq:5672/%2f/main
+  SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: amqp://guest:guest@rabbitmq:5672/%2f/main_failed
+  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: amqp://guest:guest@rabbitmq:5672/%2f/catalog_promotion_removal
+  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: amqp://guest:guest@rabbitmq:5672/%2f/catalog_promotion_removal_failed
+
 services:
   app:
     build:
@@ -13,18 +28,37 @@ services:
       - composer_cache:/root/.composer/cache
       - caddy_data:/data
     environment:
-      APP_ENV: ${OMA_ENV:-prod}
-      APP_DEBUG: ${OMA_DEBUG:-0}
-      APP_RUNTIME: Runtime\FrankenPhpSymfony\Runtime
+      <<: *app-env
       FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG-}
-      DATABASE_URL: mysql://sylius:sylius@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
-      DEFAULT_URI: ${OMA_DEFAULT_URI:-http://localhost:8080}
-      GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
-      MAILER_DSN: smtp://mailpit:1025
-      MESSENGER_TRANSPORT_DSN: sync://
     depends_on:
       mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./docker/frankenphp
+    command:
+      - php
+      - bin/console
+      - messenger:consume
+      - main
+      - catalog_promotion_removal
+      - --time-limit=3600
+      - --memory-limit=256M
+      - --no-interaction
+    volumes:
+      - ./:/app:cached
+      - app_var:/app/var
+      - composer_cache:/root/.composer/cache
+    environment: *app-env
+    healthcheck:
+      disable: true
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   mysql:
@@ -45,6 +79,19 @@ services:
       timeout: 5s
       retries: 20
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - '15673:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
   mailpit:
     image: axllent/mailpit:latest
     ports:
@@ -55,3 +102,4 @@ volumes:
   composer_cache:
   caddy_data:
   app_var:
+  rabbitmq_data:

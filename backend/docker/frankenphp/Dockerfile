@@ -4,7 +4,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_MEMORY_LIMIT=-1 \
     SERVER_NAME=:80
 
-RUN install-php-extensions intl pdo_mysql zip gd exif opcache apcu
+RUN install-php-extensions intl pdo_mysql zip gd exif opcache apcu amqp
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git unzip zip curl ca-certificates gnupg default-mysql-client \

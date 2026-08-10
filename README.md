@@ -24,6 +24,11 @@ make landing       # build Angulara i wgranie go do backend/public
 - Sklep: http://localhost:8080/sklep/
 - Panel: http://localhost:8080/admin/ (`admin` / `oma2026!`)
 - Maile: http://localhost:8025 (Mailpit — cały ruch z dev-a idzie tam)
+- Kolejki: http://localhost:15673 (RabbitMQ, `guest` / `guest`)
+
+`make up` podnosi też `rabbitmq` i `worker` (konsument messengera). Port `5672` nie jest publikowany
+na hosta, bo aplikacja łączy się po sieci Compose — panel jest na `15673`, żeby nie kolidować
+z innym RabbitMQ, który możesz mieć lokalnie.
 
 Landing osobno, z hot reloadem: `npm install && npm start` → http://localhost:4200
 
@@ -34,6 +39,21 @@ Landing osobno, z hot reloadem: `npm install && npm start` → http://localhost:
 **Zmiany w landingu wymagają `make landing`.** Bez tego `backend/public/` serwuje poprzedni build i wygląda to jak „zmiany nie działają".
 
 **Yarn w `backend/`.** Rootowy `package.json` (Angular) deklaruje `packageManager: npm`, przez co yarn wychodził w górę drzewa i odmawiał startu — dlatego `backend/package.json` ma własne `packageManager: yarn@1.22.22`. Przy Node 23 instaluj z `--ignore-engines`.
+
+## Kolejki i promocje z datami
+
+Transporty messengera na localu idą na **RabbitMQ** (`symfony/amqp-messenger`, rozszerzenie `amqp`
+w obrazie). Nie jest to kosmetyka: Sylius planuje start i koniec **promocji katalogowej** przez
+`DelayStamp` — wylicza opóźnienie do daty startu i do daty końca i wysyła komunikaty z tym
+opóźnieniem. Respektują je tylko transporty asynchroniczne. Na `sync://` opóźnienie jest ignorowane,
+komunikaty wykonują się od razu przy zapisie i **daty promocji przestają cokolwiek znaczyć**.
+
+Dlatego promocje z terminem wymagają działającego konsumenta:
+
+```bash
+docker compose logs -f worker
+docker compose exec app php bin/console messenger:stats
+```
 
 ## Konfiguracja usług zewnętrznych
 
