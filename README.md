@@ -75,19 +75,21 @@ Payment Element — kod BLIK wpisuje się na stronie sklepu, bez przekierowania.
 
 ## Wdrożenie (produkcja)
 
-Produkcja stoi na VPS Mikrus (`matt197`) obok innych, niezależnych stacków — własny projekt
-Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. Port 80 na tym serwerze należy do
-innej aplikacji i nie jest ruszany.
+Produkcja stoi na VPS Mikrus (`kate123`, 8 GB RAM / 2 vCPU, SSH na porcie `10123`) — projekt
+Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. Serwer jest dedykowany dla OMA,
+nie dzieli zasobów z innymi stackami.
 
-Adres: **https://happy-frog5880.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
+Adres: **https://strong-cow5239.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
 
 Merge do `master` uruchamia `.github/workflows/deploy.yml`, który:
 
 1. buduje obraz z `deploy/Dockerfile` (composer bez dev, `yarn encore production`, build Angulara)
    i wypycha go do `ghcr.io/tymekb/oma-krakow`,
 2. kopiuje pliki stacku na serwer i wpisuje nowy tag obrazu do `/opt/oma-prod/.env`,
-3. odpala `deploy/remote-deploy.sh` (migracje, `compose up --wait`, `image prune`),
-4. odpala `deploy/smoke-test.sh` — `/`, `/sklep/`, `/admin/login`.
+3. odpala `deploy/remote-deploy.sh` (migracje przy zatrzymanym workerze, `compose up --wait`,
+   `image prune`),
+4. odpala `deploy/smoke-test.sh` — stan kontenerów `app`/`worker`/`mysql` oraz `/`, `/sklep/`,
+   `/admin/login`.
 
 Obraz jest self-contained: `vendor/`, assety Encore i landing są w nim wypalone, więc na serwerze
 nie ma kodu z repo ani bind-mountów. Trwałe dane to wolumeny: baza, `public/media`, klucze JWT
@@ -112,36 +114,39 @@ Sekrety żyją **tylko** w `/opt/oma-prod/.env` (nie w CI, nie w repo) — `APP_
 Hasło admina na produkcji jest inne niż `oma2026!` z fixtures — te ostatnie są w publicznym repo,
 więc po zaseedowaniu zostało zmienione i nie ma go w repozytorium.
 
-Mikrus wystawia tylko porty `20197`/`30197` (oba zajęte przez inny stack), dlatego ruch wchodzi przez
-proxy webowe Mikrusa: `domena 40197` rejestruje subdomenę kierującą na port `40197`. TLS kończy się
-na Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd `TRUSTED_PROXIES`
-w `config/packages/prod/framework.yaml`. Uwaga: każde wywołanie `domena` bez podanej nazwy generuje
-**nową** losową subdomenę.
+Ruch wchodzi przez proxy webowe Mikrusa: `domena 40123` rejestruje subdomenę kierującą na port
+`40123`. TLS kończy się na Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd
+`TRUSTED_PROXIES` w `config/packages/prod/framework.yaml`. Uwaga: każde wywołanie `domena` bez
+podanej nazwy generuje **nową** losową subdomenę, a subdomeny `byst.re` są przypisane do konkretnego
+VPS-a — przy przenosinach API odpowiada `Domena już istnieje` i starą trzeba najpierw zwolnić
+w panelu Mikrusa. Bezpośrednio wystawione porty TCP tej maszyny to `20123`/`30123` (wolne, ale bez
+TLS-a, więc nieużywane).
 
-### Wydajność na 1 vCPU / 2 GB
+### Wydajność na 2 vCPU / 8 GB
 
-Maszyna jest współdzielona z innymi stackami (~750 MB zajmują sąsiedzi), bez swapa (LXC), więc
-budżet pamięci jest twardy i pilnują go `mem_limit` na kontenerach — przy wysypce Docker ubija nasz
-kontener, a nie host OOM killer, który mógłby trafić w sąsiedni serwis.
+Limity pamięci (`mem_limit`) zostają, choć maszyna jest dedykowana: bez swapa (LXC) wyciek w PHP
+ubija wtedy kontener, a nie cały serwer. Budżet jest ustawiony z dużym zapasem — przy normalnym
+ruchu stack bierze ~600 MB z 8 GB (`app` ~290 MB, `worker` ~120 MB, `mysql` ~175 MB).
 
 Włączony jest **worker mode** FrankenPHP (`FRANKENPHP_CONFIG` w `deploy/compose.prod.yaml`): kernel
-Symfony bootuje raz na wątek. Zmierzone na originie dla `/sklep/`:
+Symfony bootuje raz na wątek, `OMA_PHP_WORKERS=4` przy `OMA_PHP_THREADS=8`. Zmierzone dla `/sklep/`
+(`bench.sh /sklep/ 24 2`), porównanie ze starą maszyną (`matt197`, 1 vCPU / 2 GB, współdzielona):
 
-| | bez worker mode | z worker mode |
+| | matt197 | kate123 |
 |---|---|---|
-| throughput | 5,4 rps | 12,8 rps |
-| p50 | 0,28 s | 0,12 s |
-| p95 | 0,51 s | 0,16 s |
+| throughput | 5,7 rps | 35,6 rps |
+| p50 | 0,27 s | 0,03 s |
+| p95 | 0,54 s | 0,08 s |
 
-Przy `concurrency=4` throughput stoi na 12,8 rps, a latencja rośnie do p50 0,28 s — jedno vCPU jest
-wysycone, więc zwiększanie liczby workerów nic nie doda, tylko zabierze RAM. Stąd `OMA_PHP_WORKERS=2`.
+Sufit to ~33 rps przy `concurrency=8` i `16` (p95 odpowiednio 0,21 s i 0,33 s) — wysycają się dwa
+vCPU, więc dokładanie workerów niczego już nie doda.
 
-Transporty messengera są na `sync://` i **nie ma kontenera workera**. Routowane są tylko promocje
-katalogowe i historia najniższej ceny, czyli rzadkie akcje w panelu — a stale działający worker
-zajmował 142 MB i przy `--memory-limit` wpadał w pętlę restartów, bootując za każdym razem cały
-kernel. Na tej maszynie to była główna przyczyna przeciążenia (load 11 i sekundowe czasy odpowiedzi).
+Transporty messengera idą na `doctrine://default`, a konsumuje je **kontener `worker`** z osobnym
+limitem pamięci. Wcześniej robił to cron co 5 minut, bo na 1 vCPU stały worker był główną przyczyną
+przeciążenia; tutaj kosztuje ~120 MB i nie ma powodu opóźniać promocji katalogowych o kilka minut.
+`remote-deploy.sh` kasuje starego `/etc/cron.d/oma-messenger`, jeśli został po poprzednim wdrożeniu.
 
-JIT jest wyłączony, a `opcache`/APCu przykręcone w `deploy/php-prod.ini`. `memory_limit` musi
+JIT (`tracing`, 64 MB) i `opcache` 256 MB są ustawione w `deploy/php-prod.ini`. `memory_limit` musi
 zostać na 512 MB — niżej `opcache.preload` nie wchodzi i kontener wpada w pętlę restartów.
 
 Do pomiarów: `bash /opt/oma-prod/bench.sh /sklep/ 24 2`.

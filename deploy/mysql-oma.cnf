@@ -1,11 +1,11 @@
 [mysqld]
-innodb_buffer_pool_size = 128M
-innodb_redo_log_capacity = 64M
+innodb_buffer_pool_size = 512M
+innodb_redo_log_capacity = 128M
 innodb_flush_method = O_DIRECT
 performance_schema = OFF
-max_connections = 40
-table_open_cache = 400
-tmp_table_size = 16M
-max_heap_table_size = 16M
-sort_buffer_size = 512K
-join_buffer_size = 512K
+max_connections = 100
+table_open_cache = 2000
+tmp_table_size = 32M
+max_heap_table_size = 32M
+sort_buffer_size = 1M
+join_buffer_size = 1M
