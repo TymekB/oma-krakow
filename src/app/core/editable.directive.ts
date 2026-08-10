@@ -13,12 +13,16 @@ export class EditableDirective implements OnInit {
 
   private original = '';
   private armed = false;
+  private lastApplied?: string;
 
   constructor() {
     effect(() => {
       const stored = this.content.value(this.key());
 
-      if (stored !== undefined && document.activeElement !== this.element && stored !== this.element.textContent?.trim()) {
+      const holdsCaret = this.element.contains(document.activeElement);
+
+      if (stored !== undefined && stored !== this.lastApplied && !holdsCaret) {
+        this.lastApplied = stored;
         this.element.textContent = stored;
       }
 
@@ -71,6 +75,7 @@ export class EditableDirective implements OnInit {
       return;
     }
 
+    this.lastApplied = text;
     this.content.stage(this.key(), text);
   }
 
