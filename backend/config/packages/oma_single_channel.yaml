@@ -1,0 +1,46 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_admin.catalog_promotion.create.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.catalog_promotion.show.content.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.catalog_promotion.update.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.payment_method.create.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.payment_method.update.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.product.create.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.product.update.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.promotion.create.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.promotion.update.content.form.sections.general':
+            channels:
+                enabled: false
+
+        'sylius_admin.shipping_method.create.content.form.configuration':
+            channels:
+                enabled: false
+
+        'sylius_admin.shipping_method.update.content.form.configuration':
+            channels:
+                enabled: false
+

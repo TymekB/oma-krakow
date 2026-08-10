@@ -78,3 +78,26 @@ test.describe('Panel admina', () => {
     expect(orderNumbers[0], 'zamówienia sprzed zmiany zachowują stare, 9-cyfrowe numery').toHaveLength(4);
   });
 });
+
+test.describe('Jeden kanał', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginToAdmin(page);
+  });
+
+  const forms = [
+    { url: '/admin/payment-methods/new/offline', nazwa: 'metoda płatności' },
+    { url: '/admin/shipping-methods/new', nazwa: 'sposób wysyłki' },
+    { url: '/admin/promotions/new', nazwa: 'promocja' },
+    { url: '/admin/products/new/simple', nazwa: 'produkt' },
+  ];
+
+  for (const { url, nazwa } of forms) {
+    test(`formularz "${nazwa}" nie pyta o kanał`, async ({ page }) => {
+      const response = await page.goto(url);
+
+      expect(response?.status(), 'formularz się otwiera').toBe(200);
+      await expect(page.locator('[name*="[channels]"]')).toHaveCount(0);
+      await expect(page.getByText('Kanały', { exact: true })).toHaveCount(0);
+    });
+  }
+});
