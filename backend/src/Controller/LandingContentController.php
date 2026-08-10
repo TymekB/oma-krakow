@@ -107,14 +107,23 @@ final readonly class LandingContentController
             return new JsonResponse(['error' => 'Brak uprawnień.'], Response::HTTP_FORBIDDEN);
         }
 
+        $current = $this->repository->findAllAsMap();
+
         $revisions = array_map(
-            static fn ($revision) => [
-                'id' => $revision->getId(),
-                'author' => $revision->getAuthor(),
-                'reason' => $revision->getReason(),
-                'changedKeys' => $revision->getChangedKeys(),
-                'createdAt' => $revision->getCreatedAt()->format('Y-m-d H:i'),
-            ],
+            static function ($revision) use ($current): array {
+                $snapshot = $revision->getSnapshot();
+                ksort($snapshot);
+                ksort($current);
+
+                return [
+                    'id' => $revision->getId(),
+                    'author' => $revision->getAuthor(),
+                    'reason' => $revision->getReason(),
+                    'changedKeys' => $revision->getChangedKeys(),
+                    'createdAt' => $revision->getCreatedAt()->format('Y-m-d H:i'),
+                    'isCurrent' => $snapshot === $current,
+                ];
+            },
             $this->revisionRepository->findLatest(),
         );
 
@@ -142,13 +151,6 @@ final readonly class LandingContentController
                 'message' => 'Ta wersja jest identyczna z obecną treścią strony.',
             ]);
         }
-
-        $this->revisionRepository->record(
-            $revision->getSnapshot(),
-            $restored,
-            $this->currentAuthor(),
-            'restore',
-        );
 
         return new JsonResponse(['restored' => count($restored)]);
     }

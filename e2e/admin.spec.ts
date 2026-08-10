@@ -22,13 +22,18 @@ test.describe('Panel admina', () => {
 
   test('drzewo kategorii nie dubluje się po wejściu w edycję', async ({ page }) => {
     await page.goto('/admin/taxons/');
+    await page.waitForLoadState('networkidle');
     const onFreshLoad = await page.locator('[data-live-name-value]').count();
 
     await page.locator('a[href*="/admin/taxons/"][href*="/edit"]:visible').first().click();
     await expect(page).toHaveURL(/\/admin\/taxons\/\d+\/edit/);
+    await page.waitForLoadState('networkidle');
 
     const afterNavigation = await page.locator('[data-live-name-value]').count();
-    const directLoad = await page.reload().then(() => page.locator('[data-live-name-value]').count());
+
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    const directLoad = await page.locator('[data-live-name-value]').count();
 
     expect(afterNavigation, 'nawigacja nie zostawia komponentów poprzedniej strony').toBe(directLoad);
     expect(onFreshLoad).toBeGreaterThan(0);

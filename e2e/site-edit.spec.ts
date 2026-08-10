@@ -57,7 +57,7 @@ test.describe('Edytor strony w panelu', () => {
     }
   });
 
-  test('przywrócenie wersji cofa treść strony', async ({ page }) => {
+  test('przywrócenie wersji cofa treść i nie dopisuje wpisu do historii', async ({ page }) => {
     const before = await (await page.request.get('/landing-content.json')).json();
     const original = before.values[EDITED_KEY] ?? null;
 
@@ -68,11 +68,19 @@ test.describe('Edytor strony w panelu', () => {
 
     await page.request.put('/admin/landing-content', { data: { values: { [EDITED_KEY]: 'WERSJA DRUGA' } } });
 
+    const historyBefore = await (await page.request.get('/admin/site/revisions')).json();
+
     const restore = await page.request.post(`/admin/site/revisions/${first.id}/restore`);
     expect(restore.ok()).toBe(true);
 
     const restored = await (await page.request.get('/landing-content.json')).json();
     expect(restored.values[EDITED_KEY]).toBe('WERSJA PIERWSZA');
+
+    const historyAfter = await (await page.request.get('/admin/site/revisions')).json();
+    expect(historyAfter.revisions.length, 'przywrócenie nie tworzy nowego wpisu').toBe(
+      historyBefore.revisions.length,
+    );
+    expect(historyAfter.revisions.find((item: { id: number }) => item.id === first.id).isCurrent).toBe(true);
 
     if (original !== null) {
       await resetContent(page, original);

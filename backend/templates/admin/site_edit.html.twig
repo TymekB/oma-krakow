@@ -284,12 +284,12 @@
                 return;
             }
 
-            historyList.innerHTML = revisions.map((revision, index) => `
+            historyList.innerHTML = revisions.map((revision) => `
                 <div class="site-edit__revision">
                     <div class="site-edit__revision-meta">
                         <div class="site-edit__revision-date">
                             ${revision.createdAt}
-                            ${index === 0 ? '<span class="site-edit__badge">wersja aktualna</span>' : ''}
+                            ${revision.isCurrent ? '<span class="site-edit__badge">wersja aktualna</span>' : ''}
                         </div>
                         <div class="site-edit__revision-info">
                             ${revision.reason === 'restore' ? 'przywrócenie' : 'edycja'} ·
@@ -297,7 +297,7 @@
                             zmienionych pól: ${revision.changedKeys.length}
                         </div>
                     </div>
-                    ${index === 0 ? '' : `<button type="button" data-restore="${revision.id}">Przywróć</button>`}
+                    ${revision.isCurrent ? '' : `<button type="button" data-restore="${revision.id}">Przywróć</button>`}
                 </div>
             `).join('');
         };
@@ -336,7 +336,7 @@
                 return;
             }
 
-            showToast(`Przywrócono wersję strony (zmienionych pól: ${restored}).`);
+            showToast(`Przywrócono wersję strony (cofniętych pól: ${restored}).`);
             frame.contentWindow.location.reload();
             void loadHistory();
         });
