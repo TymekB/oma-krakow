@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ status_code }} — OMA</title>
+    <link rel="icon" href="/favicon-oma.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wine-900: #3b141d;
+            --wine-800: #5a1f2c;
+            --wine-600: #8a3746;
+            --paper: #f4f3f0;
+            --paper-line: #dcd9d4;
+            --ink: #2a2320;
+            --ink-soft: #6f6259;
+            --ink-faint: #9c8d83;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.25rem;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.42;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.05' numOctaves='3' stitchTiles='stitch' seed='11'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.58 0'/></filter><rect width='72' height='72' filter='url(%23n)'/></svg>");
+            background-size: 72px 72px;
+        }
+
+        .error {
+            position: relative;
+            z-index: 2;
+            width: min(100%, 34rem);
+            text-align: center;
+        }
+
+        .error__wordmark {
+            font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+            font-size: 3.4rem;
+            line-height: 1;
+            color: var(--wine-800);
+            margin: 0;
+        }
+
+        .error__tag {
+            font-size: 0.68rem;
+            letter-spacing: 0.34em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+            margin: 0.35rem 0 2.75rem;
+        }
+
+        .error__code {
+            font-size: 0.72rem;
+            letter-spacing: 0.42em;
+            text-transform: uppercase;
+            color: var(--wine-600);
+            margin-bottom: 0.75rem;
+        }
+
+        .error__title {
+            font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+            font-weight: 400;
+            font-size: clamp(1.9rem, 5vw, 2.6rem);
+            line-height: 1.2;
+            margin: 0 0 1rem;
+        }
+
+        .error__lead {
+            color: var(--ink-soft);
+            margin: 0 auto 2.5rem;
+            max-width: 30rem;
+        }
+
+        .error__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .error__btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.85rem 2rem;
+            border: 1px solid var(--wine-800);
+            border-radius: 2rem;
+            background: var(--wine-800);
+            color: var(--paper);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background 0.35s ease, color 0.35s ease;
+        }
+
+        .error__btn:hover { background: var(--wine-600); border-color: var(--wine-600); }
+
+        .error__btn--ghost { background: transparent; color: var(--wine-800); }
+        .error__btn--ghost:hover { background: var(--wine-800); color: var(--paper); }
+
+        .error__contact {
+            padding-top: 2rem;
+            border-top: 1px solid var(--paper-line);
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+        }
+
+        .error__contact-label {
+            font-size: 0.66rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--ink-faint);
+            margin-bottom: 0.75rem;
+        }
+
+        .error__contact a {
+            color: var(--wine-700, #6e2937);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(138, 55, 70, 0.35);
+        }
+
+        .error__contact a:hover { color: var(--wine-600); }
+    </style>
+</head>
+<body>
+    <main class="error">
+        <p class="error__wordmark">oma</p>
+        <p class="error__tag">Kraków</p>
+
+        <p class="error__code">Błąd {{ status_code }}</p>
+
+        <h1 class="error__title">
+            {% if status_code == 404 %}
+                Nie ma tu tego, czego szukasz
+            {% elseif status_code == 403 %}
+                Ta strona jest niedostępna
+            {% elseif status_code == 503 %}
+                Chwilowa przerwa techniczna
+            {% else %}
+                Coś poszło nie tak
+            {% endif %}
+        </h1>
+
+        <p class="error__lead">
+            {% if status_code == 404 %}
+                Strona mogła zmienić adres albo już jej nie ma. Wróć na stronę główną lub zajrzyj do sklepu.
+            {% elseif status_code == 403 %}
+                Nie masz uprawnień, żeby zobaczyć tę stronę. Jeśli to pomyłka, daj znać.
+            {% elseif status_code == 503 %}
+                Pracujemy nad przywróceniem strony. Spróbuj ponownie za kilka minut.
+            {% else %}
+                Po naszej stronie wystąpił błąd. Spróbuj ponownie za chwilę — jeśli problem wróci, napisz do nas.
+            {% endif %}
+        </p>
+
+        <div class="error__actions">
+            <a class="error__btn" href="/">Strona główna</a>
+            <a class="error__btn error__btn--ghost" href="/sklep/">Sklep</a>
+        </div>
+
+        <div class="error__contact">
+            <div class="error__contact-label">Kontakt z administratorem</div>
+            <div><a href="mailto:baran.tymoteusz@gmail.com">baran.tymoteusz@gmail.com</a></div>
+            <div><a href="tel:+48728761171">+48 728 761 171</a></div>
+        </div>
+    </main>
+</body>
+</html>

@@ -26,6 +26,7 @@ sylius:
         variant:
             tracked_help: 'Jeśli ta opcja jest włączona, system będzie śledził stan magazynowy i zatrzyma sprzedaż produktu, gdy stan osiągnie 0.'
     ui:
+        channel_pricings: 'Ceny'
         chart_sales: 'Sprzedaż'
         chart_paid_orders_count: 'Liczba opłaconych zamówień'
         sylius_logo: 'OMA'

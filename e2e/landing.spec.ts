@@ -84,3 +84,15 @@ test.describe('Historia zmian strony', () => {
     expect([302, 401, 403]).toContain(response.status());
   });
 });
+
+test.describe('Strony błędów', () => {
+  for (const path of ['/sklep/nie-ma-takiej-strony', '/admin/nie-ma-takiej-strony']) {
+    test(`404 na ${path} pokazuje kontakt do administratora`, async ({ page }) => {
+      const response = await page.goto(path);
+
+      expect(response?.status()).toBe(404);
+      await expect(page.getByText('baran.tymoteusz@gmail.com')).toBeVisible();
+      await expect(page.getByText('+48 728 761 171')).toBeVisible();
+    });
+  }
+});
