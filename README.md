@@ -59,33 +59,66 @@ Produkcja stoi na VPS Mikrus (`matt197`) obok innych, niezależnych stacków —
 Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. Port 80 na tym serwerze należy do
 innej aplikacji i nie jest ruszany.
 
-Adres: **https://shy-chicken9377.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
+Adres: **https://happy-frog5880.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
 
 Merge do `master` uruchamia `.github/workflows/deploy.yml`, który:
 
 1. buduje obraz z `deploy/Dockerfile` (composer bez dev, `yarn encore production`, build Angulara)
    i wypycha go do `ghcr.io/tymekb/oma-krakow`,
-2. kopiuje `deploy/compose.prod.yaml` na serwer i wpisuje nowy tag obrazu do `/opt/oma-prod/.env`,
-3. odpala migracje Doctrine, podnosi stack (`--wait`) i robi smoke test `/`, `/sklep/`, `/admin/login`.
+2. kopiuje pliki stacku na serwer i wpisuje nowy tag obrazu do `/opt/oma-prod/.env`,
+3. odpala `deploy/remote-deploy.sh` (migracje, `compose up --wait`, `image prune`),
+4. odpala `deploy/smoke-test.sh` — `/`, `/sklep/`, `/admin/login`.
 
 Obraz jest self-contained: `vendor/`, assety Encore i landing są w nim wypalone, więc na serwerze
 nie ma kodu z repo ani bind-mountów. Trwałe dane to wolumeny: baza, `public/media`, klucze JWT
 i sesje.
+
+Skrypty wdrożeniowe są w plikach, nie inline w YAML-u, bo `docker compose run` przechwytuje stdin —
+skrypt podany przez `bash -s` zostałby po części zjedzony przez kontener migracji i reszta kroków
+nigdy by się nie wykonała (przy zerowym kodzie wyjścia, czyli fałszywie „zielono").
+
+### Hostname kanału
+
+Sylius rozpoznaje kanał po nagłówku `Host`. Kanał `OMA_WEB` ma w bazie `hostname` ustawiony na
+domenę produkcyjną — bez tego `/sklep/` zwraca 404. Przy zmianie domeny trzeba zmienić dwie rzeczy:
+`hostname` w `sylius_channel` oraz `OMA_DEFAULT_URI` w `.env`. Dlatego smoke test uderza z właściwym
+nagłówkiem `Host`, a nie po `localhost`.
 
 ### Konfiguracja serwera
 
 Sekrety żyją **tylko** w `/opt/oma-prod/.env` (nie w CI, nie w repo) — `APP_SECRET`, hasła do bazy,
 `JWT_PASSPHRASE`, klucze Google/Stripe, `MAILER_DSN`. Po zmianie: `docker compose up -d`.
 
-Mikrus wystawia tylko porty `20197`/`30197` (oba zajęte), dlatego ruch wchodzi przez proxy webowe
-Mikrusa: `domena 40197` zarejestrowało subdomenę kierującą na port `40197`. TLS kończy się na
-Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd `TRUSTED_PROXIES`
-w `config/packages/prod/framework.yaml`.
+Mikrus wystawia tylko porty `20197`/`30197` (oba zajęte przez inny stack), dlatego ruch wchodzi przez
+proxy webowe Mikrusa: `domena 40197` rejestruje subdomenę kierującą na port `40197`. TLS kończy się
+na Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd `TRUSTED_PROXIES`
+w `config/packages/prod/framework.yaml`. Uwaga: każde wywołanie `domena` bez podanej nazwy generuje
+**nową** losową subdomenę.
 
-### Limity maszyny
+### Wydajność na 1 vCPU / 2 GB
 
-VPS ma 1 vCPU i 2 GB RAM dzielone z innymi stackami, bez swapa (LXC). Dlatego opcache/JIT są
-przykręcone w `deploy/php-prod.ini`, a MySQL w `deploy/mysql-oma.cnf`.
+Maszyna jest współdzielona z innymi stackami (~750 MB zajmują sąsiedzi), bez swapa (LXC), więc
+budżet pamięci jest twardy i pilnują go `mem_limit` na kontenerach — przy wysypce Docker ubija nasz
+kontener, a nie host OOM killer, który mógłby trafić w sąsiedni serwis.
+
+Włączony jest **worker mode** FrankenPHP (`FRANKENPHP_CONFIG` w `deploy/compose.prod.yaml`): kernel
+Symfony bootuje raz na wątek. Zmierzone na originie dla `/sklep/`:
+
+| | bez worker mode | z worker mode |
+|---|---|---|
+| throughput | 5,4 rps | 12,2 rps |
+| p50 | 0,28 s | 0,12 s |
+| p95 | 0,51 s | 0,16 s |
+
+Transporty messengera są na `sync://` i **nie ma kontenera workera**. Routowane są tylko promocje
+katalogowe i historia najniższej ceny, czyli rzadkie akcje w panelu — a stale działający worker
+zajmował 142 MB i przy `--memory-limit` wpadał w pętlę restartów, bootując za każdym razem cały
+kernel. Na tej maszynie to była główna przyczyna przeciążenia (load 11 i sekundowe czasy odpowiedzi).
+
+JIT jest wyłączony, a `opcache`/APCu przykręcone w `deploy/php-prod.ini`. `memory_limit` musi
+zostać na 512 MB — niżej `opcache.preload` nie wchodzi i kontener wpada w pętlę restartów.
+
+Do pomiarów: `bash /opt/oma-prod/bench.sh /sklep/ 24 2`.
 
 ## Testy
 
@@ -110,7 +143,7 @@ src/app/
   layout/        navbar, footer
   sections/      hero, about, services, manifesto, gallery, pricing, testimonials, contact
   pages/home/    kompozycja sekcji (lazy-loaded route)
-public/assets/img/  zdjęcia gabinetu (zoptymalizowane JPG)
+public/assets/img/  zdjęcia gabinetu (WebP, JPEG tylko dla og:image)
 ```
 
 Cała treść tekstowa, cennik i dane kontaktowe są w jednym pliku: `src/app/core/site.data.ts`.

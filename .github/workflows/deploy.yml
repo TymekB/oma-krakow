@@ -77,7 +77,8 @@ jobs:
         run: |
           ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'mkdir -p /opt/oma-prod'
           scp -P "$SSH_PORT" deploy/compose.prod.yaml "$SSH_USER@$SSH_HOST:/opt/oma-prod/compose.yaml"
-          scp -P "$SSH_PORT" deploy/mysql-oma.cnf "$SSH_USER@$SSH_HOST:/opt/oma-prod/mysql-oma.cnf"
+          scp -P "$SSH_PORT" deploy/mysql-oma.cnf deploy/remote-deploy.sh deploy/smoke-test.sh \
+            "$SSH_USER@$SSH_HOST:/opt/oma-prod/"
 
       - name: Log in to registry on host
         run: |
@@ -86,39 +87,7 @@ jobs:
                 "docker login ghcr.io -u '${{ github.actor }}' --password-stdin"
 
       - name: Deploy
-        run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "IMAGE='$IMAGE' bash -s" <<'REMOTE'
-          set -euo pipefail
-          cd /opt/oma-prod
-
-          if [ ! -f .env ]; then
-            echo "Brak /opt/oma-prod/.env — konfiguracja stacku musi juz istniec na serwerze" >&2
-            exit 1
-          fi
-
-          grep -v '^OMA_IMAGE=' .env > .env.next
-          echo "OMA_IMAGE=$IMAGE" >> .env.next
-          mv .env.next .env
-
-          docker compose pull --quiet
-          docker compose up -d --wait --wait-timeout 180 mysql
-
-          docker compose run --rm --no-deps app \
-            php -d memory_limit=-1 bin/console doctrine:migrations:migrate \
-              --no-interaction --allow-no-migration
-
-          docker compose up -d --wait --wait-timeout 300 --remove-orphans
-          docker image prune -f
-          REMOTE
+        run: ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "bash /opt/oma-prod/remote-deploy.sh '$IMAGE'" < /dev/null
 
       - name: Smoke test
-        run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<'REMOTE'
-          set -euo pipefail
-          port="$(grep '^OMA_PORT=' /opt/oma-prod/.env | cut -d= -f2 || echo 40197)"
-          for path in / /sklep/ /admin/login; do
-            code="$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${port}${path}")"
-            echo "$path -> $code"
-            case "$code" in 2*|3*) ;; *) echo "FAIL $path"; exit 1 ;; esac
-          done
-          REMOTE
+        run: ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'bash /opt/oma-prod/smoke-test.sh' < /dev/null

@@ -1,25 +1,5 @@
 name: oma-prod
 
-x-app-env: &app-env
-  APP_ENV: prod
-  APP_DEBUG: 0
-  APP_SECRET: ${OMA_APP_SECRET:?OMA_APP_SECRET is required}
-  DATABASE_URL: mysql://sylius:${OMA_DB_PASSWORD:?OMA_DB_PASSWORD is required}@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
-  DEFAULT_URI: ${OMA_DEFAULT_URI:?OMA_DEFAULT_URI is required}
-  TRUSTED_PROXIES: ${OMA_TRUSTED_PROXIES:-}
-  MAILER_DSN: ${OMA_MAILER_DSN:-null://null}
-  JWT_PASSPHRASE: ${OMA_JWT_PASSPHRASE:?OMA_JWT_PASSPHRASE is required}
-  GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
-  GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
-  STRIPE_PUBLISHABLE_KEY: ${OMA_STRIPE_PUBLISHABLE_KEY:-}
-  STRIPE_SECRET_KEY: ${OMA_STRIPE_SECRET_KEY:-}
-
-x-app-volumes: &app-volumes
-  - media:/app/public/media
-  - jwt:/app/config/jwt
-  - var_log:/app/var/log
-  - var_sessions:/app/var/sessions
-
 services:
   app:
     image: ${OMA_IMAGE:?OMA_IMAGE is required}
@@ -28,36 +8,37 @@ services:
       - '${OMA_PORT:-40197}:80'
     mem_limit: ${OMA_APP_MEM:-700m}
     environment:
-      <<: *app-env
-      FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG:-}
-    volumes: *app-volumes
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${OMA_APP_SECRET:?OMA_APP_SECRET is required}
+      DATABASE_URL: mysql://sylius:${OMA_DB_PASSWORD:?OMA_DB_PASSWORD is required}@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
+      DEFAULT_URI: ${OMA_DEFAULT_URI:?OMA_DEFAULT_URI is required}
+      TRUSTED_PROXIES: ${OMA_TRUSTED_PROXIES:-}
+      MAILER_DSN: ${OMA_MAILER_DSN:-null://null}
+      JWT_PASSPHRASE: ${OMA_JWT_PASSPHRASE:?OMA_JWT_PASSPHRASE is required}
+      GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
+      STRIPE_PUBLISHABLE_KEY: ${OMA_STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_SECRET_KEY: ${OMA_STRIPE_SECRET_KEY:-}
+      MESSENGER_TRANSPORT_DSN: sync://
+      SYLIUS_MESSENGER_TRANSPORT_MAIN_DSN: sync://
+      SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: sync://
+      SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: sync://
+      SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: sync://
+      FRANKENPHP_CONFIG: |
+        num_threads ${OMA_PHP_THREADS:-4}
+        worker /app/public/index.php ${OMA_PHP_WORKERS:-2}
+    volumes:
+      - media:/app/public/media
+      - jwt:/app/config/jwt
+      - var_log:/app/var/log
+      - var_sessions:/app/var/sessions
     healthcheck:
       test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/']
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
-    depends_on:
-      mysql:
-        condition: service_healthy
-
-  worker:
-    image: ${OMA_IMAGE:?OMA_IMAGE is required}
-    restart: unless-stopped
-    mem_limit: ${OMA_WORKER_MEM:-240m}
-    healthcheck:
-      disable: true
-    command:
-      - php
-      - bin/console
-      - messenger:consume
-      - main
-      - catalog_promotion_removal
-      - --time-limit=3600
-      - --memory-limit=128M
-      - --no-interaction
-    environment: *app-env
-    volumes: *app-volumes
+      interval: 30s
+      timeout: 10s
+      retries: 6
+      start_period: 90s
     depends_on:
       mysql:
         condition: service_healthy
@@ -86,10 +67,10 @@ services:
           '-uroot',
           '-p${OMA_DB_ROOT_PASSWORD}',
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
 
 volumes:
   mysql_data:
