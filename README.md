@@ -89,6 +89,9 @@ nagłówkiem `Host`, a nie po `localhost`.
 Sekrety żyją **tylko** w `/opt/oma-prod/.env` (nie w CI, nie w repo) — `APP_SECRET`, hasła do bazy,
 `JWT_PASSPHRASE`, klucze Google/Stripe, `MAILER_DSN`. Po zmianie: `docker compose up -d`.
 
+Hasło admina na produkcji jest inne niż `oma2026!` z fixtures — te ostatnie są w publicznym repo,
+więc po zaseedowaniu zostało zmienione i nie ma go w repozytorium.
+
 Mikrus wystawia tylko porty `20197`/`30197` (oba zajęte przez inny stack), dlatego ruch wchodzi przez
 proxy webowe Mikrusa: `domena 40197` rejestruje subdomenę kierującą na port `40197`. TLS kończy się
 na Cloudflare, więc aplikacja dostaje HTTP z `X-Forwarded-Proto` — stąd `TRUSTED_PROXIES`
@@ -106,9 +109,12 @@ Symfony bootuje raz na wątek. Zmierzone na originie dla `/sklep/`:
 
 | | bez worker mode | z worker mode |
 |---|---|---|
-| throughput | 5,4 rps | 12,2 rps |
+| throughput | 5,4 rps | 12,8 rps |
 | p50 | 0,28 s | 0,12 s |
 | p95 | 0,51 s | 0,16 s |
+
+Przy `concurrency=4` throughput stoi na 12,8 rps, a latencja rośnie do p50 0,28 s — jedno vCPU jest
+wysycone, więc zwiększanie liczby workerów nic nie doda, tylko zabierze RAM. Stąd `OMA_PHP_WORKERS=2`.
 
 Transporty messengera są na `sync://` i **nie ma kontenera workera**. Routowane są tylko promocje
 katalogowe i historia najniższej ceny, czyli rzadkie akcje w panelu — a stale działający worker
