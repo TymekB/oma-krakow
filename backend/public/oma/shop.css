@@ -385,3 +385,9 @@ footer {
 .oma-pay__item--apay svg {
   color: #1a1a1a;
 }
+
+a.link-reset:hover,
+.list-nav li a:hover,
+.oma-topbar a:hover {
+  color: var(--oma-wine-600) !important;
+}

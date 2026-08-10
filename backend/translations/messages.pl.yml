@@ -57,6 +57,8 @@ sylius:
         manage_product_positions_in_taxon: 'Zarządzaj pozycjami produktów w %taxon_name%'
 
 oma:
+    ui:
+        view_site: 'Zobacz stronę'
     google_login:
         button: 'Kontynuuj z Google'
         or: 'albo'

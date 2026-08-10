@@ -34,7 +34,7 @@ security:
                 secret: "%env(APP_SECRET)%"
                 path: "/%sylius_admin.path_name%"
                 name: APP_ADMIN_REMEMBER_ME
-                lifetime: 31536000
+                lifetime: 1209600
                 remember_me_parameter: _remember_me
             logout:
                 path: sylius_admin_logout
@@ -98,7 +98,7 @@ security:
             remember_me:
                 secret: "%env(APP_SECRET)%"
                 name: APP_SHOP_REMEMBER_ME
-                lifetime: 31536000
+                lifetime: 1209600
                 remember_me_parameter: _remember_me
             logout:
                 path: sylius_shop_logout
