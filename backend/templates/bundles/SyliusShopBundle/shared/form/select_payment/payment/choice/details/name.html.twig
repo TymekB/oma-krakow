@@ -1,0 +1,12 @@
+{% set form = hookable_metadata.context.form %}
+{% set method = hookable_metadata.context.method %}
+{% set logo = 'oma/payments/' ~ method.code ~ '.svg' %}
+{% set has_logo = file_exists(logo) %}
+
+<div class="oma-pay-choice" {{ sylius_test_html_attribute('payment-method-checkbox') }}>
+    {{ form_widget(form, sylius_test_form_attribute('payment-method-select')|merge(has_logo ? { 'label': false } : {})) }}
+
+    {% if has_logo %}
+        <img class="oma-pay-choice__logo" src="{{ asset(logo) }}" alt="{{ method.name }}" height="18" loading="lazy">
+    {% endif %}
+</div>

@@ -1,0 +1,7 @@
+{% set method = hookable_metadata.context.method %}
+{% set descriptor = method.name|split('—')|slice(1)|join('—')|trim %}
+{% set text = descriptor is not empty ? descriptor : method.description %}
+
+{% if text is not empty %}
+    <div class="oma-pay-choice__note"><small>{{ text }}</small></div>
+{% endif %}

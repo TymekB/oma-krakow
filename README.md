@@ -38,6 +38,15 @@ Landing osobno, z hot reloadem: `npm install && npm start` → http://localhost:
 
 **Zmiany w landingu wymagają `make landing`.** Bez tego `backend/public/` serwuje poprzedni build i wygląda to jak „zmiany nie działają".
 
+**Skrypty sklepu nie mogą wykonać się drugi raz.** Sylius renderuje hook `#javascripts` na końcu
+`<body>`, a Turbo Drive przy każdej nawigacji na nowo wykonuje skrypty z body. Nasz bundle
+(`app-shop-entry`) startuje w `bootstrap.js` własną aplikację Stimulusa, więc każde wejście na stronę
+produktu dokładało kolejną instancję — jedno kliknięcie „Dodaj do koszyka" dodawało tyle sztuk, ile
+było nawigacji (zgłoszone jako „klikam raz, dodaje 6"). Dlatego tag skryptu ma
+`data-turbo-eval="false"`, a inline'owy skrypt w `templates/shop/javascripts.html.twig` pilnuje się
+flagą na `window`. Pilnuje tego test `shop.spec.ts` → „po kilku nawigacjach Turbo jedno kliknięcie
+dodaje jedną sztukę". Panelu to nie dotyczy — admin chodzi na pełnych przeładowaniach.
+
 **Yarn w `backend/`.** Rootowy `package.json` (Angular) deklaruje `packageManager: npm`, przez co yarn wychodził w górę drzewa i odmawiał startu — dlatego `backend/package.json` ma własne `packageManager: yarn@1.22.22`. Przy Node 23 instaluj z `--ignore-engines`.
 
 ## Kolejki i promocje z datami
@@ -66,6 +75,50 @@ OMA_GOOGLE_CLIENT_ID=... OMA_GOOGLE_CLIENT_SECRET=... docker compose up -d app
 **Logowanie Google** — w Google Cloud Console dodaj *Authorized redirect URI*
 `http://localhost:8080/sklep/connect/google/check`. Dopóki klucze są puste, przycisk „Kontynuuj z Google"
 się nie renderuje, a `/sklep/connect/google` zwraca 404 (zamiast wysypywać się na pustym kluczu).
+
+**PayU (główna bramka)** — metoda `payu` jest włączona i pierwsza na liście, na kluczach
+**publicznego POS-u testowego PayU** (sandbox, PLN: `pos_id`/`client_id` `300746`). Klucze siedzą
+w `.env` i w `compose.yaml` (`OMA_PAYU_*`), a w bazie w zaszyfrowanym `gatewayConfig` — produkcyjne
+podmienia się w panelu (*Konfiguracja → Metody płatności → PayU*) albo przez `OMA_PAYU_*` przy
+`make reset`. Środowisko wybiera się polem *Środowisko* (`sandbox` → `secure.snd.payu.com`,
+`production` → `secure.payu.com`).
+
+Przepływ: checkout → `capture` tworzy zamówienie w PayU (REST `v2_1/orders`) → redirect na
+`redirectUri` → powrót na `continueUrl` (`/sklep/order/after-pay/{hash}`) odpytuje status zamówienia
+→ webhook `POST /payment-methods/payu` domyka płatność. Webhook weryfikuje nagłówek
+`OpenPayu-Signature` (`md5(body + drugi klucz)`); zły albo brakujący podpis to 403 i nic się nie zapisuje.
+Karta testowa: `4444333322221111`, `12/29`, CVV `123` (odrzucenie: `5000105018126595`).
+
+**PayU na localu nie dostanie webhooka** — `notifyUrl` wskazuje na `localhost:8080`, więc PayU nie ma
+jak się dobić. Płatność i tak zmieni stan po powrocie z bramki (odpytanie statusu na `continueUrl`).
+Do testów webhooka albo tunel (`cloudflared`/`ngrok` + `OMA_DEFAULT_URI`), albo ręcznie podpisany POST
+na `/payment-methods/payu`.
+
+Metody PayU można dosiać do istniejącej bazy bez czyszczenia danych (osobna suita fixtur, bez purgera):
+
+```bash
+docker compose exec app php bin/console sylius:fixtures:load payu -n
+```
+
+**Apple Pay** to druga metoda na tej samej bramce (`payu_apple_pay`), z ustawionym polem
+*Wymuszona metoda płatności* = Apple Pay. Zamówienie leci do PayU z `payMethods.payMethod = {type: PBL, value: jp}`
+i arkusz Apple Pay pokazuje **PayU na swojej domenie** — dlatego nie potrzebujemy ani certyfikatu
+Merchant Identity, ani pliku `apple-developer-merchantid-domain-association.txt`, ani zgody Apple
+Developer Program. To jedyna wersja Apple Pay, którą da się tu zrobić bez tych rzeczy; wariant
+z tokenem (Apple Pay JS + `authorizationCode`) wymaga certyfikatów od PayU i konta Apple Developer.
+
+Uwaga na wartości PayU: **`jp` to Apple Pay, a `ap` to Google Pay** (wbrew intuicji — potwierdzone
+przez `GET /api/v2_1/paymethods` na sandboxie, gdzie oba są `ENABLED`).
+
+Apple Pay pokazuje się w checkoucie tylko wtedy, gdy przeglądarka je obsługuje — skrypt
+w `templates/shop/javascripts.html.twig` chowa metodę, gdy `window.ApplePaySession.canMakePayments()`
+jest niedostępne (Chrome, Firefox, Windows). Sprawdzenie musi być po stronie klienta, bo o dostępności
+decyduje urządzenie i Wallet, a nie User-Agent.
+
+Do faktycznego zapłacenia potrzebne są: Safari na urządzeniu Apple, region wspierający Apple Pay,
+[konto sandbox testera](https://developer.apple.com/apple-pay/sandbox-testing/) (App Store Connect →
+Users and Access → Sandbox → Testers), karta testowa Apple dodana ręcznie do Wallet oraz **HTTPS**
+(czyli nie `localhost` — potrzebny tunel i `OMA_DEFAULT_URI`).
 
 **Stripe (karta, BLIK, Przelewy24)** — metoda płatności `stripe` jest **wyłączona**, bo w bazie
 zapisane są zaszyfrowane puste klucze. Żeby ją uruchomić: wpisz klucze testowe w panelu
@@ -179,6 +232,13 @@ vendor/bin/ecs check --fix
 
 CI (GitHub Actions) buduje landing, uruchamia ECS + PHPStan + PHPUnit + linty Twiga i kontenera
 oraz build assetów. Testy e2e nie są w CI — wymagają pełnego stacku Dockera.
+
+`e2e/payu.spec.ts` przechodzi checkout do końca i sprawdza, czy zamówienie ląduje w sandboxie PayU —
+czyli **wymaga internetu** i tworzy prawdziwe zamówienie testowe w PayU. Sandbox PayU odcina nadmiarowy
+ruch (HTTP 429), więc nie warto go puszczać w pętli.
+
+E2e trzeba puszczać na stacku w `APP_ENV=prod` (domyślnym). W `make dev` requesty są na tyle wolniejsze,
+że asercje `toHaveURL` wchodzą w timeout.
 
 ## Struktura landingu
 

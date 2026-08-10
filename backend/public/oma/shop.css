@@ -210,6 +210,42 @@ footer {
   box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
 }
 
+.oma-pay-card {
+  background: #fff;
+  border: 1px solid var(--oma-sand-200);
+  border-radius: var(--bs-border-radius);
+}
+
+.oma-pay-card__body {
+  cursor: pointer;
+  margin: 0;
+  width: 100%;
+}
+
+.oma-pay-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.oma-pay-choice__logo {
+  height: 18px;
+  width: auto;
+  display: block;
+}
+
+.oma-pay-choice__note {
+  padding-left: 1.5rem;
+  color: var(--oma-ink-soft);
+}
+
+.oma-summary-total {
+  font-family: var(--oma-body);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--oma-wine-800);
+}
+
 .table-success,
 tr.table-success,
 tr.table-success > * {

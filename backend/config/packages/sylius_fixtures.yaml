@@ -115,19 +115,44 @@ sylius_fixtures:
                 payment_method:
                     options:
                         custom:
+                            payu: &payu_payment_method
+                                code: 'payu'
+                                name: 'PayU — karta, BLIK, przelew online'
+                                description: 'Płatność online obsługiwana przez PayU.'
+                                gatewayName: 'PayU'
+                                gatewayFactory: 'payu'
+                                usePayum: false
+                                gatewayConfig:
+                                    environment: '%env(PAYU_ENVIRONMENT)%'
+                                    pos_id: '%env(PAYU_POS_ID)%'
+                                    client_id: '%env(PAYU_CLIENT_ID)%'
+                                    client_secret: '%env(PAYU_CLIENT_SECRET)%'
+                                    signature_key: '%env(PAYU_SIGNATURE_KEY)%'
+                                enabled: true
+                                channels:
+                                    - 'OMA_WEB'
+                            payu_apple_pay: &payu_apple_pay_payment_method
+                                code: 'payu_apple_pay'
+                                name: 'Apple Pay'
+                                description: 'Płatność Apple Pay rozliczana przez PayU. Wymaga Safari na urządzeniu Apple.'
+                                gatewayName: 'PayU Apple Pay'
+                                gatewayFactory: 'payu'
+                                usePayum: false
+                                gatewayConfig:
+                                    environment: '%env(PAYU_ENVIRONMENT)%'
+                                    pos_id: '%env(PAYU_POS_ID)%'
+                                    client_id: '%env(PAYU_CLIENT_ID)%'
+                                    client_secret: '%env(PAYU_CLIENT_SECRET)%'
+                                    signature_key: '%env(PAYU_SIGNATURE_KEY)%'
+                                    pay_method: 'jp'
+                                enabled: true
+                                channels:
+                                    - 'OMA_WEB'
                             blik:
                                 code: 'blik'
                                 name: 'BLIK — przelew na telefon'
                                 description: 'Szybki przelew BLIK na numer telefonu gabinetu.'
                                 instructions: 'Po złożeniu zamówienia wyślemy SMS-em numer telefonu do przelewu BLIK. Zamówienie realizujemy po zaksięgowaniu wpłaty.'
-                                enabled: true
-                                channels:
-                                    - 'OMA_WEB'
-                            bank_transfer:
-                                code: 'bank_transfer'
-                                name: 'Przelew bankowy'
-                                description: 'Tradycyjny przelew na konto gabinetu.'
-                                instructions: 'Dane do przelewu wyślemy w mailu z potwierdzeniem zamówienia.'
                                 enabled: true
                                 channels:
                                     - 'OMA_WEB'
@@ -269,3 +294,11 @@ sylius_fixtures:
                                 images:
                                     -   path: '/app/assets/fixtures/karta-podarunkowa.jpg'
                                         type: 'main'
+
+        payu:
+            fixtures:
+                payment_method:
+                    options:
+                        custom:
+                            payu: *payu_payment_method
+                            payu_apple_pay: *payu_apple_pay_payment_method

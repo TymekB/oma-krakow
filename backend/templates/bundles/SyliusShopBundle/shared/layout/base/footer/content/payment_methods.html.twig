@@ -6,20 +6,32 @@
         <li><a href="https://www.instagram.com/oma.fizjo.krakow/" target="_blank" rel="noopener">&#64;oma.fizjo.krakow</a></li>
     </ul>
 
-    {% set payment_methods = oma_enabled_payment_methods() %}
+    {% set hidden_methods = ['payu_apple_pay'] %}
+    {% set payment_methods = oma_enabled_payment_methods()|filter(method => method.code not in hidden_methods) %}
 
     {% if payment_methods is not empty %}
+        {% set gateway_brands = { 'payu': [{ 'code': 'blik', 'name': 'BLIK' }] } %}
+
         <div class="oma-footer__heading mt-4">Metody płatności</div>
         <ul class="oma-pay">
             {% for method in payment_methods %}
                 {% set logo = 'oma/payments/' ~ method.code ~ '.svg' %}
                 <li class="oma-pay__item">
                     {% if file_exists(logo) %}
-                        <img src="{{ asset(logo) }}" alt="{{ method.name }}" height="18" loading="lazy">
+                        <img src="{{ asset(logo) }}" alt="{{ method.name }}" height="14" loading="lazy">
                     {% else %}
                         <span>{{ method.name }}</span>
                     {% endif %}
                 </li>
+
+                {% for brand in gateway_brands[method.code] ?? [] %}
+                    {% set brand_logo = 'oma/payments/' ~ brand.code ~ '.svg' %}
+                    {% if file_exists(brand_logo) %}
+                        <li class="oma-pay__item">
+                            <img src="{{ asset(brand_logo) }}" alt="{{ brand.name }}" height="14" loading="lazy">
+                        </li>
+                    {% endif %}
+                {% endfor %}
             {% endfor %}
         </ul>
     {% endif %}
