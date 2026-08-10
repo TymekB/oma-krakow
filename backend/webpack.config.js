@@ -10,6 +10,10 @@ const SyliusShop = require('@sylius-ui/shop');
 // Admin config
 const adminConfig = SyliusAdmin.getBaseWebpackConfig(path.resolve(__dirname));
 
+// Encore nie hashuje nazw w dev, wiec stary plik potrafi zostac w cache przegladarki
+adminConfig.output.filename = '[name].[contenthash:8].js';
+adminConfig.output.chunkFilename = '[name].[contenthash:8].js';
+
 adminConfig.plugins.push(
     new webpack.NormalModuleReplacementPlugin(
         /[\\/]scripts[\\/]statistics_chart\.js$/,
