@@ -52,7 +52,7 @@ export async function addFirstProductToCart(page: Page): Promise<string> {
   await page.locator('a[href*="/sklep/produkty/"]').first().click();
   await expect(page.locator('#add-to-cart-button')).toBeVisible();
 
-  const productName = (await page.locator('h1').first().textContent())?.trim() ?? '';
+  const productName = (await page.locator('h1.text-break').first().textContent())?.trim() ?? '';
 
   await page.locator('#add-to-cart-button').click();
   await page.waitForTimeout(2000);

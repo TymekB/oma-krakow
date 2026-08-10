@@ -42,11 +42,42 @@ test.describe('Sklep', () => {
   });
 
   test('dodanie produktu do koszyka aktualizuje podsumowanie', async ({ page }) => {
+    const serverErrors: string[] = [];
+    page.on('response', (response) => {
+      if (response.status() >= 500) {
+        serverErrors.push(`${response.status()} ${response.request().method()} ${new URL(response.url()).pathname}`);
+      }
+    });
+
     const productName = await addFirstProductToCart(page);
+    expect(productName, 'nazwa produktu ze strony produktu, nie pusty tytuł offcanvasu').not.toBe('');
+
     await page.goto('/sklep/cart/');
 
     await expect(page.locator('body')).toContainText(productName);
     await expect(page.locator('body')).toContainText('Suma');
+    expect(serverErrors, 'dodanie do koszyka bez odpowiedzi 5xx').toEqual([]);
+  });
+
+  test('po kilku nawigacjach Turbo jedno kliknięcie dodaje jedną sztukę', async ({ page }) => {
+    await page.goto('/sklep/');
+
+    for (let i = 0; i < 3; i++) {
+      await page.goto('/sklep/taxons/aromaterapia');
+      await page.locator('a[href*="/sklep/produkty/"]').first().click();
+      await expect(page.locator('#add-to-cart-button')).toBeVisible();
+      await page.goBack();
+    }
+
+    await page.locator('a[href*="/sklep/produkty/"]').first().click();
+    await expect(page.locator('#add-to-cart-button')).toBeVisible();
+    await page.locator('#add-to-cart-button').click();
+    await page.waitForTimeout(2500);
+
+    await page.goto('/sklep/cart/');
+    const quantity = page.locator('input[name*="quantity"]').first();
+
+    await expect(quantity, 'bundle sklepu nie może wykonać się drugi raz po nawigacji Turbo').toHaveValue('1');
   });
 
   test('sortowanie działa i zachowuje kategorię', async ({ page }) => {

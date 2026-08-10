@@ -128,18 +128,29 @@ Limity pamięci (`mem_limit`) zostają, choć maszyna jest dedykowana: bez swapa
 ubija wtedy kontener, a nie cały serwer. Budżet jest ustawiony z dużym zapasem — przy normalnym
 ruchu stack bierze ~600 MB z 8 GB (`app` ~290 MB, `worker` ~120 MB, `mysql` ~175 MB).
 
-Włączony jest **worker mode** FrankenPHP (`FRANKENPHP_CONFIG` w `deploy/compose.prod.yaml`): kernel
-Symfony bootuje raz na wątek, `OMA_PHP_WORKERS=4` przy `OMA_PHP_THREADS=8`. Zmierzone dla `/sklep/`
-(`bench.sh /sklep/ 24 2`), porównanie ze starą maszyną (`matt197`, 1 vCPU / 2 GB, współdzielona):
+**Worker mode FrankenPHP jest wyłączony i musi taki zostać** — psuł dodawanie do koszyka. Kernel
+Symfony żyje wtedy między requestami, a `Sylius\Component\Channel\Context\CachedPerRequestChannelContext`
+trzyma encję kanału w `SplObjectStorage` kluczowanym obiektem `Request`. Klasa zakłada, że proces
+kończy się razem z requestem; w worker mode runner FrankenPHP po każdym przebiegu woła
+`gc_collect_cycles()`, EntityManager jest resetowany, a kontekst potrafi oddać **odłączony** kanał.
+Efekt: `POST /sklep/_components/sylius_shop:product:add_to_cart_form/addToCart` kończy się 500 z
+`ORMInvalidArgumentException: A new entity was found through the relationship 'Order#channel'`
+przy tworzeniu nowego koszyka. Widać to tylko jako migające 500 w XHR-ze Live Componentu, a koszyk
+zostaje w połowicznym stanie — przez co `/sklep/checkout/` zwraca potem 404.
 
-| | matt197 | kate123 |
-|---|---|---|
-| throughput | 5,7 rps | 35,6 rps |
-| p50 | 0,27 s | 0,03 s |
-| p95 | 0,54 s | 0,08 s |
+To jedyna klasa w Syliusie z tym wzorcem (`grep -rl SplObjectStorage vendor/sylius`), więc łatka
+punktowa jest możliwa, ale nie warto jej trzymać na produkcji bez potrzeby — bez worker mode
+i tak jest z zapasem. Zmierzone dla `/sklep/` (`bench.sh /sklep/ 24 2`):
 
-Sufit to ~33 rps przy `concurrency=8` i `16` (p95 odpowiednio 0,21 s i 0,33 s) — wysycają się dwa
-vCPU, więc dokładanie workerów niczego już nie doda.
+| | matt197 (1 vCPU) | kate123 bez worker mode | kate123 z worker mode |
+|---|---|---|---|
+| throughput | 5,7 rps | 21,0 rps | 34,6 rps (ale psuje koszyk) |
+| p50 | 0,27 s | 0,09 s | 0,03 s |
+| p95 | 0,54 s | 0,10 s | 0,07 s |
+
+Regresję łapie `e2e/shop.spec.ts` → „dodanie produktu do koszyka nie zwraca 5xx". Uwaga na starą
+wersję tego testu: asercja na nazwie produktu brała pierwszy `h1`, którym jest pusty tytuł
+offcanvasu, więc test przechodził mimo wywalonego koszyka.
 
 Transporty messengera idą na `doctrine://default`, a konsumuje je **kontener `worker`** z osobnym
 limitem pamięci. Wcześniej robił to cron co 5 minut, bo na 1 vCPU stały worker był główną przyczyną

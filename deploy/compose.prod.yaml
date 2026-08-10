@@ -7,7 +7,7 @@ x-app-env: &app-env
   DATABASE_URL: mysql://sylius:${OMA_DB_PASSWORD:?OMA_DB_PASSWORD is required}@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
   DEFAULT_URI: ${OMA_DEFAULT_URI:?OMA_DEFAULT_URI is required}
   TRUSTED_PROXIES: ${OMA_TRUSTED_PROXIES:-}
-  MAILER_DSN: ${OMA_MAILER_DSN:-null://null}
+  MAILER_DSN: ${OMA_MAILER_DSN:-smtp://mailpit:1025}
   JWT_PASSPHRASE: ${OMA_JWT_PASSPHRASE:?OMA_JWT_PASSPHRASE is required}
   GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
   GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
@@ -35,7 +35,6 @@ services:
       <<: *app-env
       FRANKENPHP_CONFIG: |
         num_threads ${OMA_PHP_THREADS:-8}
-        worker /app/public/index.php ${OMA_PHP_WORKERS:-4}
     volumes:
       - media:/app/public/media
       - jwt:/app/config/jwt
@@ -75,6 +74,25 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    mem_limit: ${OMA_MAILPIT_MEM:-128m}
+    ports:
+      - '127.0.0.1:${OMA_MAILPIT_UI_PORT:-8025}:8025'
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 2000
+      MP_SMTP_MAX_RECIPIENTS: 50
+    volumes:
+      - mailpit_data:/data
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   mysql:
     image: mysql:8.0
