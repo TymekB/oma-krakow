@@ -125,6 +125,7 @@ services:
 
 volumes:
   mysql_data:
+  mailpit_data:
   media:
   jwt:
   var_log:
