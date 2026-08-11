@@ -28,6 +28,7 @@
         "knpuniversity/oauth2-client-bundle": "^2.20",
         "league/oauth2-google": "^5.0",
         "runtime/frankenphp-symfony": "^1.0",
+        "sentry/sentry-symfony": "^5.12",
         "sylius/adyen-plugin": "^2.0.6",
         "sylius/mollie-plugin": "^3.2.3",
         "sylius/paypal-plugin": "^2.0.8",
