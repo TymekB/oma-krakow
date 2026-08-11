@@ -85,6 +85,7 @@ oma:
             signature_key: 'Drugi klucz (MD5)'
             pay_method: 'Wymuszona metoda płatności'
             pay_method_any: 'Wybór po stronie PayU'
+            pay_method_apple_pay: 'Apple Pay'
             pay_method_google_pay: 'Google Pay'
             pay_method_blik: 'BLIK'
             pay_method_card: 'Karta płatnicza'
