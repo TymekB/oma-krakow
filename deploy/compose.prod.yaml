@@ -30,6 +30,8 @@ x-app-env: &app-env
   SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/main_failed
   SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/catalog_promotion_removal
   SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/catalog_promotion_removal_failed
+  HEALTHCHECKS_PING_URL: ${OMA_HC_PING_URL:-}
+  OMA_BACKUP_KEEP_DAYS: ${OMA_BACKUP_KEEP_DAYS:-7}
 
 services:
   app:
@@ -47,6 +49,15 @@ services:
       - jwt:/app/config/jwt
       - var_log:/app/var/log
       - var_sessions:/app/var/sessions
+      - db_backup:/backup
+    labels:
+      ofelia.enabled: 'true'
+      ofelia.job-exec.expired-carts.schedule: '0 15 3 * * *'
+      ofelia.job-exec.expired-carts.command: 'bin/oma-cron expired-carts php bin/console sylius:remove-expired-carts --no-interaction'
+      ofelia.job-exec.db-backup.schedule: '0 0 3 * * *'
+      ofelia.job-exec.db-backup.command: 'bin/oma-cron db-backup bin/oma-db-backup'
+      ofelia.job-exec.unpaid-orders.schedule: '0 30 3 * * *'
+      ofelia.job-exec.unpaid-orders.command: 'bin/oma-cron unpaid-orders php bin/console sylius:cancel-unpaid-orders --no-interaction'
     healthcheck:
       test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/']
       interval: 30s
@@ -154,6 +165,46 @@ services:
       retries: 10
       start_period: 60s
 
+  healthchecks:
+    image: healthchecks/healthchecks:latest
+    restart: unless-stopped
+    mem_limit: ${OMA_HC_MEM:-256m}
+    ports:
+      - '127.0.0.1:${OMA_HC_PORT:-8010}:8000'
+    environment:
+      ALLOWED_HOSTS: ${OMA_HC_ALLOWED_HOSTS:-*}
+      DB: sqlite
+      DB_NAME: /data/hc.sqlite
+      LANG: C.UTF-8
+      DEBUG: 'False'
+      DEFAULT_FROM_EMAIL: ${OMA_HC_FROM_EMAIL:-crony@oma-fizjo.pl}
+      EMAIL_HOST: ${OMA_HC_EMAIL_HOST:-mailpit}
+      EMAIL_PORT: ${OMA_HC_EMAIL_PORT:-1025}
+      EMAIL_HOST_USER: ${OMA_HC_EMAIL_USER:-}
+      EMAIL_HOST_PASSWORD: ${OMA_HC_EMAIL_PASSWORD:-}
+      EMAIL_USE_TLS: ${OMA_HC_EMAIL_USE_TLS:-False}
+      EMAIL_USE_VERIFICATION: 'False'
+      REGISTRATION_OPEN: 'False'
+      SECRET_KEY: ${OMA_HC_SECRET_KEY:?OMA_HC_SECRET_KEY is required}
+      SITE_NAME: 'OMA — crony'
+      SITE_ROOT: ${OMA_HC_SITE_ROOT:?OMA_HC_SITE_ROOT is required}
+    volumes:
+      - healthchecks_data:/data
+
+  cron:
+    image: mcuadros/ofelia:latest
+    restart: unless-stopped
+    mem_limit: ${OMA_CRON_MEM:-128m}
+    command: daemon --docker
+    environment:
+      TZ: ${OMA_HC_TZ:-Europe/Warsaw}
+    depends_on:
+      - app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      disable: true
+
 volumes:
   mysql_data:
   rabbitmq_data:
@@ -162,3 +213,5 @@ volumes:
   jwt:
   var_log:
   var_sessions:
+  healthchecks_data:
+  db_backup:

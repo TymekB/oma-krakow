@@ -1,7 +1,7 @@
 DC ?= docker compose
 APP = $(DC) exec -T app bash -lc
 
-.PHONY: build up down restart logs install fixtures prices assets landing shell console db reset dev
+.PHONY: build up down restart logs install fixtures prices assets landing shell console db reset dev crons
 
 build:
 	$(DC) build
@@ -49,6 +49,9 @@ console:
 
 db:
 	$(DC) exec mysql mysql -usylius -psylius sylius_oma
+
+crons:
+	env $$(grep -E '^OMA_HC_' .env | xargs) ../deploy/healthchecks-bootstrap.sh
 
 dev:
 	OMA_ENV=dev OMA_DEBUG=1 OMA_FRANKENPHP_CONFIG= $(DC) up -d --force-recreate app

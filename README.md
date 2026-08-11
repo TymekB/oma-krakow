@@ -368,6 +368,63 @@ sięga po to przez `oma_review_confirmed_by_purchase(review)`.
 Testy: `e2e/reviews.spec.ts` — gość odbity na logowanie, zalogowany dodaje opinię bez pola e-mail,
 badge pojawia się po opłaconym zamówieniu i nie pojawia się bez zakupu.
 
+## Crony i ich monitoring (Healthchecks)
+
+Do tej pory sklep nie miał żadnego zadania cyklicznego — stary `/etc/cron.d/oma-messenger` zniknął,
+gdy konsument messengera stał się stałym serwisem. Teraz w Compose są trzy joby i pilnowanie ich
+działania:
+
+| Slug | Kiedy | Co robi |
+|---|---|---|
+| `expired-carts` | 03:15 | `sylius:remove-expired-carts` — sprząta porzucone koszyki |
+| `db-backup` | 03:00 | `bin/oma-db-backup` — `mysqldump` do wolumenu `db_backup`, retencja 7 dni |
+| `unpaid-orders` | 03:30 | `sylius:cancel-unpaid-orders` — anuluje nieopłacone zamówienia |
+
+Harmonogram trzyma **Ofelia** (serwis `cron`) — zadania są etykietami `ofelia.job-exec.*` na serwisie
+`app`, więc widać je obok aplikacji i nie ma osobnego crontaba ani przebudowy obrazu. Ofelia wchodzi
+do działającego kontenera przez `docker exec`, dlatego montuje `docker.sock` tylko do odczytu.
+
+Cron u Ofelii ma **sześć pól** (pierwsze to sekundy), więc `0 0 3 * * *` to 03:00:00. Kontener dostaje
+`TZ=Europe/Warsaw` i checki w Healthchecks mają tę samą strefę — inaczej Ofelia liczyłaby w UTC,
+a monitoring czekałby na ping dwie godziny wcześniej i sypał fałszywymi alarmami. Zmieniając
+harmonogram zmień go w obu miejscach.
+
+Każde zadanie jest owinięte w `bin/oma-cron <slug> <komenda>`: pinguje `/start`, uruchamia komendę,
+a potem pinguje kod wyjścia i przesyła wyjście komendy jako treść. Healthchecks alarmuje więc
+w dwóch przypadkach: **komenda padła** albo **cron w ogóle się nie odpalił**. Bez `HEALTHCHECKS_PING_URL`
+wrapper po prostu odpala komendę, więc lokalne wywołania ręczne działają jak dotąd.
+
+Kontener Healthchecks dostaje `LANG=C.UTF-8` i to nie jest ozdoba: uwsgi startuje osadzony
+interpreter Pythona bez ustawionego locale, więc `SITE_NAME` z półpauzą dekodowało się na surogaty
+i **każda strona panelu zwracała 500** (pingi i API działały normalnie, bo nie renderują szablonu).
+
+Panel Healthchecks: http://localhost:8010 (na produkcji tylko przez `127.0.0.1`, wystaw tunelem).
+Pierwsze uruchomienie zakłada konto, projekt, klucz pingowania i trzy checki z właściwymi
+harmonogramami:
+
+```bash
+cd backend                                            # albo /opt/oma-prod na serwerze
+OMA_HC_ADMIN_PASSWORD='...' ../deploy/healthchecks-bootstrap.sh
+# → PING_URL=http://healthchecks:8000/ping/<klucz>
+```
+
+Marginesy (*grace*) są dobrane do tego, ile kosztuje spóźnienie: kopia bazy ma godzinę, sprzątanie
+koszyków i anulowanie zamówień po dwie. Oba sprzątające joby są dobowe, bo progi Syliusa to 2 i 5 dni
+— częstsze uruchamianie nic nie zmienia, a wąskie okno alertu tylko szumi.
+
+Zwrócony `PING_URL` wpisz do `.env` jako `OMA_HC_PING_URL` i przeładuj `app` oraz `cron`. Skrypt jest
+idempotentny — klucz raz wygenerowany zostaje, a kolejne uruchomienia tylko poprawiają harmonogramy
+checków. Alerty idą mailem na konto administratora Healthchecks (kanał `email` zakłada się razem
+z kontem); w devie łapie je Mailpit, na produkcji ustaw `OMA_HC_EMAIL_*`.
+
+Nowe zadanie dodaje się w dwóch miejscach: etykieta `ofelia.job-exec.<slug>` w Compose plus wpis
+w `JOBS` w `deploy/healthchecks-bootstrap.sh`. Bez wpisu w skrypcie check i tak powstanie przy
+pierwszym pingu (`create=1`), ale z domyślnym okresem 1 dnia — dlatego harmonogramy trzymamy w kodzie.
+
+Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`). To kopia **lokalna**, na tym
+samym dysku co baza — chroni przed pomyłką w danych, nie przed utratą serwera. Wysyłka poza VPS jest
+do zrobienia osobno.
+
 ## Wdrożenie (produkcja)
 
 Produkcja stoi na VPS Mikrus (`kate123`, 8 GB RAM / 2 vCPU, SSH na porcie `10123`) — projekt

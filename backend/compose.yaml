@@ -23,6 +23,7 @@ x-app-env: &app-env
   SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: amqp://guest:guest@rabbitmq:5672/%2f/main_failed
   SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: amqp://guest:guest@rabbitmq:5672/%2f/catalog_promotion_removal
   SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: amqp://guest:guest@rabbitmq:5672/%2f/catalog_promotion_removal_failed
+  HEALTHCHECKS_PING_URL: ${OMA_HC_PING_URL:-}
 
 services:
   app:
@@ -36,9 +37,18 @@ services:
       - app_var:/app/var
       - composer_cache:/root/.composer/cache
       - caddy_data:/data
+      - db_backup:/backup
     environment:
       <<: *app-env
       FRANKENPHP_CONFIG: ${OMA_FRANKENPHP_CONFIG-}
+    labels:
+      ofelia.enabled: 'true'
+      ofelia.job-exec.expired-carts.schedule: '0 15 3 * * *'
+      ofelia.job-exec.expired-carts.command: 'bin/oma-cron expired-carts php bin/console sylius:remove-expired-carts --no-interaction'
+      ofelia.job-exec.db-backup.schedule: '0 0 3 * * *'
+      ofelia.job-exec.db-backup.command: 'bin/oma-cron db-backup bin/oma-db-backup'
+      ofelia.job-exec.unpaid-orders.schedule: '0 30 3 * * *'
+      ofelia.job-exec.unpaid-orders.command: 'bin/oma-cron unpaid-orders php bin/console sylius:cancel-unpaid-orders --no-interaction'
     depends_on:
       mysql:
         condition: service_healthy
@@ -109,9 +119,43 @@ services:
     ports:
       - '8025:8025'
 
+  healthchecks:
+    image: healthchecks/healthchecks:latest
+    ports:
+      - '8010:8000'
+    environment:
+      ALLOWED_HOSTS: '*'
+      DB: sqlite
+      DB_NAME: /data/hc.sqlite
+      LANG: C.UTF-8
+      DEBUG: 'False'
+      DEFAULT_FROM_EMAIL: crony@oma-fizjo.pl
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: 1025
+      EMAIL_USE_TLS: 'False'
+      EMAIL_USE_VERIFICATION: 'False'
+      REGISTRATION_OPEN: 'False'
+      SECRET_KEY: ${OMA_HC_SECRET_KEY:-dev-secret-key}
+      SITE_NAME: 'OMA — crony'
+      SITE_ROOT: ${OMA_HC_SITE_ROOT:-http://localhost:8010}
+    volumes:
+      - healthchecks_data:/data
+
+  cron:
+    image: mcuadros/ofelia:latest
+    command: daemon --docker
+    environment:
+      TZ: ${OMA_HC_TZ:-Europe/Warsaw}
+    depends_on:
+      - app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 volumes:
   mysql_data:
   composer_cache:
   caddy_data:
   app_var:
   rabbitmq_data:
+  healthchecks_data:
+  db_backup:

@@ -1,0 +1,30 @@
+#!/bin/sh
+set -u
+
+SLUG="${1:?podaj slug zadania}"
+shift
+
+OUTPUT="$(mktemp)"
+trap 'rm -f "$OUTPUT"' EXIT
+
+ping() {
+    if [ -z "${HEALTHCHECKS_PING_URL:-}" ]; then
+        return 0
+    fi
+
+    curl -fsS -m 10 --retry 3 -o /dev/null \
+        --data-binary "@$OUTPUT" \
+        "${HEALTHCHECKS_PING_URL}/${SLUG}${1}?create=1" || true
+}
+
+ping /start
+
+set +e
+"$@" >"$OUTPUT" 2>&1
+STATUS=$?
+set -e
+
+cat "$OUTPUT"
+ping "/${STATUS}"
+
+exit "$STATUS"
