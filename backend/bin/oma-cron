@@ -61,11 +61,11 @@ sentry_check_in() {
     }
 
     if [ "$1" = 'in_progress' ] && [ -n "$SENTRY_SCHEDULE" ]; then
-        body="$(printf '{"check_in_id":"%s","status":"in_progress","monitor_config":{"schedule":{"type":"crontab","value":"%s"},"timezone":"%s","checkin_margin":%s,"max_runtime":%s}}' \
-            "$CHECK_IN_ID" "$SENTRY_SCHEDULE" "${OMA_HC_TZ:-Europe/Warsaw}" \
+        body="$(printf '{"check_in_id":"%s","status":"in_progress","environment":"%s","monitor_config":{"schedule":{"type":"crontab","value":"%s"},"timezone":"%s","checkin_margin":%s,"max_runtime":%s}}' \
+            "$CHECK_IN_ID" "${APP_ENV:-prod}" "$SENTRY_SCHEDULE" "${OMA_HC_TZ:-Europe/Warsaw}" \
             "${OMA_SENTRY_CHECKIN_MARGIN:-10}" "${OMA_SENTRY_MAX_RUNTIME:-30}")"
     else
-        body="$(printf '{"check_in_id":"%s","status":"%s"}' "$CHECK_IN_ID" "$1")"
+        body="$(printf '{"check_in_id":"%s","status":"%s","environment":"%s"}' "$CHECK_IN_ID" "$1" "${APP_ENV:-prod}")"
     fi
 
     if ! curl -fsS -m 10 --retry 3 -o /dev/null \
