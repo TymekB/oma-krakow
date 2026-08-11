@@ -40,6 +40,15 @@ const LISTY = [
   ['55-edycja-strony', '/admin/site/edit'],
 ];
 
+const KANAL = process.env.OMA_CHANNEL_CODE ?? 'OMA_WEB';
+
+const PRODUKT_DEMO = { kod: 'KREM_NAWILZAJACY', nazwa: 'Krem nawilżający', slug: 'krem-nawilzajacy' };
+
+const WARTOSCI_OPCJI = [
+  ['POJEMNOSC_30', '30 ml', '89.00'],
+  ['POJEMNOSC_50', '50 ml', '129.00'],
+];
+
 const ZAKLADKI_PRODUKTU = [
   ['Tłumaczenia', '11a-produkt-tlumaczenia'],
   ['Ceny', '11b-produkt-ceny'],
@@ -89,11 +98,10 @@ if (await utworz.count()) {
 await idz('/admin/products/new/simple');
 await zrzut('10b-produkt-nowy');
 
-const produkt = await page.evaluate(async () => {
-  const odpowiedz = await fetch('/admin/products/', { headers: { Accept: 'text/html' } });
-  const html = await odpowiedz.text();
-  return html.match(/\/admin\/products\/(\d+)\/edit/)?.[1] ?? null;
-});
+await idz('/admin/products/');
+const produkt = await page.evaluate(
+  () => [...document.querySelectorAll('a')].map((a) => a.getAttribute('href') ?? '').find((h) => /\/admin\/products\/\d+\/edit/.test(h))?.match(/(\d+)/)?.[1] ?? null,
+);
 
 if (produkt) {
   await idz(`/admin/products/${produkt}/edit`);
@@ -133,6 +141,103 @@ const historia = page.getByRole('button', { name: /Historia zmian/i }).first();
 if (await historia.count()) {
   await historia.click();
   await zrzut('55a-historia-zmian', 1000);
+}
+
+await produktKonfigurowalny();
+
+/**
+ * Rozdzial 5 pokazuje produkt konfigurowalny, ktorego sklep na co dzien nie ma.
+ * Dane demo powstaja tylko na czas zrzutow i sa kasowane na koncu.
+ */
+async function produktKonfigurowalny() {
+  page.on('dialog', (okno) => okno.accept());
+
+  await usunDemo();
+
+  await idz('/admin/product-options/new');
+  await page.fill('[name="sylius_admin_product_option[code]"]', 'POJEMNOSC');
+  await page.fill('[name="sylius_admin_product_option[translations][pl_PL][name]"]', 'Pojemność');
+
+  const dodajWartosc = page.getByRole('button', { name: /Dodaj wartość/i }).first();
+  for (const _ of WARTOSCI_OPCJI) {
+    await dodajWartosc.click();
+    await page.waitForTimeout(500);
+  }
+  for (const [i, [kod, etykieta]] of WARTOSCI_OPCJI.entries()) {
+    await page.fill(`[name="sylius_admin_product_option[values][${i}][code]"]`, kod);
+    await page.fill(`[name="sylius_admin_product_option[values][${i}][translations][pl_PL][value]"]`, etykieta);
+  }
+  await page.getByRole('button', { name: /^Utwórz$/ }).first().click();
+  await page.waitForLoadState('networkidle');
+  const opcja = page.url().match(/product-options\/(\d+)/)?.[1];
+
+  await idz(`/admin/product-options/${opcja}/edit`);
+  await zrzut('10d-opcja-wartosci', 1600);
+
+  await idz('/admin/products/new');
+  await page.fill('[name="sylius_admin_product[code]"]', PRODUKT_DEMO.kod);
+  await page.locator('.ts-wrapper').first().click();
+  await page.waitForTimeout(500);
+  await page.locator('.ts-dropdown .option', { hasText: 'Pojemność' }).first().click();
+  await page.waitForTimeout(400);
+  await page.evaluate(() => document.activeElement?.blur());
+  await zrzut('10c-produkt-konfigurowalny', 1000);
+
+  await page.locator('#side-nav button', { hasText: /^\s*Tłumaczenia\s*$/ }).first().click();
+  await page.waitForTimeout(500);
+  await page.fill('[name="sylius_admin_product[translations][pl_PL][name]"]', PRODUKT_DEMO.nazwa);
+  await page.fill('[name="sylius_admin_product[translations][pl_PL][slug]"]', PRODUKT_DEMO.slug);
+  await page.getByRole('button', { name: /^Utwórz$/ }).first().click();
+  await page.waitForLoadState('networkidle');
+  const produkt = page.url().match(/products\/(\d+)\/edit/)?.[1];
+
+  if (!produkt) {
+    console.warn('Nie udalo sie utworzyc produktu demo — pomijam zrzuty wariantow');
+    await usunDemo();
+    return;
+  }
+
+  await page.getByRole('button', { name: /Zarządzaj wariantami/i }).first().click();
+  await zrzut('10e-zarzadzaj-wariantami', 1000);
+
+  await idz(`/admin/products/${produkt}/variants/generate`);
+  await zrzut('10f-generowanie-wariantow', 1400);
+
+  for (const [i, [, etykieta, cena]] of WARTOSCI_OPCJI.entries()) {
+    await page.fill(`[name="sylius_admin_product_generate_variants[variants][${i}][code]"]`, `${PRODUKT_DEMO.kod}-${etykieta.replace(' ', '').toUpperCase()}`);
+    await page.fill(`[name="sylius_admin_product_generate_variants[variants][${i}][channelPricings][${KANAL}][price]"]`, cena);
+  }
+  await page.getByRole('button', { name: /^Generuj$/ }).first().click();
+  await page.waitForLoadState('networkidle');
+
+  await idz(`/admin/products/${produkt}/variants/`);
+  await zrzut('10g-warianty-lista', 1000);
+
+  await usunDemo();
+}
+
+async function usunDemo() {
+  for (const [lista, tekst] of [['/admin/products/', PRODUKT_DEMO.nazwa], ['/admin/product-options/', 'Pojemność']]) {
+    await idz(lista);
+    const wiersz = page.locator('tr', { hasText: tekst }).first();
+
+    if (!(await wiersz.count())) {
+      continue;
+    }
+
+    // ikona kosza otwiera modal; przycisk potwierdzenia siedzi w tym modalu, nie w wierszu
+    const kosz = wiersz.locator('button.btn-icon:not(.dropdown-static)').first();
+
+    if (!(await kosz.isVisible().catch(() => false))) {
+      console.warn(`Nie znalazlem kosza dla "${tekst}" — dane demo zostaja do recznego usuniecia`);
+      continue;
+    }
+
+    await kosz.click();
+    await page.waitForTimeout(900);
+    await page.locator('.modal.show button.btn-danger').first().click();
+    await page.waitForLoadState('networkidle');
+  }
 }
 
 execFileSync('sh', ['-c', `for f in "${RAW}"/*.png; do sips -Z 1440 -s format jpeg -s formatOptions 78 "$f" --out "${IMG}/$(basename "$f" .png).jpg" >/dev/null; done`]);

@@ -359,12 +359,160 @@
   </table>
 
   <figure>
-    <img src="img/10b-produkt-nowy.jpg" alt="Formularz nowego produktu">
-    <figcaption>Formularz nowego produktu</figcaption>
+    <img src="img/10b-produkt-nowy.jpg" alt="Formularz nowego produktu prostego">
+    <figcaption>Formularz nowego produktu prostego</figcaption>
   </figure>
+
+  <h3>Produkt konfigurowalny — czym jest</h3>
+
+  <p>Produkt konfigurowalny to <strong>jedna pozycja w sklepie, pod którą kryje się kilka wersji do wyboru</strong>. Klient wchodzi na stronę „Krem nawilżający", a tam wybiera z listy pojemność — 30 ml albo 50 ml. Każda wersja ma <strong>własną cenę, własny kod i własny stan magazynowy</strong>, ale opis, zdjęcia i kategoria są wspólne.</p>
+
+  <p>Te wersje nazywają się <strong>wariantami</strong>. Nie tworzysz ich ręcznie jedna po drugiej — panel wygeneruje je za Ciebie ze wszystkich kombinacji, które wskażesz.</p>
+
+  <table>
+    <tr><th style="width:34%">&nbsp;</th><th style="width:33%">Produkt prosty</th><th>Produkt konfigurowalny</th></tr>
+    <tr><td><strong>Wersje</strong></td><td>Jedna</td><td>Kilka do wyboru</td></tr>
+    <tr><td><strong>Cena</strong></td><td>Jedna, w zakładce <em>Ceny</em></td><td>Osobna dla każdej wersji</td></tr>
+    <tr><td><strong>Magazyn</strong></td><td>Jeden licznik sztuk</td><td>Osobny licznik dla każdej wersji</td></tr>
+    <tr><td><strong>Klient w sklepie</strong></td><td>Klika „Dodaj do koszyka"</td><td>Najpierw wybiera wersję, potem dodaje do koszyka</td></tr>
+    <tr><td><strong>Ile pracy</strong></td><td>Jeden formularz</td><td>Trzy kroki (opisane niżej)</td></tr>
+  </table>
+
+  <div class="tip">
+    <b>Kiedy naprawdę go potrzebujesz</b>
+    Tylko wtedy, gdy te wersje różnią się ceną albo trzeba liczyć ich zapas osobno — np. krem
+    w dwóch pojemnościach. Jeśli różnica jest wyłącznie opisowa (np. zapach, a cena i tak ta sama),
+    prościej zrobić <strong>osobne produkty proste</strong> albo dopisać informację w opisie.
+  </div>
+
+  <div class="warn">
+    <b>Decyzja jest na starcie</b>
+    W panelu nie ma przełącznika zamieniającego produkt prosty w konfigurowalny. Jeśli po czasie
+    okaże się, że potrzebujesz wersji do wyboru, trzeba założyć produkt od nowa. Dlatego przy
+    produktach, o których wiesz, że „kiedyś będą w dwóch rozmiarach", warto pomyśleć o tym od razu.
+  </div>
+
+  <h3>Jak stworzyć produkt konfigurowalny — trzy kroki</h3>
+
+  <p>Kolejność ma znaczenie: najpierw musi istnieć <strong>opcja</strong> (rodzaj wyboru), dopiero potem produkt, który z niej korzysta.</p>
+
+  <h4>Krok 1 — utwórz opcję (rodzaj wyboru)</h4>
+
+  <p>Idziesz do <em>Katalog → Warianty</em> i klikasz <strong>Utwórz</strong>. Opcja to nagłówek wyboru, np. „Pojemność", wraz z listą jego możliwych wartości.</p>
+
+  <figure>
+    <img src="img/10d-opcja-wartosci.jpg" alt="Formularz opcji produktu z wartościami">
+    <figcaption>Opcja „Pojemność" z dwiema wartościami</figcaption>
+  </figure>
+
+  <ol class="steps">
+    <li>W polu <strong>Kod</strong> wpisz identyfikator, np. <code>POJEMNOSC</code>. Bez polskich znaków i spacji.</li>
+    <li>W sekcji <strong>Tłumaczenia</strong>, w polu <strong>Nazwa</strong>, wpisz to, co zobaczy klient — <em>Pojemność</em>.</li>
+    <li>Kliknij <strong>Dodaj wartość</strong>. Pojawi się para pól: <em>Kod</em> (np. <code>POJEMNOSC_30</code>) i wartość widoczna dla klienta (np. <em>30 ml</em>).</li>
+    <li>Powtórz dla każdej wersji — tutaj drugi raz, dla <em>50 ml</em>.</li>
+    <li>Kliknij <strong>Utwórz</strong>.</li>
+  </ol>
+
+  <div class="note">
+    <b>Jedną opcję tworzysz raz</b>
+    Skoro powstała „Pojemność" z wartościami 30 ml i 50 ml, możesz jej użyć we wszystkich kolejnych
+    produktach. Nie zakładaj drugiej takiej samej.
+  </div>
+
+  <h4>Krok 2 — utwórz produkt i wskaż mu opcję</h4>
+
+  <p>Wracasz do <em>Katalog → Produkty</em>, klikasz <strong>Utwórz → Produkt konfigurowalny</strong>.</p>
+
+  <figure>
+    <img src="img/10c-produkt-konfigurowalny.jpg" alt="Formularz produktu konfigurowalnego z wybraną opcją">
+    <figcaption>Formularz produktu konfigurowalnego — w polu „Opcje" wybrana „Pojemność"</figcaption>
+  </figure>
+
+  <p>Formularz jest <strong>krótszy niż przy produkcie prostym</strong> — ma tylko sześć zakładek zamiast dziesięciu. Zniknęły <em>Ceny</em>, <em>Podatki</em>, <em>Wysyłka</em> i <em>Magazyn</em>, bo te ustawienia należą teraz do poszczególnych wersji, a nie do produktu jako całości.</p>
+
+  <ol class="steps">
+    <li>W zakładce <strong>Ogólne</strong> wpisz <strong>Kod</strong> produktu.</li>
+    <li>W polu <strong>Opcje</strong> kliknij i wybierz z listy utworzoną wcześniej opcję. Pojawi się niebieski znacznik z jej nazwą. Możesz wskazać kilka opcji naraz (np. pojemność i zapach) — panel wygeneruje wtedy wszystkie kombinacje.</li>
+    <li>Zostaw <strong>Metodę wyboru wariantu</strong> na <em>Wybór wariantu</em> — klient dostanie jedną prostą listę gotowych wersji. (Druga możliwość, <em>Dopasowywanie opcji</em>, daje osobną listę na każdą opcję i przydaje się dopiero przy kilku opcjach jednocześnie.)</li>
+    <li>Przejdź do zakładki <strong>Tłumaczenia</strong> i wpisz <strong>Nazwę</strong> oraz opis — dokładnie jak przy produkcie prostym.</li>
+    <li>Uzupełnij <strong>Kategorie</strong> i <strong>Media</strong>, jeśli chcesz od razu.</li>
+    <li>Kliknij <strong>Utwórz</strong>.</li>
+  </ol>
+
+  <div class="warn">
+    <b>Produkt na tym etapie jeszcze się nie sprzeda</b>
+    Po zapisaniu istnieje sama „skorupa" — nazwa i opis, ale bez żadnej wersji i bez ceny.
+    Klient nie może go kupić, dopóki nie zrobisz kroku trzeciego.
+  </div>
+
+  <h4>Krok 3 — wygeneruj warianty i nadaj im ceny</h4>
+
+  <p>Na stronie zapisanego produktu pojawił się przycisk <strong>Zarządzaj wariantami</strong>. Kliknij go i wybierz <strong>Generuj</strong>.</p>
+
+  <figure>
+    <img src="img/10e-zarzadzaj-wariantami.jpg" alt="Rozwinięte menu Zarządzaj wariantami">
+    <figcaption>Menu „Zarządzaj wariantami”</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:30%">Pozycja menu</th><th>Co robi</th></tr>
+    <tr><td><strong>Lista wariantów</strong></td><td>Pokazuje wszystkie wersje produktu.</td></tr>
+    <tr><td><strong>Utwórz</strong></td><td>Dodaje jedną wersję ręcznie.</td></tr>
+    <tr><td><strong>Generuj</strong></td><td>Tworzy od razu wszystkie kombinacje z wybranych opcji. <strong>Tego używasz.</strong></td></tr>
+  </table>
+
+  <p>Panel sam przygotuje po jednym bloku na każdą wartość opcji — tutaj dwa, dla 30 ml i 50 ml.</p>
+
+  <figure>
+    <img src="img/10f-generowanie-wariantow.jpg" alt="Ekran generowania wariantów">
+    <figcaption>Ekran „Generuj warianty" — po jednym bloku na wersję</figcaption>
+  </figure>
+
+  <p>W każdym bloku wypełniasz:</p>
+  <ul>
+    <li><strong>Kod</strong> (wymagany) — identyfikator wersji. Wygodnie trzymać się schematu „kod produktu + wersja", np. <code>KREM_NAWILZAJACY-30ML</code> i <code>KREM_NAWILZAJACY-50ML</code>.</li>
+    <li><strong>Nazwa</strong> — opcjonalna. Zostaw pustą, a panel sam podpisze wersję nazwą produktu i wartością opcji („Krem nawilżający 30 ml").</li>
+    <li><strong>Cena</strong> (wymagana) — kwota brutto dla tej konkretnej wersji.</li>
+    <li><strong>Cena wyjściowa</strong> i <strong>Cena minimalna</strong> — jak w zakładce <em>Ceny</em> produktu prostego; można zostawić puste.</li>
+  </ul>
+
+  <p>Na koniec klikasz <strong>Generuj</strong> w prawym górnym rogu. Wersje trafiają na listę wariantów.</p>
+
+  <figure>
+    <img src="img/10g-warianty-lista.jpg" alt="Lista wygenerowanych wariantów">
+    <figcaption>Lista wariantów po wygenerowaniu</figcaption>
+  </figure>
+
+  <div class="warn">
+    <b>Kod i cena są obowiązkowe w każdym bloku</b>
+    Jeśli któryś zostawisz pusty, panel nie wygeneruje <em>żadnej</em> wersji — pokaże czerwone
+    komunikaty „Wprowadź kod produktu" i „Należy zdefiniować cenę" przy brakujących polach.
+  </div>
+
+  <h3>Codzienna praca z produktem konfigurowalnym</h3>
+
+  <p>Od tej chwili prawie wszystko robisz <strong>na poziomie wariantu</strong>, a nie produktu:</p>
+
+  <table>
+    <tr><th style="width:44%">Chcę zmienić…</th><th>Gdzie</th></tr>
+    <tr><td>Cenę jednej z wersji</td><td>Lista wariantów → ołówek przy wersji → <em>Ceny</em></td></tr>
+    <tr><td>Stan magazynowy jednej z wersji</td><td>Lista wariantów → ołówek przy wersji → <em>Magazyn</em></td></tr>
+    <tr><td>Opis, zdjęcia, kategorię</td><td>Edycja samego produktu — są wspólne dla wszystkich wersji</td></tr>
+    <tr><td>Kolejność wersji na liście u klienta</td><td>Lista wariantów → kolumna <em>Pozycja</em> → <em>Zapisz pozycje</em></td></tr>
+    <tr><td>Dopisać trzecią wersję (np. 100 ml)</td><td>Najpierw dodaj wartość w <em>Katalog → Warianty</em>, potem <em>Zarządzaj wariantami → Generuj</em> ponownie</td></tr>
+  </table>
+
+  <div class="tip">
+    <b>Sprawdź efekt oczami klienta</b>
+    Po wygenerowaniu wariantów kliknij <em>Zobacz w sklepie</em>. Na stronie produktu powinna pojawić
+    się lista wyboru, a cena — zmieniać się przy przełączaniu wersji. Jeśli listy nie ma, najczęściej
+    znaczy to, że warianty nie zostały wygenerowane albo produkt jest wyłączony.
+  </div>
 
   <h3>Zakładki formularza produktu</h3>
   <p>Po lewej stronie formularza jest lista zakładek. Klikasz w nie, żeby przechodzić między częściami produktu. <strong>Nie zapisują się osobno</strong> — możesz uzupełnić kilka zakładek i dopiero na końcu kliknąć <em>Utwórz</em> / <em>Aktualizuj</em>.</p>
+
+  <p>Poniżej opisany jest komplet dziesięciu zakładek <strong>produktu prostego</strong>. Produkt konfigurowalny ma ich sześć — brakujące cztery (<em>Ceny</em>, <em>Podatki</em>, <em>Wysyłka</em>, <em>Magazyn</em>) znajdziesz wtedy w edycji pojedynczego wariantu, gdzie działają dokładnie tak samo.</p>
 
   <figure>
     <img src="img/11-produkt-edycja.jpg" alt="Edycja produktu — zakładka Ogólne">
@@ -602,9 +750,16 @@
   <p>Tworzysz tu <strong>rodzaj wyboru</strong> (np. „Pojemność") wraz z listą możliwych wartości („30 ml", „50 ml"). Potem, przy tworzeniu <em>produktu konfigurowalnego</em>, wskazujesz tę opcję, a sklep wygeneruje osobne wersje produktu — każda z własną ceną i własnym stanem magazynowym.</p>
 
   <div class="note">
+    <b>To jest krok pierwszy, nie osobne zadanie</b>
+    Ta sekcja sama w sobie niczego nie sprzedaje — jest wstępem do produktu konfigurowalnego.
+    Pełny przepływ, od utworzenia opcji po wygenerowanie wersji z cenami, opisany jest
+    w <strong>rozdziale 5</strong>, w części „Jak stworzyć produkt konfigurowalny — trzy kroki".
+  </div>
+
+  <div class="note">
     <b>Stan na dziś</b>
-    Lista jest pusta — wszystkie produkty w sklepie występują w jednej wersji. Ta sekcja przyda się
-    dopiero, gdy pojawi się produkt „do wyboru". Dopóki go nie ma, możesz o niej zapomnieć.
+    Lista jest pusta — wszystkie produkty w sklepie występują w jednej wersji. Zaglądasz tu dopiero
+    wtedy, gdy zakładasz produkt „do wyboru".
   </div>
 </div>
 
@@ -1212,6 +1367,8 @@
   <table>
     <tr><th style="width:44%">Chcę…</th><th>Idę do…</th></tr>
     <tr><td>Dodać nowy produkt do sklepu</td><td>Katalog → Produkty → <em>Utwórz → Prosty produkt</em></td></tr>
+    <tr><td>Dodać produkt w kilku wersjach (np. dwie pojemności)</td><td>Katalog → Warianty → <em>Utwórz</em>, potem Produkty → <em>Utwórz → Produkt konfigurowalny</em> → <em>Zarządzaj wariantami → Generuj</em></td></tr>
+    <tr><td>Zmienić cenę jednej wersji produktu</td><td>Katalog → Produkty → ołówek → <em>Zarządzaj wariantami → Lista wariantów</em> → ołówek</td></tr>
     <tr><td>Zmienić cenę produktu</td><td>Katalog → Produkty → ołówek → zakładka <em>Ceny</em></td></tr>
     <tr><td>Chwilowo ukryć produkt</td><td>Katalog → Produkty → ołówek → <em>Ogólne</em> → wyłącz <em>Dostępny</em></td></tr>
     <tr><td>Zmienić zdjęcie produktu</td><td>Katalog → Produkty → ołówek → zakładka <em>Media</em></td></tr>
