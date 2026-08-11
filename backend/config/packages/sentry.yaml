@@ -1,0 +1,11 @@
+when@prod:
+    sentry:
+        dsn: '%env(SENTRY_DSN)%'
+        options:
+            environment: '%kernel.environment%'
+            enable_logs: true
+            ignore_exceptions:
+                - 'Symfony\Component\ErrorHandler\Error\FatalError'
+                - 'Symfony\Component\Debug\Exception\FatalErrorException'
+                - 'Symfony\Component\HttpKernel\Exception\NotFoundHttpException'
+                - 'Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException'

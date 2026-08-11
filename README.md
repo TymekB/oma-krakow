@@ -176,6 +176,24 @@ Do faktycznego zapłacenia potrzebne są: Safari na urządzeniu Apple, region ws
 Users and Access → Sandbox → Testers), karta testowa Apple dodana ręcznie do Wallet oraz **HTTPS**
 (czyli nie `localhost` — potrzebny tunel i `OMA_DEFAULT_URI`).
 
+**Sentry (monitoring błędów)** — bundle `sentry/sentry-symfony` jest w `config/bundles.php` włączony
+tylko dla `prod`, a lokalny docker i tak chodzi na `APP_ENV=prod` (`OMA_ENV`), więc działa też na
+localu. DSN idzie przez `SENTRY_DSN`: lokalnie w `backend/.env.local`, na produkcji przez
+`OMA_SENTRY_DSN` w `/opt/oma-prod/.env` (stąd `SENTRY_DSN: ${OMA_SENTRY_DSN:-}` w
+`deploy/compose.prod.yaml`). W `compose.yaml` dla lokala tej zmiennej celowo nie ma — z tego samego
+powodu co przy kluczach Google. Pusty DSN = SDK wyłączone i nic nie wychodzi na zewnątrz, więc brak
+zmiennej nigdy nie wywala aplikacji.
+
+Konfiguracja w `config/packages/sentry.yaml`: `enable_logs: true` (logi obok wyjątków) plus
+`environment` z `%kernel.environment%`. W `deploy/php-prod.ini` jest
+`zend.exception_ignore_args = Off`, bez tego stack trace w Sentry nie ma argumentów funkcji.
+
+Sprawdzenie, że DSN działa (wysyła prawdziwe zdarzenie do projektu):
+
+```bash
+docker compose exec app php bin/console sentry:test
+```
+
 ### Apple Pay express checkout (adres z arkusza zamiast formularza) — ODŁOŻONE
 
 > **Świadomie wyłączone, nie porzucone.** Ten wariant wymaga **Apple Developer Program za 99 USD
@@ -412,7 +430,7 @@ nagłówkiem `Host`, a nie po `localhost`.
 ### Konfiguracja serwera
 
 Sekrety żyją **tylko** w `/opt/oma-prod/.env` (nie w CI, nie w repo) — `APP_SECRET`, hasła do bazy,
-`JWT_PASSPHRASE`, klucze Google/Stripe, `MAILER_DSN`. Po zmianie: `docker compose up -d`.
+`JWT_PASSPHRASE`, klucze Google/Stripe, `MAILER_DSN`, `OMA_SENTRY_DSN`. Po zmianie: `docker compose up -d`.
 
 Hasło admina na produkcji jest inne niż `oma2026!` z fixtures — te ostatnie są w publicznym repo,
 więc po zaseedowaniu zostało zmienione i nie ma go w repozytorium.
