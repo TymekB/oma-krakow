@@ -1,0 +1,14 @@
+{% set form = hookable_metadata.context.form %}
+{% set order = hookable_metadata.context.order %}
+
+{% if not order.shippingRequired %}
+    <p class="oma-checkout-note">{{ 'oma.checkout.no_delivery.note'|trans }}</p>
+
+    {% if form.customer is defined and form.customer.firstName is defined %}
+        <div class="row">
+            <div class="col-12 col-md-6">{{ form_row(form.customer.firstName) }}</div>
+            <div class="col-12 col-md-6">{{ form_row(form.customer.lastName) }}</div>
+        </div>
+        {{ form_row(form.customer.phoneNumber) }}
+    {% endif %}
+{% endif %}

@@ -222,6 +222,12 @@ footer {
   text-underline-offset: 0.2em;
 }
 
+.oma-checkout-note {
+  font-size: 0.88rem;
+  color: var(--oma-ink-soft);
+  margin-bottom: 1.75rem;
+}
+
 .oma-google-login {
   margin-bottom: 1.5rem;
 }

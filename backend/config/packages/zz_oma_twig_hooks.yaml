@@ -4,9 +4,15 @@ sylius_twig_hooks:
             login_hint:
                 template: 'shop/checkout/login_hint.html.twig'
                 priority: 250
+            contact_details:
+                template: 'shop/checkout/contact_details.html.twig'
+                priority: 150
             guest_address_memory:
                 template: 'shop/checkout/guest_address_memory.html.twig'
                 priority: -250
+
+        'sylius_shop.checkout.complete.content.form.summary.addresses':
+            paypal_missing_billing_address: { enabled: false }
 
         'sylius.shop.product_review.index.content.main.list.review.footer':
             confirmed_by_purchase:

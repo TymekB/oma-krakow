@@ -69,6 +69,9 @@ oma:
             question: 'Masz konto?'
             action: 'Zaloguj się'
             reason: 'i wypełnij formularz tylko za pierwszym razem.'
+        no_delivery:
+            step: 'Dane kontaktowe'
+            note: 'Tego zamówienia nie wysyłamy pocztą, więc adres nie jest potrzebny — wystarczą dane kontaktowe.'
     review:
         confirmed_by_purchase: 'Zweryfikowano zakupem'
         login_to_add: 'Zaloguj się, aby dodać opinię'
