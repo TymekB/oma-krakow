@@ -90,6 +90,20 @@ Wiadomość, której worker nie potrafi zdeserializować (np. wrzucona ręcznie,
 `messenger:consume` i przy `restart: unless-stopped` daje pętlę restartów. Kolejkę czyści się wtedy
 `rabbitmqctl purge_queue main`.
 
+**`hostname: rabbitmq` w obu compose'ach musi zostać.** RabbitMQ trzyma dane w katalogu nazwanym po
+węźle (`mnesia/rabbit@<hostname>`), a bez jawnego hostname'a węzeł nazywa się od ID kontenera. Każde
+**odtworzenie** kontenera (zmiana obrazu, portu, healthchecku — czyli i część wdrożeń) dawało wtedy
+nową nazwę węzła i pusty katalog danych: wolumen zostawał, ale wszystkie trwałe kolejki i zaplanowane
+komunikaty stawały się sierotami. Objaw jest zdradliwy, bo nic nie krzyczy — po prostu daty promocji
+przestają działać, a `list_queues` pokazuje tylko `main` i `catalog_promotion_removal`. Sprawdzenie:
+
+```bash
+docker compose exec rabbitmq rabbitmqctl eval 'node().'   # ma być rabbit@rabbitmq
+```
+
+Jeśli zaplanowane komunikaty jednak przepadną, wejdź w panelu w każdą promocję z datą i zapisz ją —
+`CatalogPromotionAnnouncer` wysyła wtedy start i koniec od nowa.
+
 ## Konfiguracja usług zewnętrznych
 
 Klucze bramek podaje się przez zmienne środowiskowe czytane w `backend/compose.yaml`:

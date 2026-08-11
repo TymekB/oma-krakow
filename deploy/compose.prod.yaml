@@ -87,6 +87,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
+    hostname: rabbitmq
     restart: unless-stopped
     mem_limit: ${OMA_RABBITMQ_MEM:-512m}
     environment:

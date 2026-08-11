@@ -92,6 +92,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
+    hostname: rabbitmq
     ports:
       - '15673:15672'
     volumes:
