@@ -1,0 +1,13 @@
+{% extends '@!SyliusAdmin/shared/form_theme.html.twig' %}
+
+{% block sylius_channel_collection_row %}
+    {% if form.children|length > 1 %}
+        {{ parent() }}
+    {% else %}
+        {% for channel_configuration in form %}
+            {{ form_row(channel_configuration, sylius_test_form_attribute('tab-content')|merge({ 'label': false })) }}
+        {% endfor %}
+
+        {{ form_errors(form) }}
+    {% endif %}
+{% endblock %}
