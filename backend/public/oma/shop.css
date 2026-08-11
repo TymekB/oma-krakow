@@ -231,14 +231,6 @@ footer {
   padding-block: 0.95rem;
 }
 
-.oma-google-login__note {
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  text-align: center;
-  color: var(--oma-ink-faint);
-  margin: 0.7rem 0 0;
-}
-
 .oma-google-login__divider {
   margin-top: 1.5rem;
 }

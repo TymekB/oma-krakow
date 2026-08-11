@@ -69,7 +69,6 @@ oma:
             reason: 'i wypełnij formularz tylko za pierwszym razem.'
     google_login:
         button: 'Kontynuuj z Google'
-        note: 'Najszybciej — bez hasła i wypełniania formularza.'
         or: 'albo'
         failed: 'Logowanie przez Google nie powiodło się. Spróbuj ponownie.'
     payu:
