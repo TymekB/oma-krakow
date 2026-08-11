@@ -616,7 +616,9 @@ Dlatego doszły dwa bezpieczniki recyklingu workerów — `uwsgi.ini` w obrazie 
 | Zmienna | Domyślnie | Po co |
 |---|---|---|
 | `OMA_HC_MAX_REQUESTS` | 400 | worker kończy pracę po N żądaniach i wstaje czysty |
-| `OMA_HC_RELOAD_ON_RSS` | 128 | worker jest ubijany, gdy jego RSS przekroczy 128 MB |
+| `OMA_HC_RELOAD_ON_RSS` | 256 | worker jest ubijany, gdy jego RSS przekroczy 256 MB |
+
+Próg **256 MB, nie 128 MB**, i to celowo: Argon2 przy logowaniu dokłada ~64 MiB do workera, który normalnie trzyma 80–100 MB. Niższy próg recyklowałby workera po **każdym** logowaniu, a przy pechowym momencie sprawdzenia mógłby zabić go w środku żądania — czyli 502 na logowaniu.
 
 Sprawdzone, że to działa, a nie tylko jest tolerowane: przy `UWSGI_RELOAD_ON_RSS=1` obraz loguje
 `Respawned uWSGI worker 1`. Gdyby opcja była nieznana, `strict` w `uwsgi.ini` w ogóle nie pozwoliłby
