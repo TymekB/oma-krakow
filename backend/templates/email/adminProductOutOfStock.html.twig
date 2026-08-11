@@ -1,0 +1,37 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'oma.email.admin_product_out_of_stock.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {% set label_style = 'font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8d83; padding-bottom: 4px;' %}
+
+    {{ oma.greeting('oma.email.admin_product_out_of_stock.heading'|trans({}, null, localeCode)) }}
+
+    {{ oma.lead('oma.email.admin_product_out_of_stock.lead'|trans({}, null, localeCode)) }}
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_product_out_of_stock.product'|trans({}, null, localeCode) }}</div>
+    <div style="padding-bottom: 24px;">
+        {% if product is not null %}
+            <div style="color: #2a2320;">{{ product.name }}</div>
+        {% endif %}
+        <div style="color: #6f6259;">{{ variant.code }}</div>
+    </div>
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_product_out_of_stock.stock'|trans({}, null, localeCode) }}</div>
+    <div style="padding-bottom: 24px; color: #2a2320;">
+        {{ 'oma.email.admin_product_out_of_stock.on_hand'|trans({'%count%': variant.onHand}, null, localeCode) }}
+        <span style="color: #6f6259;">
+            ({{ 'oma.email.admin_product_out_of_stock.on_hold'|trans({'%count%': variant.onHold}, null, localeCode) }})
+        </span>
+    </div>
+
+    {% if product is not null and product.id is not null %}
+        <div style="text-align: center; padding-top: 8px;">
+            {{ oma.button(url('sylius_admin_product_update', {'id': product.id}), 'oma.email.admin_product_out_of_stock.open_in_admin'|trans({}, null, localeCode)) }}
+        </div>
+    {% endif %}
+{% endblock %}

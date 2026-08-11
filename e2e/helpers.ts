@@ -54,8 +54,9 @@ export async function registerVerifiedCustomer(page: Page, email: string, passwo
   await expect(page, `konto ${email} jest zalogowane`).not.toHaveURL(/\/sklep\/login/);
 }
 
-export async function findEmailFor(recipient: string): Promise<{ subject: string; html: string }> {
-  const response = await fetch(`${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:${recipient}`)}`);
+export async function findEmailFor(recipient: string, subject?: string): Promise<{ subject: string; html: string }> {
+  const query = subject === undefined ? `to:${recipient}` : `to:${recipient} subject:"${subject}"`;
+  const response = await fetch(`${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(query)}`);
   const found = await response.json();
   const message = found.messages?.[0];
 
@@ -66,6 +67,61 @@ export async function findEmailFor(recipient: string): Promise<{ subject: string
   const detail = await (await fetch(`${MAILPIT_URL}/api/v1/message/${message.ID}`)).json();
 
   return { subject: message.Subject, html: detail.HTML ?? detail.Text ?? '' };
+}
+
+export async function loginToAdminIfNeeded(page: Page): Promise<void> {
+  await page.goto('/admin/login');
+
+  if (!(await page.locator('input[name="_username"]').count())) {
+    return;
+  }
+
+  await page.locator('input[name="_username"]').fill(ADMIN.username);
+  await page.locator('input[name="_password"]').fill(ADMIN.password);
+  await page.locator('form').getByRole('button').first().click();
+  await expect(page).toHaveURL(/\/admin\/?$/);
+}
+
+export async function setNotificationEnabled(page: Page, code: string, enabled: boolean): Promise<void> {
+  await loginToAdminIfNeeded(page);
+  await page.goto('/admin/zdarzenia');
+
+  await page.locator(`input[value="${code}"]`).setChecked(enabled, { force: true });
+  await page.getByRole('button', { name: /Zapisz/i }).first().click();
+
+  await expect(page.locator(`input[value="${code}"]`), `zdarzenie ${code} zapisane`).toBeChecked({ checked: enabled });
+}
+
+export async function countEmailsFor(recipient: string, subject: string): Promise<number> {
+  const query = `to:${recipient} subject:"${subject}"`;
+  const response = await fetch(`${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(query)}`);
+  const found = await response.json();
+
+  return found.messages_count ?? 0;
+}
+
+export async function readReservedStock(page: Page, variantId: number): Promise<number> {
+  await loginToAdminIfNeeded(page);
+  await page.goto('/admin/inventory/');
+
+  const reserved = page.locator(`span.onHold[data-product-variant-id="${variantId}"]`);
+
+  return (await reserved.count()) ? Number(await reserved.first().innerText()) : 0;
+}
+
+export async function setProductStock(page: Page, productId: number, onHand: number, tracked: boolean): Promise<void> {
+  await loginToAdminIfNeeded(page);
+  await page.goto(`/admin/products/${productId}/edit`);
+  await page.locator('[data-bs-target="#product-inventory"]').click();
+
+  const trackedInput = page.locator('[name="sylius_admin_product[variant][tracked]"]');
+  await trackedInput.setChecked(tracked, { force: true });
+  await page.fill('[name="sylius_admin_product[variant][onHand]"]', String(onHand));
+  await page.getByRole('button', { name: /Aktualizuj|Zapisz/i }).first().click();
+
+  await expect(page.locator('body'), `stan produktu ${productId} zapisany`).not.toContainText('zawiera błędy');
+  await expect(trackedInput).toBeChecked({ checked: tracked });
+  await expect(page.locator('[name="sylius_admin_product[variant][onHand]"]')).toHaveValue(String(onHand));
 }
 
 export async function addFirstProductToCart(page: Page): Promise<string> {
