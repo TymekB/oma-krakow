@@ -109,10 +109,34 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
         $existingUser = $this->shopUserRepository->findOneBy(['username' => $canonicalEmail]);
 
         if ($existingUser instanceof ShopUserInterface) {
+            $this->activateUnverifiedUser($existingUser, $googleUser);
+
             return $existingUser;
         }
 
         return $this->createShopUser($googleUser, $email, $canonicalEmail);
+    }
+
+    /**
+     * Konto zalozone w sklepie i nigdy niepotwierdzone mailem jest wylaczone, wiec
+     * logowanie przez Google konczylo sie bledem. Google potwierdza wlasnosc adresu,
+     * wiec taka weryfikacja jest rownowazna klknieciu w link z maila.
+     */
+    private function activateUnverifiedUser(ShopUserInterface $shopUser, GoogleUser $googleUser): void
+    {
+        if ($shopUser->isEnabled() && $shopUser->isVerified()) {
+            return;
+        }
+
+        if (!$googleUser->isEmailTrustworthy()) {
+            throw new AuthenticationException('Google nie potwierdzilo wlasnosci adresu e-mail.');
+        }
+
+        $shopUser->setEnabled(true);
+        $shopUser->setVerifiedAt(new \DateTime());
+        $shopUser->setPlainPassword(bin2hex(random_bytes(self::RANDOM_PASSWORD_BYTES)));
+
+        $this->shopUserRepository->add($shopUser);
     }
 
     private function createShopUser(GoogleUser $googleUser, string $email, string $canonicalEmail): ShopUserInterface
