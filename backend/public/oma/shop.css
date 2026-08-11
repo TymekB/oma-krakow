@@ -374,6 +374,25 @@ footer {
   margin-top: 1.25rem;
 }
 
+.oma-footer__credit {
+  margin-top: 1.5rem;
+  margin-bottom: 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--oma-ink-faint);
+}
+
+.oma-footer__credit a {
+  color: var(--oma-ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.1em;
+}
+
+.oma-footer__credit a:hover {
+  color: var(--oma-wine-700);
+}
+
 .oma-pay {
   list-style: none;
   padding: 0;

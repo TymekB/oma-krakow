@@ -75,17 +75,25 @@
     color: rgba(250, 246, 241, 0.5);
   }
 
-  &__credit a {
-    color: rgba(250, 246, 241, 0.75);
-    border-bottom: 1px solid rgba(250, 246, 241, 0.3);
-    padding-bottom: 0.1em;
-    transition:
-      color 0.35s var(--ease),
-      border-color 0.35s var(--ease);
+  &__credit {
+    margin-top: 1.25rem;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: rgba(250, 246, 241, 0.45);
 
-    &:hover {
-      color: var(--cream);
-      border-color: var(--cream);
+    a {
+      font-size: inherit;
+      color: rgba(250, 246, 241, 0.75);
+      border-bottom: 1px solid rgba(250, 246, 241, 0.3);
+      padding-bottom: 0.1em;
+      transition:
+        color 0.35s var(--ease),
+        border-color 0.35s var(--ease);
+
+      &:hover {
+        color: var(--cream);
+        border-color: var(--cream);
+      }
     }
   }
 }
