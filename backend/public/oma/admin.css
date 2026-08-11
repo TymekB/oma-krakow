@@ -6,6 +6,7 @@
   --oma-cream: #faf6f1;
   --oma-sand-100: #f2eae1;
   --oma-sand-200: #e5d9cb;
+  --oma-sand-300: #cfbdab;
   --oma-ink: #2a2320;
   --oma-ink-soft: #6f6259;
   --oma-display: 'Cormorant Garamond', Georgia, serif;
@@ -367,4 +368,34 @@ body.antialiased,
 
 [data-bs-theme='dark'] .oma-admin-logo__mark {
   color: var(--oma-cream);
+}
+
+.oma-switch {
+  min-height: 0;
+  margin: 0;
+  padding-left: 2.5rem;
+}
+
+.oma-switch .form-check-input,
+.oma-switch .form-check-input:focus {
+  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+
+  width: 2.25rem;
+  height: 1.25rem;
+  margin: 0.15rem 0 0 -2.5rem;
+  background-color: var(--oma-sand-300);
+  border-color: var(--oma-sand-300);
+  background-image: var(--bs-form-switch-bg);
+  cursor: pointer;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.oma-switch .form-check-input:checked {
+  background-color: var(--oma-wine-800);
+  border-color: var(--oma-wine-800);
+}
+
+.oma-switch .form-check-input:focus {
+  border-color: var(--oma-wine-600);
+  box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
 }

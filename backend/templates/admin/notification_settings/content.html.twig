@@ -32,14 +32,16 @@
                     <div class="list-group list-group-flush">
                         {% for event in events %}
                             <label class="list-group-item d-flex align-items-start gap-3 py-3" for="event-{{ event.value }}">
-                                <input
-                                    class="form-check-input m-0 mt-1 flex-shrink-0"
-                                    type="checkbox"
-                                    id="event-{{ event.value }}"
-                                    name="events[]"
-                                    value="{{ event.value }}"
-                                    {{ enabled[event.value] ? 'checked' : '' }}
-                                >
+                                <span class="form-check form-switch oma-switch flex-shrink-0">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="event-{{ event.value }}"
+                                        name="events[]"
+                                        value="{{ event.value }}"
+                                        {{ enabled[event.value] ? 'checked' : '' }}
+                                    >
+                                </span>
                                 <span>
                                     <span class="d-block">{{ event.label()|trans }}</span>
                                     <span class="d-block text-secondary small">{{ event.description()|trans }}</span>
