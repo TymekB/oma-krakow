@@ -5,6 +5,7 @@ sylius:
                 catalog:
                     taxons: 'Kategorie'
                     inventory: 'Magazyn'
+                    association_types: 'Powiązania produktów'
     form:
         catalog_promotion:
             scope:

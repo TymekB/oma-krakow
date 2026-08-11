@@ -17,11 +17,43 @@ final class AdminMenuListener
         'sylius.ui.administration',
         'credit_memos',
         'mollie_subscriptions',
+        'channels',
+        'countries',
+        'zones',
+        'currencies',
+    ];
+
+    private const MOVED_TO_SALES = [
+        'payment_methods',
+        'shipping_methods',
+        'shipping_categories',
     ];
 
     public function __invoke(MenuBuilderEvent $event): void
     {
+        $this->moveToSales($event->getMenu());
         $this->removeFrom($event->getMenu());
+    }
+
+    private function moveToSales(ItemInterface $menu): void
+    {
+        $sales = $menu->getChild('sales');
+        $configuration = $menu->getChild('configuration');
+
+        if (null === $sales || null === $configuration) {
+            return;
+        }
+
+        foreach (self::MOVED_TO_SALES as $name) {
+            $item = $configuration->getChild($name);
+
+            if (null === $item) {
+                continue;
+            }
+
+            $configuration->removeChild($name);
+            $sales->addChild($item);
+        }
     }
 
     private function removeFrom(ItemInterface $item): void
