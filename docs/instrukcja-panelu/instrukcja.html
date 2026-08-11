@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>OMA — instrukcja obsługi panelu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+
+  :root {
+    --wine-800: #5a1f2c;
+    --wine-600: #8a3746;
+    --paper: #f4f3f0;
+    --paper-line: #dcd9d4;
+    --ink: #2a2320;
+    --ink-soft: #6f6259;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Jost', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-weight: 500; color: var(--wine-800); }
+
+  h1 { font-size: 30pt; line-height: 1.15; margin: 0 0 0.4rem; }
+  h2 { font-size: 19pt; margin: 0 0 0.2rem; }
+  h3 { font-size: 13pt; margin: 1.1rem 0 0.3rem; color: var(--wine-600); }
+  h4 { font-size: 10.5pt; margin: 0.9rem 0 0.25rem; color: var(--ink); font-weight: 500; }
+
+  p { margin: 0 0 0.55rem; }
+  ul, ol { margin: 0 0 0.6rem; padding-left: 1.1rem; }
+  li { margin-bottom: 0.2rem; }
+
+  strong { font-weight: 500; color: var(--wine-800); }
+  code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 0.87em; background: var(--paper); padding: 0.05em 0.3em; border-radius: 3px; }
+
+  /* --- strona tytułowa --- */
+  .cover { height: 245mm; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover .mark { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 64pt; color: var(--wine-800); line-height: 1; margin-bottom: 0.2rem; }
+  .cover .sub { letter-spacing: 0.42em; font-size: 9pt; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 3.5rem; }
+  .cover h1 { font-size: 34pt; margin-bottom: 1rem; }
+  .cover .lead { font-size: 12pt; color: var(--ink-soft); max-width: 120mm; margin: 0 auto 3rem; }
+  .cover .meta { font-size: 9pt; color: var(--ink-soft); letter-spacing: 0.06em; }
+  .cover hr { width: 60mm; border: 0; border-top: 1px solid var(--paper-line); margin: 2rem auto; }
+
+  /* --- sekcje --- */
+  .section { break-before: page; }
+  .section-head { border-bottom: 1px solid var(--paper-line); padding-bottom: 0.5rem; margin-bottom: 0.9rem; }
+  .section-head .kicker { font-size: 8pt; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-soft); display: block; margin-bottom: 0.25rem; }
+  .section-head .path { font-size: 9pt; color: var(--ink-soft); margin-top: 0.15rem; }
+
+  /* --- zrzuty ekranu --- */
+  figure { margin: 0.8rem 0 1rem; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; max-height: 132mm; width: auto; height: auto; border: 1px solid var(--paper-line); border-radius: 4px; }
+  figcaption { font-size: 8.5pt; color: var(--ink-soft); margin-top: 0.35rem; font-style: italic; }
+
+  /* --- ramki --- */
+  .note, .warn, .tip {
+    border-left: 3px solid var(--wine-600);
+    background: var(--paper);
+    padding: 0.55rem 0.8rem;
+    margin: 0.7rem 0;
+    break-inside: avoid;
+    font-size: 10pt;
+  }
+  .warn { border-left-color: #b3452f; }
+  .tip { border-left-color: #6f8a5a; }
+  .note b, .warn b, .tip b { display: block; font-size: 8pt; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 0.2rem; font-weight: 500; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 0.9rem; font-size: 9.5pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--paper-line); vertical-align: top; }
+  th { font-weight: 500; color: var(--wine-800); background: var(--paper); font-size: 9pt; }
+
+  ol.steps { counter-reset: step; list-style: none; padding-left: 0; }
+  ol.steps > li { counter-increment: step; position: relative; padding-left: 1.6rem; margin-bottom: 0.35rem; }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 0.05rem;
+    width: 1.1rem; height: 1.1rem; border-radius: 50%;
+    background: var(--wine-800); color: #fff;
+    font-size: 7.5pt; line-height: 1.1rem; text-align: center;
+  }
+
+  .toc { break-after: page; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; padding: 0.22rem 0; border-bottom: 1px dotted var(--paper-line); }
+  .toc > ol > li::before { content: counter(toc) ". "; color: var(--wine-600); }
+  .toc > ol > li.group { counter-increment: none; margin-top: 0.9rem; font-size: 8pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); border: 0; }
+  .toc > ol > li.group::before { content: none; }
+</style>
+</head>
+<body>
+
+<!-- ============ OKŁADKA ============ -->
+<div class="cover">
+  <div class="mark">oma</div>
+  <div class="sub">Kraków</div>
+  <h1>Instrukcja obsługi panelu</h1>
+  <p class="lead">Jak prowadzić sklep i stronę OMA — krok po kroku, bez wiedzy technicznej.</p>
+  <hr>
+  <p class="meta">Panel administracyjny sklepu &middot; wersja z sierpnia 2026</p>
+</div>
+
+<!-- ============ SPIS TREŚCI ============ -->
+<div class="section toc">
+  <div class="section-head"><h2>Spis treści</h2></div>
+  <ol>
+    <li class="group">Podstawy</li>
+    <li>Jak się zalogować</li>
+    <li>Jak zbudowany jest panel</li>
+    <li>Elementy, które powtarzają się na każdym ekranie</li>
+    <li>Panel (strona główna)</li>
+
+    <li class="group">Katalog — co sprzedajesz</li>
+    <li>Produkty</li>
+    <li>Kategorie</li>
+    <li>Magazyn</li>
+    <li>Cechy</li>
+    <li>Warianty</li>
+    <li>Powiązania produktów</li>
+
+    <li class="group">Sprzedaż — co się dzieje z zamówieniami</li>
+    <li>Zamówienia</li>
+    <li>Płatności</li>
+    <li>Przesyłki</li>
+    <li>Metody płatności</li>
+    <li>Sposoby wysyłki</li>
+    <li>Kategorie wysyłki</li>
+
+    <li class="group">Klient</li>
+    <li>Klienci</li>
+    <li>Grupy</li>
+
+    <li class="group">Marketing</li>
+    <li>Promocje koszyka</li>
+    <li>Promocje katalogu</li>
+    <li>Recenzje produktu</li>
+
+    <li class="group">Konfiguracja</li>
+    <li>Kursy wymiany walut</li>
+    <li>Ustawienia regionalne</li>
+    <li>Kategorie podatkowe</li>
+    <li>Stawki podatkowe</li>
+    <li>Administratorzy</li>
+    <li>Edycja strony</li>
+
+    <li class="group">Na koniec</li>
+    <li>Najczęstsze zadania — ściąga</li>
+    <li>Czego lepiej nie ruszać</li>
+  </ol>
+</div>
+
+<!-- ============ 1. LOGOWANIE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Podstawy</span>
+    <h2>1. Jak się zalogować</h2>
+  </div>
+
+  <p>Panel to osobna strona, na którą wchodzisz tylko Ty. Klienci jej nie widzą — oni oglądają sklep pod adresem <code>/sklep/</code>.</p>
+
+  <ol class="steps">
+    <li>Otwórz przeglądarkę i wejdź na adres panelu — kończy się on na <code>/admin</code>.</li>
+    <li>Wpisz nazwę użytkownika (nie e-mail, tylko login) oraz hasło.</li>
+    <li>Kliknij przycisk logowania. Trafisz od razu na stronę główną panelu.</li>
+  </ol>
+
+  <figure>
+    <img src="img/01-login.jpg" alt="Ekran logowania do panelu">
+    <figcaption>Ekran logowania</figcaption>
+  </figure>
+
+  <div class="tip">
+    <b>Dobra praktyka</b>
+    Zapisz adres panelu w zakładkach przeglądarki. Jeśli zapomnisz hasła, nowe może ustawić osoba,
+    która ma dostęp do sekcji <em>Administratorzy</em> (opis w rozdziale 26).
+  </div>
+
+  <div class="warn">
+    <b>Uwaga</b>
+    Nie zapisuj hasła na kartce przy komputerze i nie przekazuj go dalej. Jeśli ktoś jeszcze ma
+    pracować w panelu, załóż mu <strong>osobne konto</strong> zamiast dzielić się swoim.
+  </div>
+
+  <h3>Wylogowanie</h3>
+  <p>W prawym górnym rogu jest ikona sylwetki człowieka. Po kliknięciu rozwija się menu z opcją wylogowania. Warto z niej korzystać, gdy pracujesz na komputerze, do którego ma dostęp ktoś jeszcze.</p>
+</div>
+
+<!-- ============ 2. BUDOWA PANELU ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Podstawy</span>
+    <h2>2. Jak zbudowany jest panel</h2>
+  </div>
+
+  <p>Ekran dzieli się na dwie części. Po <strong>lewej</strong> jest bordowe menu — stała lista wszystkich miejsc, do których możesz wejść. Po <strong>prawej</strong> wyświetla się to, co wybrałaś.</p>
+
+  <p>Menu jest pogrupowane tematycznie. Kliknięcie w nazwę grupy (np. „Katalog") rozwija ją i pokazuje pozycje w środku.</p>
+
+  <table>
+    <tr><th style="width:26%">Grupa w menu</th><th>Do czego służy</th></tr>
+    <tr><td><strong>Panel</strong></td><td>Strona główna z podsumowaniem: ile sprzedano, ile jest nowych zamówień.</td></tr>
+    <tr><td><strong>Katalog</strong></td><td>Wszystko, co sprzedajesz: produkty, kategorie, stany magazynowe.</td></tr>
+    <tr><td><strong>Sprzedaż</strong></td><td>Zamówienia klientów, płatności, przesyłki oraz sposoby płatności i dostawy.</td></tr>
+    <tr><td><strong>Klient</strong></td><td>Lista osób, które kupiły lub założyły konto.</td></tr>
+    <tr><td><strong>Marketing</strong></td><td>Promocje, rabaty, opinie o produktach.</td></tr>
+    <tr><td><strong>Konfiguracja</strong></td><td>Ustawienia techniczne: podatki, języki, konta administratorów, edycja strony wizytówki.</td></tr>
+  </table>
+
+  <div class="note">
+    <b>Skrót</b>
+    Nad menu jest pole <em>„Wyszukaj w menu…"</em>. Jeśli nie pamiętasz, gdzie coś jest — wpisz tam
+    pierwsze litery, np. „prom", a menu samo pokaże pasujące pozycje.
+  </div>
+
+  <h3>Nazwy w menu a nagłówki stron</h3>
+  <p>W kilku miejscach nazwa w menu różni się od tytułu na stronie — to normalne, chodzi o to samo:</p>
+  <table>
+    <tr><th style="width:34%">W menu widzisz</th><th>Na stronie zobaczysz</th></tr>
+    <tr><td>Cechy</td><td>Atrybuty produktu</td></tr>
+    <tr><td>Warianty</td><td>Opcje produktu</td></tr>
+    <tr><td>Powiązania produktów</td><td>Typy powiązań produktu</td></tr>
+    <tr><td>Sposoby wysyłki</td><td>Metody wysyłki</td></tr>
+    <tr><td>Promocje katalogu</td><td>Promocje katalogowe</td></tr>
+  </table>
+</div>
+
+<!-- ============ 3. POWTARZALNE ELEMENTY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Podstawy</span>
+    <h2>3. Elementy, które powtarzają się na każdym ekranie</h2>
+  </div>
+
+  <p>Prawie każda pozycja z menu wygląda tak samo: <strong>lista</strong> rzeczy, a nad nią przyciski. Gdy raz zrozumiesz jedną listę, zrozumiesz wszystkie.</p>
+
+  <figure>
+    <img src="img/10-produkty-lista.jpg" alt="Typowa lista w panelu — na przykładzie produktów">
+    <figcaption>Typowa lista w panelu (tutaj: Produkty)</figcaption>
+  </figure>
+
+  <h3>Co jest gdzie</h3>
+  <table>
+    <tr><th style="width:26%">Element</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Ścieżka u góry</strong></td><td>Np. <em>Panel / Produkty</em>. Pokazuje, gdzie jesteś. Kliknięcie w wcześniejszy człon cofa Cię o krok.</td></tr>
+    <tr><td><strong>Utwórz</strong></td><td>Bordowy lub obramowany przycisk w prawym górnym rogu. Dodaje nową pozycję.</td></tr>
+    <tr><td><strong>Filtry</strong></td><td>Rozwijany pasek nad listą. Pozwala zawęzić listę, np. pokazać tylko zamówienia z jednego miesiąca.</td></tr>
+    <tr><td><strong>Pokaż 10</strong></td><td>Ile wierszy naraz. Możesz zmienić na 25, 50 lub 100.</td></tr>
+    <tr><td><strong>Nagłówki kolumn</strong></td><td>Te ze strzałeczką obok nazwy są klikalne — sortują listę rosnąco/malejąco.</td></tr>
+    <tr><td><strong>Kwadraciki po lewej</strong></td><td>Zaznaczanie wierszy. Po zaznaczeniu można użyć czerwonego „Usuń" nad listą i skasować kilka pozycji naraz.</td></tr>
+    <tr><td><strong>Poprzednia / Następna</strong></td><td>Przewijanie kolejnych stron listy, na samym dole.</td></tr>
+  </table>
+
+  <h3>Ikony w kolumnie „Akcje"</h3>
+  <table>
+    <tr><th style="width:26%">Ikona</th><th>Co robi</th></tr>
+    <tr><td><strong>Oko</strong></td><td>Podgląd — pokazuje szczegóły bez możliwości edycji.</td></tr>
+    <tr><td><strong>Ołówek</strong></td><td>Edycja — otwiera formularz do zmiany danych.</td></tr>
+    <tr><td><strong>Czerwony kosz</strong></td><td>Usunięcie. Panel poprosi o potwierdzenie. Tej operacji <strong>nie da się cofnąć</strong>.</td></tr>
+    <tr><td><strong>Trzy kropki</strong></td><td>Dodatkowe opcje, np. „Zobacz w sklepie".</td></tr>
+  </table>
+
+  <h3>Znaczki w kolumnie „Włączone"</h3>
+  <p><strong>Zielony ptaszek</strong> oznacza, że pozycja jest aktywna i widoczna w sklepie. <strong>Szary krzyżyk</strong> — że jest wyłączona i klienci jej nie widzą.</p>
+
+  <div class="warn">
+    <b>Najważniejsza zasada</b>
+    Zmiany w formularzach zapisują się dopiero po kliknięciu przycisku <strong>Utwórz</strong>
+    (przy nowej pozycji) albo <strong>Aktualizuj</strong> (przy istniejącej) — bordowego przycisku
+    w prawym górnym rogu. Samo wypełnienie pól i wyjście ze strony <em>niczego nie zapisuje</em>.
+  </div>
+</div>
+
+<!-- ============ 4. PULPIT ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Podstawy</span>
+    <h2>4. Panel (strona główna)</h2>
+    <div class="path">Menu → Panel</div>
+  </div>
+
+  <p>To pierwszy ekran po zalogowaniu. Służy do szybkiego rzutu oka na to, co dzieje się w sklepie.</p>
+
+  <figure>
+    <img src="img/02-pulpit.jpg" alt="Strona główna panelu z podsumowaniem sprzedaży">
+    <figcaption>Strona główna — podsumowanie sprzedaży</figcaption>
+  </figure>
+
+  <h3>Cztery kafelki u góry</h3>
+  <table>
+    <tr><th style="width:32%">Kafelek</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Sprzedaż</strong></td><td>Łączna wartość opłaconych zamówień.</td></tr>
+    <tr><td><strong>Opłacone zamówienia</strong></td><td>Ile zamówień zostało faktycznie zapłaconych.</td></tr>
+    <tr><td><strong>Klienci</strong></td><td>Ile osób jest w bazie klientów.</td></tr>
+    <tr><td><strong>Średnia wartość zamówienia</strong></td><td>Ile średnio zostawia u Ciebie jeden klient.</td></tr>
+  </table>
+
+  <h3>Wykres</h3>
+  <p>Zielona linia to sprzedaż w złotówkach, niebieska — liczba opłaconych zamówień. Przyciskami <strong>2 tygodnie / Miesiąc / Rok</strong> zmieniasz zakres, a strzałkami przesuwasz się w czasie.</p>
+
+  <h3>Dwie tabele na dole</h3>
+  <p><strong>Oczekujące działania</strong> to Twoja lista zadań — np. „Zamówienia do przetworzenia". Liczba obok mówi, ile ich czeka; strzałka przenosi wprost na tę listę.</p>
+  <p><strong>Nowe zamówienia</strong> to ostatnie zakupy. Ikona oka po prawej otwiera szczegóły.</p>
+
+  <div class="tip">
+    <b>Codzienny rytuał</b>
+    Zaloguj się, spójrz na „Oczekujące działania". Jeśli świeci się liczba przy zamówieniach do
+    przetworzenia — masz coś do wysłania.
+  </div>
+</div>
+
+<!-- ============ 5. PRODUKTY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>5. Produkty</h2>
+    <div class="path">Menu → Katalog → Produkty</div>
+  </div>
+
+  <p>Najważniejsza sekcja w całym panelu. Tu mieszka wszystko, co klient może kupić: olejki, vouchery, kosmetyki. Jeden produkt = jedna pozycja w sklepie.</p>
+
+  <figure>
+    <img src="img/10-produkty-lista.jpg" alt="Lista produktów">
+    <figcaption>Lista produktów</figcaption>
+  </figure>
+
+  <h3>Co widać na liście</h3>
+  <table>
+    <tr><th style="width:26%">Kolumna</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Obraz</strong></td><td>Miniaturka zdjęcia. Szary prostokąt z napisem „placeholder" oznacza, że produkt nie ma jeszcze zdjęcia.</td></tr>
+    <tr><td><strong>Nazwa</strong></td><td>To, co klient widzi w sklepie.</td></tr>
+    <tr><td><strong>Kod</strong></td><td>Wewnętrzny identyfikator, np. <code>OLEJEK_CIALO_BLP</code>. Klient go nie widzi. Musi być unikalny.</td></tr>
+    <tr><td><strong>Kategoria główna</strong></td><td>Do której kategorii produkt należy. Napis „brak kategorii głównej" to sygnał, że produkt trudno znaleźć w sklepie.</td></tr>
+    <tr><td><strong>Włączone</strong></td><td>Zielony ptaszek — produkt jest w sprzedaży. Szary krzyżyk — ukryty.</td></tr>
+  </table>
+
+  <h3>Jak dodać nowy produkt</h3>
+  <p>Kliknij <strong>Utwórz</strong> w prawym górnym rogu. Rozwinie się wybór:</p>
+
+  <figure>
+    <img src="img/10a-produkt-utworz.jpg" alt="Rozwinięty przycisk Utwórz na liście produktów">
+    <figcaption>Wybór rodzaju produktu przy tworzeniu</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:30%">Rodzaj</th><th>Kiedy wybrać</th></tr>
+    <tr><td><strong>Prosty produkt</strong></td><td>Produkt występuje w jednej wersji — jeden olejek, jeden voucher. <strong>To wybierasz prawie zawsze.</strong></td></tr>
+    <tr><td><strong>Produkt konfigurowalny</strong></td><td>Produkt ma kilka wersji do wyboru, np. ten sam krem w pojemności 30 ml i 50 ml, każda w innej cenie.</td></tr>
+  </table>
+
+  <figure>
+    <img src="img/10b-produkt-nowy.jpg" alt="Formularz nowego produktu">
+    <figcaption>Formularz nowego produktu</figcaption>
+  </figure>
+
+  <h3>Zakładki formularza produktu</h3>
+  <p>Po lewej stronie formularza jest lista zakładek. Klikasz w nie, żeby przechodzić między częściami produktu. <strong>Nie zapisują się osobno</strong> — możesz uzupełnić kilka zakładek i dopiero na końcu kliknąć <em>Utwórz</em> / <em>Aktualizuj</em>.</p>
+
+  <figure>
+    <img src="img/11-produkt-edycja.jpg" alt="Edycja produktu — zakładka Ogólne">
+    <figcaption>Edycja produktu — zakładka „Ogólne"</figcaption>
+  </figure>
+
+  <h4>Ogólne</h4>
+  <ul>
+    <li><strong>Kod</strong> — identyfikator produktu. Wpisz raz i nie zmieniaj. Używaj wielkich liter i podkreśleń, bez polskich znaków i spacji.</li>
+    <li><strong>Dostępny</strong> — przełącznik decydujący, czy produkt jest widoczny w sklepie.</li>
+    <li><strong>Czy wymagana jest dostawa?</strong> — zaznaczone dla rzeczy fizycznych (olejek, kosmetyk). Odznacz przy voucherze wysyłanym mailem — wtedy klient nie płaci za przesyłkę.</li>
+  </ul>
+
+  <h4>Tłumaczenia</h4>
+  <p>Tu wpisujesz treści, które czyta klient.</p>
+
+  <figure>
+    <img src="img/11a-produkt-tlumaczenia.jpg" alt="Zakładka Tłumaczenia w edycji produktu">
+    <figcaption>Zakładka „Tłumaczenia" — nazwa i opis produktu</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Nazwa</strong> — tytuł produktu widoczny na liście i na jego stronie.</li>
+    <li><strong>Slug</strong> — adres internetowy produktu. Uzupełnia się sam na podstawie nazwy; ikona różdżki obok generuje go ponownie.</li>
+    <li><strong>Opis</strong> — pełny opis produktu.</li>
+    <li><strong>Krótki opis</strong> — jedno-dwa zdania pokazywane w skrócie.</li>
+    <li><strong>Meta tytuł / Meta opis / Słowa kluczowe</strong> — teksty dla Google. Możesz zostawić puste, wtedy Google użyje nazwy i opisu.</li>
+  </ul>
+
+  <div class="warn">
+    <b>Uwaga na slug</b>
+    Jeśli zmienisz slug istniejącego produktu, stary link przestanie działać. Ktoś, kto zapisał go
+    sobie w zakładkach lub wysłał znajomej, trafi na pustą stronę. Zmieniaj tylko przy nowych produktach.
+  </div>
+
+  <h4>Ceny</h4>
+
+  <figure>
+    <img src="img/11b-produkt-ceny.jpg" alt="Zakładka Ceny w edycji produktu">
+    <figcaption>Zakładka „Ceny"</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Cena</strong> — kwota brutto, którą płaci klient.</li>
+    <li><strong>Pierwotna cena</strong> — cena „przed obniżką". Gdy ją podasz, w sklepie pojawi się przekreślona kwota obok aktualnej.</li>
+    <li><strong>Najniższa cena z ostatnich 30 dni</strong> — pole wymagane przez przepisy o promocjach (dyrektywa Omnibus). Sklep wylicza je sam; podaj wartość ręcznie tylko wtedy, gdy wiesz, że tak trzeba.</li>
+  </ul>
+
+  <h4>Podatki</h4>
+  <p>Wybierasz <strong>kategorię podatkową</strong> — dla produktów fizycznych zwykle „VAT 23%", dla usług i voucherów „Usługi". Sam procent ustawiony jest gdzie indziej (rozdział 24).</p>
+
+  <h4>Wysyłka</h4>
+  <p><strong>Waga, wysokość, szerokość, głębokość</strong> oraz <strong>kategoria wysyłki</strong>. Wypełniaj, jeśli koszt przesyłki ma zależeć od gabarytu. Przy jednej stałej cenie dostawy możesz zostawić puste.</p>
+
+  <h4>Magazyn</h4>
+
+  <figure>
+    <img src="img/11d-produkt-magazyn.jpg" alt="Zakładka Magazyn w edycji produktu">
+    <figcaption>Zakładka „Magazyn"</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Ilość w magazynie</strong> — ile sztuk masz.</li>
+    <li><strong>Śledź zapas</strong> — gdy włączone, sklep odejmuje sztuki przy każdym zakupie i sam ukrywa produkt po wyczerpaniu. Przy voucherach i usługach zwykle wyłącz — nie chcesz, żeby się „skończyły".</li>
+  </ul>
+
+  <h4>Kategorie</h4>
+
+  <figure>
+    <img src="img/11c-produkt-kategorie.jpg" alt="Zakładka Kategorie w edycji produktu">
+    <figcaption>Zakładka „Kategorie"</figcaption>
+  </figure>
+
+  <p>Wskazujesz, w których działach sklepu produkt ma się pokazywać. Jedna z kategorii jest <strong>główną</strong> — to ona pojawia się na liście produktów i w ścieżce nawigacji. Produkt może należeć do kilku kategorii jednocześnie.</p>
+
+  <h4>Atrybuty</h4>
+  <p>Dodatkowe informacje techniczne, np. „Pojemność (ml): 100". Wyświetlają się jako tabelka na stronie produktu. Same atrybuty tworzy się w sekcji <em>Cechy</em> (rozdział 8).</p>
+
+  <h4>Powiązania</h4>
+  <p>Produkty polecane obok tego produktu, np. „Podobne produkty". Typy powiązań definiujesz w rozdziale 10.</p>
+
+  <h4>Media</h4>
+
+  <figure>
+    <img src="img/11e-produkt-media.jpg" alt="Zakładka Media w edycji produktu">
+    <figcaption>Zakładka „Media" — zdjęcia produktu</figcaption>
+  </figure>
+
+  <p>Zdjęcia produktu. Klikasz <strong>Dodaj</strong>, wybierasz plik z dysku, opcjonalnie wpisujesz <em>typ</em> (etykietę pomocniczą). Kolejność zdjęć decyduje o tym, które będzie główne.</p>
+
+  <div class="tip">
+    <b>Zdjęcia</b>
+    Najlepiej wyglądają zdjęcia kwadratowe, około 1000 × 1000 pikseli, w formacie JPG.
+    Bardzo duże pliki (powyżej kilku megabajtów) spowalniają sklep.
+  </div>
+
+  <h3>Przyciski u góry formularza</h3>
+  <table>
+    <tr><th style="width:30%">Przycisk</th><th>Co robi</th></tr>
+    <tr><td><strong>Aktualizuj</strong></td><td>Zapisuje wszystkie zmiany. Bez tego nic się nie zapisze.</td></tr>
+    <tr><td><strong>Pokaż</strong></td><td>Podgląd danych produktu w panelu.</td></tr>
+    <tr><td><strong>Zobacz w sklepie</strong></td><td>Otwiera stronę produktu tak, jak widzi ją klient. Najlepszy sposób sprawdzenia efektu.</td></tr>
+    <tr><td><strong>Zarządzaj wariantami</strong></td><td>Tylko przy produktach konfigurowalnych — lista wersji produktu.</td></tr>
+    <tr><td><strong>Wróć</strong></td><td>Powrót do listy <strong>bez zapisywania</strong>.</td></tr>
+  </table>
+
+  <h3>Jak ukryć produkt zamiast go kasować</h3>
+  <p>Jeśli coś chwilowo nie jest dostępne, <strong>nie usuwaj produktu</strong> — wejdź w edycję, w zakładce „Ogólne" wyłącz przełącznik <em>Dostępny</em> i kliknij <em>Aktualizuj</em>. Produkt zniknie ze sklepu, ale zostanie w panelu razem z historią zamówień. Gdy wróci do oferty, wystarczy włączyć przełącznik z powrotem.</p>
+</div>
+
+<!-- ============ 6. KATEGORIE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>6. Kategorie</h2>
+    <div class="path">Menu → Katalog → Kategorie</div>
+  </div>
+
+  <p>Kategorie to działy sklepu — to, po czym klient klika, żeby zawęzić ofertę: <em>Pielęgnacja</em>, <em>Aromaterapia</em>, <em>Vouchery</em>.</p>
+
+  <figure>
+    <img src="img/12-kategorie.jpg" alt="Ekran kategorii z drzewem po lewej i formularzem po prawej">
+    <figcaption>Kategorie — drzewo po lewej, formularz po prawej</figcaption>
+  </figure>
+
+  <h3>Jak czytać ten ekran</h3>
+  <p>Po lewej stronie jest <strong>drzewo kategorii</strong>. Na samej górze stoi „Kategorie" — to korzeń, którego klient nie widzi; wszystkie prawdziwe działy są pod nim, wcięte w prawo. Po prawej stronie jest formularz — domyślnie pusty, gotowy do dodania nowej kategorii.</p>
+
+  <p>Przy każdej pozycji w drzewie są dwie ikony: <strong>ołówek</strong> (edycja) i <strong>trzy kropki</strong> (dodatkowe opcje, m.in. usunięcie i dodanie podkategorii).</p>
+
+  <h3>Jak dodać kategorię</h3>
+  <ol class="steps">
+    <li>Wejdź w <em>Katalog → Kategorie</em>. Formularz po prawej jest już pusty i gotowy.</li>
+    <li>W polu <strong>Kod</strong> wpisz krótki identyfikator, np. <code>swiece</code>. Bez polskich znaków i spacji.</li>
+    <li>W polu <strong>Rodzic</strong> wybierz kategorię nadrzędną. Zostaw puste, jeśli ma to być główny dział.</li>
+    <li>Zostaw włączony przełącznik <strong>Dostępny</strong>.</li>
+    <li>Niżej, w sekcji <strong>Tłumaczenia</strong>, wpisz <strong>Nazwę</strong> — to widzi klient. <em>Slug</em> uzupełni się sam.</li>
+    <li>Opcjonalnie dodaj <strong>Opis</strong> — pokaże się na górze strony kategorii.</li>
+    <li>Kliknij <strong>Utwórz</strong> w prawym górnym rogu.</li>
+  </ol>
+
+  <h3>Jak zmienić istniejącą kategorię</h3>
+  <p>Kliknij ikonę ołówka obok jej nazwy w drzewie. Formularz wypełni się danymi, poprawiasz i klikasz <strong>Aktualizuj</strong>.</p>
+
+  <figure>
+    <img src="img/12a-kategoria-edycja.jpg" alt="Edycja istniejącej kategorii">
+    <figcaption>Edycja istniejącej kategorii</figcaption>
+  </figure>
+
+  <h3>Kolejność kategorii</h3>
+  <p>Pozycje w drzewie można przeciągać myszką, żeby zmienić ich kolejność w menu sklepu — złap kategorię i przesuń w górę lub w dół.</p>
+
+  <div class="warn">
+    <b>Zanim usuniesz kategorię</b>
+    Produkty do niej przypisane nie znikają, ale przestają być dostępne przez menu sklepu — klient
+    trafi do nich tylko wyszukiwarką lub bezpośrednim linkiem. Najpierw przenieś produkty do innej
+    kategorii, dopiero potem kasuj.
+  </div>
+</div>
+
+<!-- ============ 7. MAGAZYN ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>7. Magazyn</h2>
+    <div class="path">Menu → Katalog → Magazyn</div>
+  </div>
+
+  <p>Zestawienie stanów magazynowych w jednym miejscu — bez wchodzenia w każdy produkt osobno.</p>
+
+  <figure>
+    <img src="img/13-magazyn.jpg" alt="Lista magazynowa">
+    <figcaption>Magazyn — stany produktów</figcaption>
+  </figure>
+
+  <p>Na liście widzisz nazwę, kod oraz liczbę sztuk z opisem stanu (np. <em>„10 Dostępne od ręki"</em>). Pojawiają się tu wyłącznie produkty z <strong>włączoną opcją „Śledź zapas"</strong> — jeśli czegoś tu nie ma, to znaczy, że sklep nie liczy jego sztuk (tak jest zwykle z voucherami).</p>
+
+  <div class="note">
+    <b>Skąd biorą się te liczby</b>
+    Sklep sam odejmuje sztuki przy każdym opłaconym zamówieniu. Ręcznie zmieniasz stan tylko wtedy,
+    gdy dostaniesz dostawę albo zrobisz inwentaryzację — przez <em>Produkty → edycja → zakładka Magazyn</em>.
+  </div>
+</div>
+
+<!-- ============ 8. CECHY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>8. Cechy</h2>
+    <div class="path">Menu → Katalog → Cechy &nbsp;·&nbsp; na stronie: „Atrybuty produktu"</div>
+  </div>
+
+  <p>Cechy to dodatkowe informacje o produkcie, wypisane w tabelce pod opisem — np. <em>Pojemność (ml)</em>, <em>Skład</em>, <em>Producent</em>.</p>
+
+  <figure>
+    <img src="img/14-cechy.jpg" alt="Lista cech produktu">
+    <figcaption>Lista cech (atrybutów produktu)</figcaption>
+  </figure>
+
+  <p>Działa to dwuetapowo: <strong>tutaj tworzysz samą cechę</strong> (np. „Pojemność (ml)"), a jej <strong>wartość dla konkretnego produktu</strong> wpisujesz w <em>Produkty → edycja → zakładka Atrybuty</em>.</p>
+
+  <h3>Kolumny na liście</h3>
+  <table>
+    <tr><th style="width:26%">Kolumna</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Nazwa</strong></td><td>Etykieta widoczna dla klienta.</td></tr>
+    <tr><td><strong>Kod</strong></td><td>Identyfikator wewnętrzny.</td></tr>
+    <tr><td><strong>Typ</strong></td><td>Rodzaj wartości: <em>Tekst</em>, <em>Liczba całkowita</em>, <em>Data</em>, <em>Pole wyboru</em> i inne.</td></tr>
+    <tr><td><strong>Tłumaczalne</strong></td><td>Czy wartość może się różnić w zależności od języka. Przy jednym języku bez znaczenia.</td></tr>
+    <tr><td><strong>Pozycja</strong></td><td>Kolejność w tabelce na stronie produktu — mniejsza liczba wyżej.</td></tr>
+  </table>
+
+  <div class="tip">
+    <b>Jak wybrać typ</b>
+    „Pojemność (ml)" → <em>Liczba całkowita</em>. „Skład" → <em>Tekst</em>.
+    Typ ustawia się przy tworzeniu cechy i <strong>później się go nie zmienia</strong> — trzeba by
+    założyć nową cechę.
+  </div>
+</div>
+
+<!-- ============ 9. WARIANTY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>9. Warianty</h2>
+    <div class="path">Menu → Katalog → Warianty &nbsp;·&nbsp; na stronie: „Opcje produktu"</div>
+  </div>
+
+  <p>Warianty służą do produktów, które występują w kilku wersjach — na przykład ten sam krem w pojemności 30 ml i 50 ml, albo świeca w trzech zapachach.</p>
+
+  <figure>
+    <img src="img/15-warianty.jpg" alt="Lista opcji produktu — pusta">
+    <figcaption>Opcje produktu — obecnie lista jest pusta</figcaption>
+  </figure>
+
+  <p>Tworzysz tu <strong>rodzaj wyboru</strong> (np. „Pojemność") wraz z listą możliwych wartości („30 ml", „50 ml"). Potem, przy tworzeniu <em>produktu konfigurowalnego</em>, wskazujesz tę opcję, a sklep wygeneruje osobne wersje produktu — każda z własną ceną i własnym stanem magazynowym.</p>
+
+  <div class="note">
+    <b>Stan na dziś</b>
+    Lista jest pusta — wszystkie produkty w sklepie występują w jednej wersji. Ta sekcja przyda się
+    dopiero, gdy pojawi się produkt „do wyboru". Dopóki go nie ma, możesz o niej zapomnieć.
+  </div>
+</div>
+
+<!-- ============ 10. POWIĄZANIA ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Katalog</span>
+    <h2>10. Powiązania produktów</h2>
+    <div class="path">Menu → Katalog → Powiązania produktów &nbsp;·&nbsp; na stronie: „Typy powiązań produktu"</div>
+  </div>
+
+  <p>Powiązania to sekcje „Może Ci się spodobać" na stronie produktu. Tutaj tworzysz <strong>rodzaj</strong> takiej sekcji, np. „Podobne produkty" albo „Komplet z…".</p>
+
+  <figure>
+    <img src="img/16-powiazania.jpg" alt="Lista typów powiązań produktu">
+    <figcaption>Typy powiązań produktu</figcaption>
+  </figure>
+
+  <p>Sam wybór konkretnych produktów robisz w <em>Produkty → edycja → zakładka Powiązania</em>. Tutaj powstaje tylko nagłówek sekcji.</p>
+
+  <div class="tip">
+    <b>Praktycznie</b>
+    Jeden, dobrze nazwany typ powiązania w zupełności wystarcza. Nazwa jest widoczna dla klienta,
+    więc niech brzmi po ludzku — „Podobne produkty", a nie „zestaw-2".
+  </div>
+</div>
+
+<!-- ============ 11. ZAMÓWIENIA ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>11. Zamówienia</h2>
+    <div class="path">Menu → Sprzedaż → Zamówienia</div>
+  </div>
+
+  <p>Serce codziennej pracy. Tu trafia każdy zakup zrobiony w sklepie.</p>
+
+  <figure>
+    <img src="img/20-zamowienia.jpg" alt="Lista zamówień">
+    <figcaption>Lista zamówień</figcaption>
+  </figure>
+
+  <h3>Trzy statusy, które trzeba umieć czytać</h3>
+  <table>
+    <tr><th style="width:24%">Kolumna</th><th>Co oznacza</th></tr>
+    <tr><td><strong>Stan</strong></td><td>Ogólny etap zamówienia: <em>Nowy</em> → <em>Zrealizowane</em> → <em>Anulowane</em>.</td></tr>
+    <tr><td><strong>Status płatności</strong></td><td><em>Oczekuje na płatność</em> — pieniądze jeszcze nie doszły. <em>Zapłacone</em> — możesz wysyłać. <em>Zwrócone</em> — pieniądze wróciły do klienta.</td></tr>
+    <tr><td><strong>Status wysyłki</strong></td><td><em>Gotowe</em> — czeka na nadanie. <em>Wysłane</em> — paczka poszła.</td></tr>
+  </table>
+
+  <div class="warn">
+    <b>Najważniejsza zasada obsługi</b>
+    Wysyłaj dopiero, gdy status płatności to <strong>Zapłacone</strong>. „Oczekuje na płatność"
+    oznacza, że klient rozpoczął płatność, ale jej nie dokończył — takie zamówienie może nigdy nie
+    zostać opłacone.
+  </div>
+
+  <h3>Szczegóły zamówienia</h3>
+  <p>Kliknij numer zamówienia (np. <em>#0025</em>) lub ikonę oka po prawej.</p>
+
+  <figure>
+    <img src="img/21-zamowienie-szczegoly.jpg" alt="Szczegóły pojedynczego zamówienia">
+    <figcaption>Szczegóły zamówienia</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:26%">Sekcja</th><th>Co zawiera</th></tr>
+    <tr><td><strong>Pozycje</strong></td><td>Co klient kupił, w jakiej ilości i za ile.</td></tr>
+    <tr><td><strong>Podsumowanie</strong></td><td>Rozbicie kwoty: wartość towaru, podatek, koszt wysyłki, rabaty i suma końcowa.</td></tr>
+    <tr><td><strong>Płatności</strong></td><td>Metoda płatności i jej stan. Tu jest też przycisk ręcznego oznaczenia jako opłacone.</td></tr>
+    <tr><td><strong>Szczegóły</strong> (prawa kolumna)</td><td>Data, waluta, język, kanał sprzedaży, adres IP oraz uwagi klienta.</td></tr>
+    <tr><td><strong>Klient</strong> (prawa kolumna)</td><td>Imię, nazwisko, e-mail i link do karty klienta.</td></tr>
+    <tr><td><strong>Adresy</strong></td><td>Adres dostawy i adres do faktury.</td></tr>
+  </table>
+
+  <h3>Przycisk „Akcje"</h3>
+  <p>W prawym górnym rogu, kryje najważniejsze operacje: anulowanie zamówienia, wysłanie e-maila potwierdzającego, pobranie faktury (jeśli jest włączona), zmianę adresu.</p>
+
+  <h3>Typowa obsługa zamówienia — krok po kroku</h3>
+  <ol class="steps">
+    <li>Wejdź w <em>Sprzedaż → Zamówienia</em>.</li>
+    <li>Znajdź wiersz ze statusem płatności <strong>Zapłacone</strong>.</li>
+    <li>Otwórz szczegóły i sprawdź, co i pod jaki adres wysłać.</li>
+    <li>Spakuj i nadaj paczkę.</li>
+    <li>Wróć do panelu, wejdź w <em>Sprzedaż → Przesyłki</em> i oznacz przesyłkę jako wysłaną (rozdział 13). Klient dostanie automatycznie wiadomość.</li>
+  </ol>
+
+  <div class="note">
+    <b>Płatność przy odbiorze</b>
+    Zamówienia opłacane przy odbiorze mają status „Oczekuje na płatność" aż do momentu, w którym
+    ręcznie oznaczysz je jako opłacone — służy do tego przycisk w sekcji <em>Płatności</em>
+    w szczegółach zamówienia.
+  </div>
+</div>
+
+<!-- ============ 12. PŁATNOŚCI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>12. Płatności</h2>
+    <div class="path">Menu → Sprzedaż → Płatności</div>
+  </div>
+
+  <p>To samo, co zamówienia, ale z perspektywy pieniędzy. Jedna lista wszystkich wpłat — przydatna, gdy chcesz sprawdzić, co się faktycznie zaksięgowało.</p>
+
+  <figure>
+    <img src="img/22-platnosci.jpg" alt="Lista płatności">
+    <figcaption>Lista płatności</figcaption>
+  </figure>
+
+  <p>Widzisz numer zamówienia, kwotę, metodę płatności i stan. Ikona oka prowadzi do zamówienia, którego dotyczy dana wpłata.</p>
+
+  <div class="tip">
+    <b>Kiedy tu zaglądać</b>
+    Gdy klient twierdzi, że zapłacił, a zamówienie wygląda na nieopłacone — filtrujesz listę po
+    stanie płatności i szybko widzisz, czy wpłata w ogóle dotarła do sklepu.
+  </div>
+</div>
+
+<!-- ============ 13. PRZESYŁKI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>13. Przesyłki</h2>
+    <div class="path">Menu → Sprzedaż → Przesyłki</div>
+  </div>
+
+  <p>Lista paczek do nadania i już nadanych.</p>
+
+  <figure>
+    <img src="img/23-przesylki.jpg" alt="Lista przesyłek">
+    <figcaption>Lista przesyłek</figcaption>
+  </figure>
+
+  <p>Przy każdej pozycji jest numer zamówienia, sposób dostawy i stan. Wiersze w stanie <strong>Gotowe</strong> to paczki czekające na nadanie. Po nadaniu użyj przycisku <strong>Wyślij</strong> — status zmieni się na „Wysłane", a klient dostanie powiadomienie e-mailem.</p>
+
+  <div class="tip">
+    <b>Najwygodniejszy sposób pracy</b>
+    Spakuj wszystkie paczki, zanieś je na pocztę czy do paczkomatu, a po powrocie oznacz je tutaj
+    zbiorczo jako wysłane. Nie trzeba wchodzić w każde zamówienie osobno.
+  </div>
+</div>
+
+<!-- ============ 14. METODY PŁATNOŚCI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>14. Metody płatności</h2>
+    <div class="path">Menu → Sprzedaż → Metody płatności</div>
+  </div>
+
+  <p>Lista sposobów, na jakie klient może zapłacić. To ustawienie, nie codzienna praca — zaglądasz tu rzadko.</p>
+
+  <figure>
+    <img src="img/24-metody-platnosci.jpg" alt="Lista metod płatności">
+    <figcaption>Metody płatności</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:34%">Metoda</th><th>Opis</th></tr>
+    <tr><td><strong>PayU — karta, BLIK, przelew online</strong></td><td>Płatność internetowa. Klient wybiera BLIK, kartę albo przelew; pieniądze potwierdzają się automatycznie i zamówienie samo dostaje status „Zapłacone".</td></tr>
+    <tr><td><strong>Płatność przy odbiorze</strong></td><td>Klient płaci gotówką lub kartą na miejscu. Status opłacenia musisz ustawić ręcznie.</td></tr>
+  </table>
+
+  <h3>Kolumny</h3>
+  <ul>
+    <li><strong>Pozycja</strong> — kolejność na liście w koszyku. Mniejsza liczba = wyżej.</li>
+    <li><strong>Kod</strong> — identyfikator wewnętrzny.</li>
+    <li><strong>Bramka</strong> — system obsługujący płatność. <em>Offline</em> oznacza „bez systemu, rozliczasz sama".</li>
+    <li><strong>Włączone</strong> — czy klient widzi tę metodę w koszyku.</li>
+  </ul>
+
+  <div class="warn">
+    <b>Czego nie ruszać</b>
+    W edycji metody PayU są pola z kluczami dostępu do systemu płatności. Ich zmiana zatrzyma
+    wszystkie płatności w sklepie. Jeśli chcesz chwilowo wyłączyć jakąś metodę — użyj wyłącznie
+    przełącznika <em>Włączone</em>.
+  </div>
+
+  <p>Przyciski <em>Adyen</em>, <em>Mollie</em> i <em>Enable PayPal</em> u góry to propozycje podłączenia kolejnych operatorów płatności. Nie są potrzebne do działania sklepu — możesz je zignorować.</p>
+</div>
+
+<!-- ============ 15. SPOSOBY WYSYŁKI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>15. Sposoby wysyłki</h2>
+    <div class="path">Menu → Sprzedaż → Sposoby wysyłki &nbsp;·&nbsp; na stronie: „Metody wysyłki"</div>
+  </div>
+
+  <p>Formy dostawy, które klient wybiera w koszyku, wraz z ich cenami.</p>
+
+  <figure>
+    <img src="img/25-sposoby-wysylki.jpg" alt="Lista sposobów wysyłki">
+    <figcaption>Sposoby wysyłki</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:34%">Sposób</th><th>Opis</th></tr>
+    <tr><td><strong>InPost Paczkomaty</strong></td><td>Dostawa do paczkomatu.</td></tr>
+    <tr><td><strong>Odbiór w gabinecie</strong></td><td>Klient odbiera osobiście — zwykle bez opłaty.</td></tr>
+    <tr><td><strong>InPost Kurier</strong></td><td>Dostawa kurierem pod adres.</td></tr>
+  </table>
+
+  <h3>Jak zmienić cenę dostawy</h3>
+  <ol class="steps">
+    <li>Kliknij ikonę ołówka przy wybranym sposobie wysyłki.</li>
+    <li>Zjedź do sekcji z <strong>kosztem</strong> — jest tam kwota przypisana do kanału sprzedaży.</li>
+    <li>Wpisz nową kwotę brutto.</li>
+    <li>Kliknij <strong>Aktualizuj</strong>.</li>
+  </ol>
+
+  <p>Zmiana działa od razu — kolejny klient zobaczy w koszyku nową cenę. Zamówienia już złożone zachowują starą.</p>
+
+  <h3>Pozostałe kolumny</h3>
+  <ul>
+    <li><strong>Strefa</strong> — obszar, na który wysyłasz (tutaj: Polska).</li>
+    <li><strong>Włączone</strong> — czy metoda jest widoczna w koszyku.</li>
+    <li><strong>Trzecia ikona akcji</strong> (kosz z pokrywką) — archiwizacja: metoda znika z koszyka, ale zostaje w historii starych zamówień. Bezpieczniejsza niż usunięcie.</li>
+  </ul>
+</div>
+
+<!-- ============ 16. KATEGORIE WYSYŁKI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Sprzedaż</span>
+    <h2>16. Kategorie wysyłki</h2>
+    <div class="path">Menu → Sprzedaż → Kategorie wysyłki</div>
+  </div>
+
+  <p>Grupy produktów o podobnych wymaganiach transportowych — np. „Standardowa", „Delikatne szkło", „Gabaryt".</p>
+
+  <figure>
+    <img src="img/26-kategorie-wysylki.jpg" alt="Lista kategorii wysyłki">
+    <figcaption>Kategorie wysyłki</figcaption>
+  </figure>
+
+  <p>Kategorię przypisujesz produktowi w zakładce <em>Wysyłka</em>. Dzięki temu można ustawić inny koszt dostawy dla różnych grup towarów.</p>
+
+  <div class="note">
+    <b>Stan na dziś</b>
+    Istnieje jedna kategoria — „Standardowa" — i wszystko jest wysyłane tak samo. Nowe kategorie
+    dodawaj dopiero wtedy, gdy pojawi się produkt wymagający innego kosztu przesyłki.
+  </div>
+</div>
+
+<!-- ============ 17. KLIENCI ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Klient</span>
+    <h2>17. Klienci</h2>
+    <div class="path">Menu → Klient → Klienci</div>
+  </div>
+
+  <p>Baza osób, które kupiły coś w sklepie lub założyły konto.</p>
+
+  <figure>
+    <img src="img/30-klienci.jpg" alt="Lista klientów">
+    <figcaption>Lista klientów</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:30%">Kolumna</th><th>Znaczenie</th></tr>
+    <tr><td><strong>E-mail</strong></td><td>Adres, na który idą potwierdzenia zamówień.</td></tr>
+    <tr><td><strong>Imię, Nazwisko</strong></td><td>Puste, jeśli ktoś kupił jako gość i nie podał danych.</td></tr>
+    <tr><td><strong>Data rejestracji</strong></td><td>Kiedy klient pojawił się w bazie.</td></tr>
+    <tr><td><strong>Włączone</strong></td><td>Czy konto działa. Wyłączone konto = brak możliwości zalogowania.</td></tr>
+    <tr><td><strong>Zweryfikowany</strong></td><td>Czy klient potwierdził adres e-mail klikając w link z wiadomości powitalnej.</td></tr>
+  </table>
+
+  <p>Ikona oka otwiera kartę klienta: dane kontaktowe, adresy oraz <strong>historię wszystkich jego zamówień</strong>. To najszybszy sposób sprawdzenia, co ktoś u Ciebie kupował.</p>
+
+  <div class="warn">
+    <b>Dane osobowe</b>
+    To lista danych osobowych. Nie eksportuj jej i nie przesyłaj dalej bez potrzeby. Jeśli klient
+    poprosi o usunięcie danych, skasuj jego wpis ikoną kosza — pamiętając, że razem z nim znika
+    historia zamówień tej osoby.
+  </div>
+</div>
+
+<!-- ============ 18. GRUPY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Klient</span>
+    <h2>18. Grupy</h2>
+    <div class="path">Menu → Klient → Grupy</div>
+  </div>
+
+  <p>Grupy pozwalają podzielić klientów na kategorie — np. „Stali pacjenci" — i przygotować promocję działającą tylko dla nich.</p>
+
+  <figure>
+    <img src="img/31-grupy-klientow.jpg" alt="Lista grup klientów — pusta">
+    <figcaption>Grupy klientów — obecnie lista jest pusta</figcaption>
+  </figure>
+
+  <p>Utworzoną grupę przypisujesz klientowi w jego karcie (<em>Klienci → edycja</em>). Przy tworzeniu promocji można wtedy wskazać, że dotyczy tylko wybranej grupy.</p>
+
+  <div class="note">
+    <b>Stan na dziś</b>
+    Żadna grupa nie jest utworzona — wszyscy klienci są traktowani jednakowo. Ta sekcja przyda się,
+    jeśli kiedyś zechcesz zrobić rabat wyłącznie dla wybranych osób.
+  </div>
+</div>
+
+<!-- ============ 19. PROMOCJE KOSZYKA ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Marketing</span>
+    <h2>19. Promocje koszyka</h2>
+    <div class="path">Menu → Marketing → Promocje koszyka</div>
+  </div>
+
+  <p>Rabaty naliczane <strong>przy podsumowaniu koszyka</strong> — od całości zamówienia. To tu tworzy się kody rabatowe.</p>
+
+  <figure>
+    <img src="img/40-promocje-koszyka.jpg" alt="Lista promocji koszyka">
+    <figcaption>Promocje koszyka</figcaption>
+  </figure>
+
+  <h3>Przykłady zastosowania</h3>
+  <ul>
+    <li>Darmowa dostawa przy zamówieniu powyżej 200 zł.</li>
+    <li>10% rabatu z kodem <code>WIOSNA</code>.</li>
+    <li>20 zł zniżki dla pierwszego zamówienia.</li>
+  </ul>
+
+  <h3>Kolumny na liście</h3>
+  <table>
+    <tr><th style="width:26%">Kolumna</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Priorytet</strong></td><td>Kolejność naliczania, gdy pasuje kilka promocji naraz. Wyższa liczba liczy się pierwsza.</td></tr>
+    <tr><td><strong>Kupony</strong></td><td>Ptaszek oznacza promocję z kodem rabatowym — klient musi wpisać hasło w koszyku. Bez ptaszka rabat nalicza się każdemu automatycznie.</td></tr>
+    <tr><td><strong>Użycie</strong></td><td>Ile razy promocja została wykorzystana i ile razy może jeszcze zadziałać, np. <em>0 / 5</em>.</td></tr>
+  </table>
+
+  <h3>Jak zbudowana jest promocja</h3>
+  <p>Formularz ma trzy części:</p>
+  <ol class="steps">
+    <li><strong>Dane podstawowe</strong> — nazwa (widoczna dla klienta), kod wewnętrzny, daty obowiązywania, limit użyć.</li>
+    <li><strong>Reguły</strong> — kiedy promocja ma zadziałać, np. „wartość koszyka co najmniej 200 zł". Brak reguł = działa zawsze.</li>
+    <li><strong>Akcje</strong> — co konkretnie ma się stać: rabat procentowy, kwotowy albo darmowa dostawa.</li>
+  </ol>
+
+  <div class="warn">
+    <b>Zawsze sprawdź na żywo</b>
+    Po utworzeniu promocji otwórz sklep, dodaj produkt do koszyka i zobacz, czy rabat nalicza się
+    zgodnie z oczekiwaniem. Źle ustawiona reguła potrafi dać rabat na wszystko.
+  </div>
+</div>
+
+<!-- ============ 20. PROMOCJE KATALOGU ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Marketing</span>
+    <h2>20. Promocje katalogu</h2>
+    <div class="path">Menu → Marketing → Promocje katalogu &nbsp;·&nbsp; na stronie: „Promocje katalogowe"</div>
+  </div>
+
+  <p>Obniżki cen widoczne <strong>od razu przy produkcie</strong>, jeszcze zanim klient cokolwiek doda do koszyka — czyli klasyczna wyprzedaż z przekreśloną ceną.</p>
+
+  <figure>
+    <img src="img/41-promocje-katalogu.jpg" alt="Lista promocji katalogowych — pusta">
+    <figcaption>Promocje katalogowe</figcaption>
+  </figure>
+
+  <h3>Różnica względem promocji koszyka</h3>
+  <table>
+    <tr><th style="width:34%">Promocje katalogu</th><th>Promocje koszyka</th></tr>
+    <tr><td>Zmieniają cenę produktu na liście i na jego stronie.</td><td>Naliczają się dopiero w koszyku.</td></tr>
+    <tr><td>Bez kodów rabatowych.</td><td>Mogą wymagać kodu.</td></tr>
+    <tr><td>Dotyczą wybranych produktów lub kategorii.</td><td>Dotyczą całego zamówienia.</td></tr>
+  </table>
+
+  <p>Przy tworzeniu wskazujesz <strong>zakres</strong> (które produkty lub kategorie), <strong>wielkość obniżki</strong> (procent lub kwota) i <strong>daty</strong> obowiązywania.</p>
+
+  <div class="tip">
+    <b>Daty działają same</b>
+    Promocja z ustawioną datą startu i końca włączy się i wyłączy automatycznie o wskazanej porze.
+    Nie musisz pamiętać, żeby ją wyłączyć.
+  </div>
+</div>
+
+<!-- ============ 21. RECENZJE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Marketing</span>
+    <h2>21. Recenzje produktu</h2>
+    <div class="path">Menu → Marketing → Recenzje produktu</div>
+  </div>
+
+  <p>Opinie wystawiane przez klientów — ocena w gwiazdkach plus komentarz.</p>
+
+  <figure>
+    <img src="img/42-recenzje.jpg" alt="Lista recenzji produktów">
+    <figcaption>Recenzje produktu</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:26%">Kolumna</th><th>Znaczenie</th></tr>
+    <tr><td><strong>Ocena</strong></td><td>Liczba gwiazdek, od 1 do 5.</td></tr>
+    <tr><td><strong>Klient</strong></td><td>Kto wystawił opinię.</td></tr>
+    <tr><td><strong>Tytuł</strong></td><td>Nagłówek recenzji.</td></tr>
+    <tr><td><strong>Produkt</strong></td><td>Czego dotyczy.</td></tr>
+    <tr><td><strong>Status</strong></td><td><em>Zaakceptowane</em> — widoczna w sklepie. <em>Nowa</em> — czeka na decyzję. <em>Odrzucone</em> — ukryta.</td></tr>
+  </table>
+
+  <p>Recenzje można <strong>usunąć</strong> ikoną kosza, ale nie da się ich edytować — i słusznie, bo to wypowiedź klienta.</p>
+
+  <div class="note">
+    <b>Nowe opinie pojawiają się od razu</b>
+    Sklep jest ustawiony tak, że recenzje są akceptowane automatycznie i widoczne natychmiast po
+    dodaniu. Jeśli któraś jest obraźliwa lub nie na temat, usuwasz ją tutaj.
+  </div>
+</div>
+
+<!-- ============ 22. KURSY WALUT ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>22. Kursy wymiany walut</h2>
+    <div class="path">Menu → Konfiguracja → Kursy wymiany walut</div>
+  </div>
+
+  <p>Przeliczniki między walutami — potrzebne wyłącznie w sklepie sprzedającym w więcej niż jednej walucie.</p>
+
+  <figure>
+    <img src="img/50-kursy-walut.jpg" alt="Lista kursów wymiany — pusta">
+    <figcaption>Kursy wymiany — lista pusta</figcaption>
+  </figure>
+
+  <div class="note">
+    <b>Nie dotyczy tego sklepu</b>
+    Sklep prowadzi sprzedaż wyłącznie w złotówkach, więc lista jest i powinna pozostać pusta.
+    Możesz tę sekcję całkowicie pominąć.
+  </div>
+</div>
+
+<!-- ============ 23. USTAWIENIA REGIONALNE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>23. Ustawienia regionalne</h2>
+    <div class="path">Menu → Konfiguracja → Ustawienia regionalne</div>
+  </div>
+
+  <p>Języki, w których działa sklep. Obecnie jest jeden: <strong>polski (Polska)</strong>.</p>
+
+  <figure>
+    <img src="img/51-ustawienia-regionalne.jpg" alt="Lista ustawień regionalnych">
+    <figcaption>Ustawienia regionalne — języki sklepu</figcaption>
+  </figure>
+
+  <div class="warn">
+    <b>Zanim dodasz drugi język</b>
+    Dodanie języka oznacza, że <strong>każdy produkt i każda kategoria</strong> będą wymagały
+    przetłumaczonej nazwy i opisu. Bez tego sklep pokaże puste miejsca. To decyzja na spokojnie,
+    a nie kliknięcie w pięć minut.
+  </div>
+</div>
+
+<!-- ============ 24. KATEGORIE PODATKOWE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>24. Kategorie podatkowe</h2>
+    <div class="path">Menu → Konfiguracja → Kategorie podatkowe</div>
+  </div>
+
+  <p>Grupy produktów objętych tą samą stawką podatku. To one pojawiają się do wyboru w zakładce <em>Podatki</em> przy produkcie.</p>
+
+  <figure>
+    <img src="img/52-kategorie-podatkowe.jpg" alt="Lista kategorii podatkowych">
+    <figcaption>Kategorie podatkowe</figcaption>
+  </figure>
+
+  <table>
+    <tr><th style="width:34%">Kategoria</th><th>Do czego służy</th></tr>
+    <tr><td><strong>VAT 23%</strong></td><td>Produkty fizyczne — olejki, kosmetyki.</td></tr>
+    <tr><td><strong>Usługi</strong></td><td>Vouchery i usługi gabinetu.</td></tr>
+  </table>
+
+  <p>Sama kategoria nie zawiera procentu — mówi tylko „ta grupa produktów jest opodatkowana osobno". Wysokość stawki ustawia się w następnym rozdziale.</p>
+</div>
+
+<!-- ============ 25. STAWKI PODATKOWE ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>25. Stawki podatkowe</h2>
+    <div class="path">Menu → Konfiguracja → Stawki podatkowe</div>
+  </div>
+
+  <p>Konkretne procenty przypisane do kategorii podatkowych i do obszaru sprzedaży.</p>
+
+  <figure>
+    <img src="img/53-stawki-podatkowe.jpg" alt="Lista stawek podatkowych">
+    <figcaption>Stawki podatkowe</figcaption>
+  </figure>
+
+  <p>Obie stawki wynoszą 23% i obowiązują w strefie „Polska" — jedna dla kategorii <em>VAT 23%</em>, druga dla <em>Usługi</em>.</p>
+
+  <div class="warn">
+    <b>Sekcja dla księgowości</b>
+    Zmiana stawki wpływa na wszystkie ceny w sklepie i na wystawiane dokumenty. Nie zmieniaj tu
+    niczego bez ustalenia z księgową — a jeśli już, zrób to poza godzinami sprzedaży i sprawdź
+    potem cenę produktu w sklepie.
+  </div>
+</div>
+
+<!-- ============ 26. ADMINISTRATORZY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>26. Administratorzy</h2>
+    <div class="path">Menu → Konfiguracja → Administratorzy</div>
+  </div>
+
+  <p>Konta osób mających dostęp do panelu. To <strong>nie są</strong> klienci sklepu — ci są w zupełnie innej sekcji (rozdział 17).</p>
+
+  <figure>
+    <img src="img/54-administratorzy.jpg" alt="Lista administratorów">
+    <figcaption>Administratorzy</figcaption>
+  </figure>
+
+  <h3>Jak dodać osobę do pomocy</h3>
+  <ol class="steps">
+    <li>Kliknij <strong>Utwórz</strong>.</li>
+    <li>Wpisz e-mail, imię i nazwisko oraz <strong>nazwę użytkownika</strong> — tę drugą osoba będzie wpisywać przy logowaniu.</li>
+    <li>Nadaj hasło i powtórz je w drugim polu.</li>
+    <li>Zostaw zaznaczone <strong>Włączone</strong>.</li>
+    <li>Kliknij <strong>Utwórz</strong> i przekaż dane tej osobie — najlepiej inną drogą niż e-mailem z hasłem w treści.</li>
+  </ol>
+
+  <h3>Jak zmienić własne hasło</h3>
+  <p>Kliknij ikonę ołówka przy swoim koncie, wpisz nowe hasło w obu polach i zapisz przyciskiem <em>Aktualizuj</em>.</p>
+
+  <div class="warn">
+    <b>Nie usuwaj ostatniego konta</b>
+    Skasowanie jedynego konta administratora odcina dostęp do panelu — nie da się już zalogować
+    i odzyskanie dostępu wymaga pomocy osoby technicznej. Zanim usuniesz jakiekolwiek konto,
+    upewnij się, że działa co najmniej jedno inne.
+  </div>
+</div>
+
+<!-- ============ 27. EDYCJA STRONY ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Konfiguracja</span>
+    <h2>27. Edycja strony</h2>
+    <div class="path">Menu → Konfiguracja → Edycja strony</div>
+  </div>
+
+  <p>Narzędzie zrobione specjalnie dla OMA. Pozwala poprawiać <strong>teksty na stronie wizytówce</strong> — tej z opisem gabinetu, cennikiem i kontaktem — bezpośrednio na podglądzie, bez znajomości czegokolwiek technicznego.</p>
+
+  <figure>
+    <img src="img/55-edycja-strony.jpg" alt="Tryb edycji strony wizytówki">
+    <figcaption>Tryb edycji strony</figcaption>
+  </figure>
+
+  <h3>Jak to działa</h3>
+  <ol class="steps">
+    <li>Wejdź w <em>Konfiguracja → Edycja strony</em>. Zobaczysz swoją stronę tak, jak wygląda dla odwiedzających.</li>
+    <li>Kliknij dowolny tekst na stronie i po prostu go popraw — jak w edytorze tekstu.</li>
+    <li>Na dole, po lewej, licznik pokazuje, ile masz niezapisanych zmian.</li>
+    <li>Gdy skończysz, kliknij <strong>Zapisz zmiany</strong>. Dopiero wtedy zmiany zobaczą odwiedzający.</li>
+  </ol>
+
+  <h3>Przyciski na dole</h3>
+  <table>
+    <tr><th style="width:30%">Przycisk</th><th>Co robi</th></tr>
+    <tr><td><strong>Zapisz zmiany</strong></td><td>Publikuje poprawki na żywej stronie.</td></tr>
+    <tr><td><strong>Odrzuć zmiany</strong></td><td>Kasuje wszystko, co zmieniłaś od ostatniego zapisu. Strona wraca do poprzedniej treści.</td></tr>
+    <tr><td><strong>Historia zmian</strong></td><td>Otwiera listę wcześniejszych wersji strony.</td></tr>
+    <tr><td><strong>Wróć do panelu</strong></td><td>Wyjście z trybu edycji (u góry po prawej).</td></tr>
+  </table>
+
+  <h3>Historia zmian — koło ratunkowe</h3>
+
+  <figure>
+    <img src="img/55a-historia-zmian.jpg" alt="Panel historii zmian strony">
+    <figcaption>Historia zmian z możliwością przywrócenia wersji</figcaption>
+  </figure>
+
+  <p>Każdy zapis zostawia ślad: data, godzina, kto zapisał i ile pól zmienił. Wersja oznaczona etykietą <strong>„wersja aktualna"</strong> to ta, którą widzą teraz odwiedzający. Przycisk <strong>Przywróć</strong> przy dowolnym wpisie cofa stronę do tamtej treści.</p>
+
+  <div class="tip">
+    <b>Możesz eksperymentować</b>
+    Dzięki historii zmian nic nie da się nieodwracalnie zepsuć. Jeśli coś przestanie Ci się podobać,
+    otwierasz historię i wracasz do poprzedniej wersji jednym kliknięciem.
+  </div>
+
+  <div class="note">
+    <b>Co można tu zmienić, a czego nie</b>
+    Edytujesz <strong>treść tekstów</strong>. Zdjęcia, układ strony, kolory i kolejność sekcji
+    wymagają zmian po stronie technicznej.
+  </div>
+</div>
+
+<!-- ============ 28. ŚCIĄGA ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Na koniec</span>
+    <h2>28. Najczęstsze zadania — ściąga</h2>
+  </div>
+
+  <table>
+    <tr><th style="width:44%">Chcę…</th><th>Idę do…</th></tr>
+    <tr><td>Dodać nowy produkt do sklepu</td><td>Katalog → Produkty → <em>Utwórz → Prosty produkt</em></td></tr>
+    <tr><td>Zmienić cenę produktu</td><td>Katalog → Produkty → ołówek → zakładka <em>Ceny</em></td></tr>
+    <tr><td>Chwilowo ukryć produkt</td><td>Katalog → Produkty → ołówek → <em>Ogólne</em> → wyłącz <em>Dostępny</em></td></tr>
+    <tr><td>Zmienić zdjęcie produktu</td><td>Katalog → Produkty → ołówek → zakładka <em>Media</em></td></tr>
+    <tr><td>Poprawić opis produktu</td><td>Katalog → Produkty → ołówek → zakładka <em>Tłumaczenia</em></td></tr>
+    <tr><td>Uzupełnić stan magazynowy po dostawie</td><td>Katalog → Produkty → ołówek → zakładka <em>Magazyn</em></td></tr>
+    <tr><td>Dodać nowy dział sklepu</td><td>Katalog → Kategorie → wypełnij formularz → <em>Utwórz</em></td></tr>
+    <tr><td>Sprawdzić, co mam wysłać</td><td>Sprzedaż → Zamówienia (status płatności: <em>Zapłacone</em>)</td></tr>
+    <tr><td>Oznaczyć paczkę jako nadaną</td><td>Sprzedaż → Przesyłki → <em>Wyślij</em></td></tr>
+    <tr><td>Sprawdzić, czy klient zapłacił</td><td>Sprzedaż → Płatności</td></tr>
+    <tr><td>Zmienić koszt dostawy</td><td>Sprzedaż → Sposoby wysyłki → ołówek</td></tr>
+    <tr><td>Zobaczyć historię zakupów klienta</td><td>Klient → Klienci → ikona oka</td></tr>
+    <tr><td>Zrobić kod rabatowy</td><td>Marketing → Promocje koszyka → <em>Utwórz</em></td></tr>
+    <tr><td>Zrobić wyprzedaż z przekreśloną ceną</td><td>Marketing → Promocje katalogu → <em>Utwórz</em></td></tr>
+    <tr><td>Usunąć nieprzyzwoitą opinię</td><td>Marketing → Recenzje produktu → kosz</td></tr>
+    <tr><td>Poprawić tekst na stronie gabinetu</td><td>Konfiguracja → Edycja strony</td></tr>
+    <tr><td>Cofnąć zmianę na stronie gabinetu</td><td>Konfiguracja → Edycja strony → <em>Historia zmian</em> → <em>Przywróć</em></td></tr>
+    <tr><td>Dodać drugą osobę do panelu</td><td>Konfiguracja → Administratorzy → <em>Utwórz</em></td></tr>
+    <tr><td>Zmienić swoje hasło</td><td>Konfiguracja → Administratorzy → ołówek przy swoim koncie</td></tr>
+  </table>
+</div>
+
+<!-- ============ 29. CZEGO NIE RUSZAĆ ============ -->
+<div class="section">
+  <div class="section-head">
+    <span class="kicker">Na koniec</span>
+    <h2>29. Czego lepiej nie ruszać</h2>
+  </div>
+
+  <p>Panel jest bezpieczny — trudno zepsuć w nim coś przypadkiem. Jest jednak kilka miejsc, w których zmiana ma większe skutki, niż się wydaje.</p>
+
+  <table>
+    <tr><th style="width:34%">Miejsce</th><th>Dlaczego ostrożnie</th></tr>
+    <tr><td><strong>Kody produktów i kategorii</strong></td><td>To identyfikatory. Zmiana kodu istniejącej pozycji potrafi zerwać powiązania z historią zamówień.</td></tr>
+    <tr><td><strong>Slug produktu</strong></td><td>Zmiana unieważnia dotychczasowy link do produktu.</td></tr>
+    <tr><td><strong>Stawki podatkowe</strong></td><td>Wpływają na wszystkie ceny i dokumenty. Tylko po ustaleniu z księgową.</td></tr>
+    <tr><td><strong>Ustawienia bramki PayU</strong></td><td>Pola z kluczami w edycji metody płatności. Ich zmiana zatrzymuje płatności w sklepie.</td></tr>
+    <tr><td><strong>Usuwanie kont administratorów</strong></td><td>Skasowanie ostatniego konta odcina dostęp do panelu.</td></tr>
+    <tr><td><strong>Dodanie drugiego języka</strong></td><td>Wymaga przetłumaczenia wszystkich produktów i kategorii, inaczej sklep pokazuje puste miejsca.</td></tr>
+    <tr><td><strong>Kosz przy zamówieniach i klientach</strong></td><td>Usunięcie kasuje historię bezpowrotnie. Do ukrywania rzeczy służy wyłączanie, nie kasowanie.</td></tr>
+  </table>
+
+  <h3>Trzy zasady na co dzień</h3>
+  <ol class="steps">
+    <li><strong>Wyłączaj zamiast usuwać.</strong> Prawie wszystko da się ukryć przełącznikiem — i w każdej chwili przywrócić.</li>
+    <li><strong>Sprawdzaj efekt w sklepie.</strong> Po każdej zmianie kliknij <em>Zobacz w sklepie</em> i spójrz oczami klienta.</li>
+    <li><strong>Zapisuj świadomie.</strong> Nic się nie zapisze, dopóki nie klikniesz <em>Utwórz</em> albo <em>Aktualizuj</em> — i odwrotnie: po kliknięciu zmiana działa od razu.</li>
+  </ol>
+
+  <div class="tip">
+    <b>Jeśli coś pójdzie nie tak</b>
+    Zrób zrzut ekranu z komunikatem błędu i zanotuj, co robiłaś krok po kroku. To jedyne, czego
+    potrzebuje osoba techniczna, żeby szybko naprawić problem.
+  </div>
+</div>
+
+</body>
+</html>
