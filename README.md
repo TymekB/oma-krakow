@@ -461,40 +461,14 @@ Nowe zadanie dodaje się w dwóch miejscach: etykieta `ofelia.job-exec.<slug>` w
 w `JOBS` w `deploy/healthchecks-bootstrap.sh`. Bez wpisu w skrypcie check i tak powstanie przy
 pierwszym pingu (`create=1`), ale z domyślnym okresem 1 dnia — dlatego harmonogramy trzymamy w kodzie.
 
-### Cron Monitors w Sentry
-
-`bin/oma-cron` raportuje każde zadanie **równolegle do dwóch miejsc** — Healthchecks i Sentry Crons —
-i każde z nich jest opcjonalne: puste `HEALTHCHECKS_PING_URL` albo puste `SENTRY_DSN` po prostu
-pomija swoją część, bez błędu. Dzięki temu self-hostowane Healthchecks można wyłączyć bez utraty
-monitoringu (a to ono ubijane przez `earlyoom` położyło serwer — patrz „Budżet pamięci").
-
-Adres check-inu składa się **z samego `SENTRY_DSN`**, więc nie ma drugiego sekretu do pilnowania.
-Z `https://<key>@o<org>.ingest.sentry.io/<project>` powstaje
-`https://o<org>.ingest.sentry.io/api/<project>/cron/<slug>/<key>/`.
-
-Przebieg jednego zadania:
-
-1. **start** — `POST` ze `status: in_progress`, własnym `check_in_id` (UUID) i `monitor_config`,
-   czyli crontabem i strefą. To jest **upsert**: monitor tworzy się sam przy pierwszym uruchomieniu,
-   nie trzeba go klikać w panelu Sentry.
-2. **koniec** — `POST` z **tym samym** `check_in_id` i `status: ok` albo `error`. Ten sam identyfikator
-   jest konieczny, żeby Sentry sparował oba zdarzenia i policzył czas trwania; dwa niepowiązane
-   check-iny wyglądałyby jak dwa osobne przebiegi.
-
-Harmonogram dla Sentry podaje się jako **drugi argument** `bin/oma-cron`, bo Ofelia używa formatu
-**6-polowego** (z sekundami), a Sentry standardowego **5-polowego** — automatyczna konwersja byłaby
-kolejnym miejscem do pomyłki, więc oba stoją obok siebie w tej samej etykiecie:
-
-```yaml
-ofelia.job-exec.db-backup.schedule: '0 0 3 * * *'
-ofelia.job-exec.db-backup.command: 'bin/oma-cron db-backup "0 3 * * *" bin/oma-db-backup'
-```
-
-Argument jest opcjonalny — rozpoznawany po tym, że zawiera spacje. Bez niego check-iny nadal lecą,
-tylko bez upsertu, czyli monitor musi już istnieć.
-
-Do regulacji: `OMA_SENTRY_CHECKIN_MARGIN` (domyślnie 10 min spóźnienia, potem „missed") i
-`OMA_SENTRY_MAX_RUNTIME` (30 min, potem „timeout").
+**Cron Monitors w Sentry nie zastąpią Healthchecks na tym planie.** Integracja była gotowa i działała
+technicznie — check-iny wracały `HTTP 202` — ale w **bezpłatnej subskrypcji Sentry można mieć tylko
+jeden cron monitor**, a mamy trzy zadania. Nadwyżkowe check-iny są przyjmowane przez Relay i odrzucane
+dopiero na asynchronicznym etapie ingestu, co widać wyłącznie w panelu jako czerwony banner
+„Errors were encountered while ingesting check-ins for this monitor" plus monitor wiszący na
+„Waiting for first Check-in". **`202` nie znaczy więc „przyjęte", tylko „zakolejkowane"** — nie da się
+na jego podstawie potwierdzić, że monitoring działa. Wracać do tego pomysłu ma sens tylko po zmianie
+planu Sentry; monitoring błędów (`sentry.yaml`) to osobna rzecz i działa bez ograniczeń.
 
 Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`), czyli w
 `/var/lib/docker/volumes/oma-prod_db_backup/_data` — poza `public/`, więc żaden URL tam nie sięga,

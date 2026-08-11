@@ -53,11 +53,11 @@ services:
     labels:
       ofelia.enabled: 'true'
       ofelia.job-exec.expired-carts.schedule: '0 15 3 * * *'
-      ofelia.job-exec.expired-carts.command: 'bin/oma-cron expired-carts "15 3 * * *" php bin/console sylius:remove-expired-carts --no-interaction'
+      ofelia.job-exec.expired-carts.command: 'bin/oma-cron expired-carts php bin/console sylius:remove-expired-carts --no-interaction'
       ofelia.job-exec.db-backup.schedule: '0 0 3 * * *'
-      ofelia.job-exec.db-backup.command: 'bin/oma-cron db-backup "0 3 * * *" bin/oma-db-backup'
+      ofelia.job-exec.db-backup.command: 'bin/oma-cron db-backup bin/oma-db-backup'
       ofelia.job-exec.unpaid-orders.schedule: '0 30 3 * * *'
-      ofelia.job-exec.unpaid-orders.command: 'bin/oma-cron unpaid-orders "30 3 * * *" php bin/console sylius:cancel-unpaid-orders --no-interaction'
+      ofelia.job-exec.unpaid-orders.command: 'bin/oma-cron unpaid-orders php bin/console sylius:cancel-unpaid-orders --no-interaction'
     healthcheck:
       test: ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://localhost/']
       interval: 30s
