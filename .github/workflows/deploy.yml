@@ -75,10 +75,13 @@ jobs:
 
       - name: Sync stack files
         run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'mkdir -p /opt/oma-prod'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 'mkdir -p /opt/oma-prod/healthchecks'
           scp -P "$SSH_PORT" deploy/compose.prod.yaml "$SSH_USER@$SSH_HOST:/opt/oma-prod/compose.yaml"
           scp -P "$SSH_PORT" deploy/mysql-oma.cnf deploy/rabbitmq-oma.conf deploy/remote-deploy.sh deploy/smoke-test.sh \
             "$SSH_USER@$SSH_HOST:/opt/oma-prod/"
+          scp -P "$SSH_PORT" backend/docker/healthchecks/local_settings.py \
+            backend/docker/healthchecks/oma.css backend/docker/healthchecks/oma-logo.svg \
+            "$SSH_USER@$SSH_HOST:/opt/oma-prod/healthchecks/"
 
       - name: Log in to registry on host
         run: |

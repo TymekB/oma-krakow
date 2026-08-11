@@ -136,10 +136,14 @@ services:
       EMAIL_USE_VERIFICATION: 'False'
       REGISTRATION_OPEN: 'False'
       SECRET_KEY: ${OMA_HC_SECRET_KEY:-dev-secret-key}
-      SITE_NAME: 'OMA — crony'
+      SITE_NAME: 'OMA Cron Managment'
       SITE_ROOT: ${OMA_HC_SITE_ROOT:-http://localhost:8010}
+      SITE_LOGO_URL: ${OMA_HC_SITE_ROOT:-http://localhost:8010}/static/img/oma-logo.svg
     volumes:
       - healthchecks_data:/data
+      - ./docker/healthchecks/local_settings.py:/opt/healthchecks/hc/local_settings.py:ro
+      - ./docker/healthchecks/oma.css:/opt/healthchecks/static-collected/css/oma.css:ro
+      - ./docker/healthchecks/oma-logo.svg:/opt/healthchecks/static-collected/img/oma-logo.svg:ro
 
   cron:
     image: mcuadros/ofelia:latest

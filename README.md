@@ -432,6 +432,45 @@ Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`). To kopia
 samym dysku co baza — chroni przed pomyłką w danych, nie przed utratą serwera. Wysyłka poza VPS jest
 do zrobienia osobno.
 
+### Branding OMA w Healthchecks
+
+Instancja nazywa się **OMA Cron Managment** (`SITE_NAME`) i chodzi w kolorystyce sklepu: winny navbar,
+papierowe tło, Cormorant Garamond w nagłówkach, Jost w treści, logo „oma KRAKÓW" w kremie. Trzy pliki
+w `backend/docker/healthchecks/`, montowane do kontenera:
+
+| Plik | Montowany jako | Rola |
+|---|---|---|
+| `oma-logo.svg` | `static-collected/img/oma-logo.svg` | logo w navbarze i w mailach, wskazywane przez `SITE_LOGO_URL` |
+| `oma.css` | `static-collected/css/oma.css` | paleta OMA |
+| `local_settings.py` | `hc/local_settings.py` | middleware wstrzykujący arkusz |
+
+**Kolorów statusów (up/down/grace) nie ruszamy.** W narzędziu do monitoringu zielony i czerwony muszą
+znaczyć to, co zwykle znaczą — przemalowanie ich na winno-piaskowo byłoby aktywnie szkodliwe.
+
+Dlaczego arkusz wchodzi middleware'em, a nie normalnie:
+
+- `{% block head %}` w `base.html` stoi **przed** arkuszami aplikacji, więc styl wstawiony tam
+  przegrywa kaskadę,
+- `{% compress %}` działa w trybie **offline** — podmiana pliku CSS w źródłach nic nie zmienia bez
+  ponownej kompresji przy starcie,
+- middleware nie dotyka żadnego pliku upstreamu, więc **przeżywa aktualizację obrazu**. Podmiana
+  szablonu albo `variables.css` wymagałaby wendorowania cudzego kodu.
+
+Pliki lądują w `static-collected/`, nie w `static/`, bo whitenoise serwuje właśnie ten katalog i tam
+nazwy nie są hashowane. Whitenoise skanuje katalog **przy starcie** — po edycji `oma.css` potrzebny
+jest `docker compose restart healthchecks`, inaczej serwuje wersję z pamięci.
+
+Jedna pułapka specyficzności: adres zalogowanego użytkownika Healthchecks koloruje regułą
+`#project-menu > .dropdown > a` na `var(--text-color)`. Selektor z ID bije zwykłe reguły navbara, więc
+`oma.css` musi dorównać specyficzności — inaczej e-mail zostaje ciemny na winnym tle (kontrast 1.2:1).
+Po poprawce jest 11.7:1.
+
+Na produkcję te trzy pliki wysyła krok *Sync stack files* w `deploy.yml` do `/opt/oma-prod/healthchecks/`
+— bez tego bind mount wskazywałby na nieistniejącą ścieżkę i kontener by nie wstał.
+
+Logo jest SVG, co wystarcza w przeglądarce, ale **część klientów pocztowych nie renderuje SVG**. Jeśli
+logo w mailach ma być pewne, podmień plik na PNG pod tą samą nazwą i ścieżką.
+
 ## Wdrożenie (produkcja)
 
 Produkcja stoi na VPS Mikrus (`kate123`, 8 GB RAM / 2 vCPU, SSH na porcie `10123`) — projekt

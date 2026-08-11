@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap');
+
+:root {
+    --oma-wine-900: #3b141d;
+    --oma-wine-800: #5a1f2c;
+    --oma-wine-700: #6e2937;
+    --oma-wine-600: #8a3746;
+    --oma-wine-300: #c2909a;
+    --oma-cream: #faf6f1;
+    --oma-paper: #f4f3f0;
+    --oma-sand-200: #e5d9cb;
+    --oma-sand-300: #cfbdab;
+    --oma-ink: #2a2320;
+    --oma-ink-soft: #6f6259;
+    --oma-ink-faint: #9c8d83;
+
+    --body-bg: var(--oma-paper);
+    --text-color: var(--oma-ink);
+    --text-muted: var(--oma-ink-soft);
+    --link-color: var(--oma-wine-700);
+    --link-hover-color: var(--oma-wine-600);
+    --border-color: var(--oma-sand-200);
+    --border-muted: var(--oma-sand-200);
+    --breadcrumb-bg: transparent;
+    --breadcrumb-active-color: var(--oma-ink-faint);
+    --dropdown-bg: #fff;
+    --dropdown-link-hover-bg: var(--oma-paper);
+    --nav-link-hover-bg: var(--oma-paper);
+}
+
+body {
+    background: var(--oma-paper);
+    color: var(--oma-ink);
+    font-family: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5 {
+    font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--oma-wine-800);
+}
+
+.navbar-default {
+    background-color: var(--oma-wine-800);
+    border-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.navbar-default .navbar-brand,
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-nav > li > a {
+    color: rgba(250, 246, 241, 0.85);
+}
+
+.navbar-default .navbar-nav > li > a:hover,
+.navbar-default .navbar-nav > li > a:focus,
+.navbar-default .navbar-nav > li.active > a {
+    background-color: var(--oma-wine-900);
+    color: var(--oma-cream);
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+    background-color: var(--oma-cream);
+}
+
+.navbar-default .navbar-toggle:hover,
+.navbar-default .navbar-toggle:focus {
+    background-color: var(--oma-wine-900);
+}
+
+#logo {
+    width: auto;
+}
+
+#project-menu > .dropdown > a,
+#project-menu > li > a {
+    color: var(--oma-cream);
+}
+
+#project-menu > .dropdown > a:hover,
+#project-menu > .dropdown > a:focus,
+#project-menu > .dropdown.open > a {
+    background-color: var(--oma-wine-900);
+    color: var(--oma-cream);
+}
+
+#project-menu .caret {
+    border-top-color: var(--oma-cream);
+}
+
+a {
+    color: var(--oma-wine-700);
+}
+
+a:hover,
+a:focus {
+    color: var(--oma-wine-600);
+}
+
+.btn-primary {
+    background-color: var(--oma-wine-800);
+    border-color: var(--oma-wine-800);
+    color: var(--oma-cream);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--oma-wine-600);
+    border-color: var(--oma-wine-600);
+    color: var(--oma-cream);
+}
+
+.btn-default {
+    border-color: var(--oma-sand-300);
+}
+
+.panel,
+.well,
+.list-group-item {
+    border-color: var(--oma-sand-200);
+}
+
+body.dark {
+    --body-bg: var(--oma-wine-900);
+    --text-color: var(--oma-cream);
+    --text-muted: var(--oma-wine-300);
+    --link-color: var(--oma-wine-300);
+    --link-hover-color: var(--oma-cream);
+    --border-color: rgba(250, 246, 241, 0.16);
+    --border-muted: rgba(250, 246, 241, 0.1);
+    --dropdown-bg: var(--oma-wine-800);
+    --dropdown-link-hover-bg: var(--oma-wine-700);
+    --nav-link-hover-bg: var(--oma-wine-800);
+}
+
+body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark h5 {
+    color: var(--oma-cream);
+}
+
+body.dark .navbar-default {
+    background-color: var(--oma-wine-800);
+}
+
+body.dark .panel,
+body.dark .well,
+body.dark .list-group-item {
+    border-color: rgba(250, 246, 241, 0.16);
+}
