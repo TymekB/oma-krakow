@@ -85,6 +85,23 @@ test.describe('Checkout', () => {
     await expect(page.locator('.oma-login-hint'), 'zalogowany nie widzi podpowiedzi').toHaveCount(0);
   });
 
+  test('voucher bez wymaganej dostawy pomija krok wysyłki', async ({ page }) => {
+    await page.goto('/sklep/produkty/voucher-masaz-relaksacyjny-60-min');
+    await expect(page.locator('#add-to-cart-button')).toBeVisible();
+    await page.locator('#add-to-cart-button').click();
+    await page.waitForTimeout(2500);
+
+    await completeAddressStep(page, uniqueEmail('voucher'));
+
+    await expect(page, 'z adresu lecimy prosto do płatności, bez wyboru dostawy').toHaveURL(/select-payment/);
+
+    const steps = page.locator('.steps').first();
+    await expect(steps, 'pasek kroków nie pokazuje wysyłki').not.toContainText('Wysyłka');
+    await expect(page.locator('body'), 'brak kosztu dostawy w podsumowaniu').not.toContainText(
+      'Szacowany koszt wysyłki',
+    );
+  });
+
   test('_target_path nie pozwala przekierować logowania na obcy host', async ({ page }) => {
     await page.goto('/sklep/login?_target_path=https://example.com/');
     await expect(page.locator('input[name="_target_path"]')).toHaveCount(0);
