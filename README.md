@@ -408,9 +408,16 @@ OMA_HC_ADMIN_PASSWORD='...' ../deploy/healthchecks-bootstrap.sh
 # → PING_URL=http://healthchecks:8000/ping/<klucz>
 ```
 
-Marginesy (*grace*) są dobrane do tego, ile kosztuje spóźnienie: kopia bazy ma godzinę, sprzątanie
-koszyków i anulowanie zamówień po dwie. Oba sprzątające joby są dobowe, bo progi Syliusa to 2 i 5 dni
-— częstsze uruchamianie nic nie zmienia, a wąskie okno alertu tylko szumi.
+Kopia bazy jest checkiem **cron** (`0 3 * * *`, grace 1 h) — tu spóźnienie kosztuje najwięcej, więc
+pilnujemy konkretnej godziny. Sprzątanie koszyków i anulowanie zamówień to checki **okresowe**:
+period 24 h, grace 2 h, czyli alarm dopiero gdy przez 26 h nie przyszedł żaden ping. Progi Syliusa to
+2 i 5 dni, więc dla nich liczy się „raz na dobę", a nie „o 3:15 co do minuty" — restart stacku w środku
+nocy nie generuje wtedy fałszywego alarmu. Ofelia i tak odpala je o stałej godzinie.
+
+Ping, który nie doszedł, wrapper wypisuje na stderr (`ping ... nie doszedl do Healthchecks`) i nie
+przewraca zadania. Warto o tym pamiętać przy podmianie klucza: `OMA_HC_PING_URL` jest **per instancja**
+— każdy bootstrap na nowej bazie generuje własny klucz, a wartość w `backend/.env` to tylko lokalny
+placeholder. Na produkcji klucz trzyma `/opt/oma-prod/.env`, którego nie ma w repo.
 
 Zwrócony `PING_URL` wpisz do `.env` jako `OMA_HC_PING_URL` i przeładuj `app` oraz `cron`. Skrypt jest
 idempotentny — klucz raz wygenerowany zostaje, a kolejne uruchomienia tylko poprawiają harmonogramy

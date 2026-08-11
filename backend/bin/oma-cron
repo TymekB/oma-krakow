@@ -12,9 +12,11 @@ ping() {
         return 0
     fi
 
-    curl -fsS -m 10 --retry 3 -o /dev/null \
+    if ! curl -fsS -m 10 --retry 3 -o /dev/null \
         --data-binary "@$OUTPUT" \
-        "${HEALTHCHECKS_PING_URL}/${SLUG}${1}?create=1" || true
+        "${HEALTHCHECKS_PING_URL}/${SLUG}${1}?create=1"; then
+        echo "oma-cron: ping ${SLUG}${1} nie doszedl do Healthchecks" >&2
+    fi
 }
 
 ping /start
