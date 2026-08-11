@@ -136,7 +136,29 @@ Do faktycznego zapłacenia potrzebne są: Safari na urządzeniu Apple, region ws
 Users and Access → Sandbox → Testers), karta testowa Apple dodana ręcznie do Wallet oraz **HTTPS**
 (czyli nie `localhost` — potrzebny tunel i `OMA_DEFAULT_URI`).
 
-### Apple Pay express checkout (adres z arkusza zamiast formularza)
+### Apple Pay express checkout (adres z arkusza zamiast formularza) — ODŁOŻONE
+
+> **Świadomie wyłączone, nie porzucone.** Ten wariant wymaga **Apple Developer Program za 99 USD
+> rocznie** (opłata cykliczna — po niewznowieniu certyfikat Merchant Identity przestaje działać
+> i przycisk znika) i decyzją właściciela sklepu na to nie idziemy. Kod zostaje, bo nic nie kosztuje:
+> `APPLE_PAY_MERCHANT_ID` jest puste, więc `ApplePaySettings::isEnabled()` zwraca `false`, szablony
+> nie renderują nic, a endpointów nikt nie woła. Jeden wpis w `.env` włącza to z powrotem.
+>
+> **Jeśli wracasz do express checkoutu, prawdopodobnie nie chcesz tej drogi.** Apple-specyficzny
+> jest tu wyłącznie adapter `AppleMerchantValidator` (walidacja merchanta certyfikatem). Reszta —
+> port `ExpressCheckout`, `SyliusExpressCheckout`, endpointy wysyłki i zamówienia, umiejscowienie
+> zachęty u góry koszyka — jest wallet-agnostyczna i posłuży bez zmian. Tańsze warianty:
+>
+> | Droga | Koszt wejścia | Uwaga |
+> |---|---|---|
+> | **Stripe** | 0 zł | Stripe waliduje merchanta za Ciebie — bez konta Apple Developer i bez Merchant ID. Podmieniasz adapter za portem `ApplePayMerchantValidator`. Stripe jest już w projekcie, wyłączony na pustych kluczach |
+> | **Google Pay przez PayU** | 0 zł | `PayUPayMethod::GooglePay = 'ap'` już istnieje. Tryb `TEST` działa bez rejestracji. Pokrywa Chrome, Edge, Firefox, Androida — i Safari też |
+> | Apple Pay (ta sekcja) | 99 USD/rok | plus zgłoszenie do PayU o Apple Pay z tokenami |
+>
+> Niezależnie od portfela: **PayU nie ma gotowego „fast checkout"**, który pomija formularz adresu —
+> adres zawsze pochodzi z portfela i to nasz kod składa z niego zamówienie. PayU oferuje natomiast
+> tokenizację kart (`TOKC_`, one-click dla powracających), co skraca krok płatności i warto to
+> rozważyć osobno.
 
 Moduł `src/Checkout/ApplePay/` pozwala kupić bez wypełniania adresu: arkusz Apple Pay oddaje kontakt
 i adres wysyłki, a my składamy z tego zamówienie i od razu wchodzimy w płatność.
@@ -175,6 +197,10 @@ a gdy PayU go odrzuci (na sandboxie `ERROR_VALUE_INVALID` / `APPLE_PAY_CLIENT_ER
 włączonych tokenów), `CapturePaymentRequestHandler` **ponawia zamówienie bez tokenu** jako pay-by-link.
 Klient traci na tym jedno dodatkowe potwierdzenie na stronie PayU, ale checkout nie pada, a adres i tak
 przyszedł z arkusza. Po włączeniu tokenów u PayU fallback przestanie się odpalać sam z siebie.
+
+`supportedNetworks` w arkuszu to celowo tylko `visa` i `masterCard` — PayU obsługuje pod 3DS wyłącznie
+te dwie sieci. Dopisanie `maestro` sprawiało, że klient mógł wybrać w Wallet kartę, którą PayU potem
+odrzuca, i bez powodu wpadał w fallback.
 
 Endpointy da się testować bez Safari i bez certyfikatów — `e2e/apple-pay-express.spec.ts` woła je
 z sesji koszyka takim payloadem, jaki wysyła arkusz (łącznie z okrojonym kontaktem, który Apple daje
