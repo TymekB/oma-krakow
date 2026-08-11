@@ -4,33 +4,34 @@ declare(strict_types=1);
 
 namespace App\Notification;
 
-use Sylius\Component\Core\Model\ChannelInterface;
-use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Mailer\Sender\SenderInterface;
+use Sylius\Component\Review\Model\ReviewInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
-#[AsEventListener(event: 'sylius.order.post_complete')]
-final readonly class OrderPlacedAdminNotifier
+#[AsEventListener(event: 'sylius.product_review.post_create')]
+final readonly class ProductReviewCreatedAdminNotifier
 {
-    public const EMAIL_CODE = 'admin_order_placed';
+    public const EMAIL_CODE = 'admin_product_review_created';
 
     public function __construct(
         private SenderInterface $emailSender,
         private AdminRecipient $adminRecipient,
+        private LocaleContextInterface $localeContext,
     ) {
     }
 
     public function __invoke(GenericEvent $event): void
     {
-        $order = $event->getSubject();
+        $review = $event->getSubject();
 
-        if (!$order instanceof OrderInterface) {
+        if (!$review instanceof ReviewInterface) {
             return;
         }
 
-        $channel = $order->getChannel();
-        $recipient = $this->adminRecipient->resolve($channel instanceof ChannelInterface ? $channel : null);
+        $channel = $this->adminRecipient->currentChannel();
+        $recipient = $this->adminRecipient->resolve($channel);
 
         if (null === $recipient) {
             return;
@@ -40,9 +41,9 @@ final readonly class OrderPlacedAdminNotifier
             self::EMAIL_CODE,
             [$recipient],
             [
-                'order' => $order,
+                'review' => $review,
                 'channel' => $channel,
-                'localeCode' => $order->getLocaleCode(),
+                'localeCode' => $this->localeContext->getLocaleCode(),
             ],
         );
     }

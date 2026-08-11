@@ -1,0 +1,50 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'oma.email.admin_product_review_created.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {% set label_style = 'font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8d83; padding-bottom: 4px;' %}
+
+    {{ oma.greeting('oma.email.admin_product_review_created.heading'|trans({}, null, localeCode)) }}
+
+    {% set rating = review.rating|default(0) %}
+    <div style="text-align: center; margin-bottom: 28px; font-size: 24px; letter-spacing: 0.2em;">
+        {% for star in 1..5 %}<span style="color: {{ star <= rating ? '#5a1f2c' : '#dcd9d4' }};">★</span>{% endfor %}
+    </div>
+
+    {% if review.reviewSubject is not null %}
+        <div style="{{ label_style }}">{{ 'oma.email.admin_product_review_created.product'|trans({}, null, localeCode) }}</div>
+        <div style="padding-bottom: 24px; color: #2a2320;">{{ review.reviewSubject.name }}</div>
+    {% endif %}
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_product_review_created.review'|trans({}, null, localeCode) }}</div>
+    <div style="padding-bottom: 24px;">
+        {% if review.title is not empty %}
+            <div style="color: #2a2320;">{{ review.title }}</div>
+        {% endif %}
+        {% if review.comment is not empty %}
+            <div style="color: #6f6259;">{{ review.comment|nl2br }}</div>
+        {% endif %}
+    </div>
+
+    {% if review.author is not null %}
+        <div style="{{ label_style }}">{{ 'oma.email.admin_product_review_created.author'|trans({}, null, localeCode) }}</div>
+        <div style="padding-bottom: 8px;">
+            {% set author_name = review.author.fullName|default('')|trim %}
+            {% if author_name is not empty %}
+                <div style="color: #2a2320;">{{ author_name }}</div>
+            {% endif %}
+            <div><a href="mailto:{{ review.author.email }}" style="color: #8a3746; text-decoration: none;">{{ review.author.email }}</a></div>
+        </div>
+    {% endif %}
+
+    {% if review.id is not null %}
+        <div style="text-align: center; padding-top: 24px;">
+            {{ oma.button(url('sylius_admin_product_review_update', {'id': review.id}), 'oma.email.admin_product_review_created.open_in_admin'|trans({}, null, localeCode)) }}
+        </div>
+    {% endif %}
+{% endblock %}

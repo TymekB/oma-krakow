@@ -91,6 +91,15 @@ test.describe('Checkout', () => {
     await page.locator('#add-to-cart-button').click();
     await page.waitForTimeout(2500);
 
+    await page.goto('/sklep/checkout/address');
+
+    for (const field of ['street', 'city', 'postcode', 'countryCode', 'provinceCode']) {
+      await expect(
+        page.locator(`[name="sylius_shop_checkout_address[billingAddress][${field}]"]`),
+        `${field} nie jest potrzebne bez dostawy`,
+      ).toHaveCount(0);
+    }
+
     await completeAddressStep(page, uniqueEmail('voucher'));
 
     await expect(page, 'z adresu lecimy prosto do płatności, bez wyboru dostawy').toHaveURL(/select-payment/);
@@ -100,6 +109,14 @@ test.describe('Checkout', () => {
     await expect(page.locator('body'), 'brak kosztu dostawy w podsumowaniu').not.toContainText(
       'Szacowany koszt wysyłki',
     );
+
+    await page.locator('input[type="radio"]').last().check();
+    await page.getByRole('button', { name: 'Dalej' }).first().click();
+
+    await expect(page, 'podsumowanie bez adresu też się renderuje').toHaveURL(/complete/);
+    await page.getByRole('button', { name: /Złóż zamówienie/i }).click();
+
+    await expect(page, 'zamówienie na voucher da się złożyć').toHaveURL(/thank-you/);
   });
 
   test('_target_path nie pozwala przekierować logowania na obcy host', async ({ page }) => {

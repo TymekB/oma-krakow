@@ -1,0 +1,3 @@
+{% set order = hookable_metadata.context.order %}
+
+<div class="mb-4 h2">{{ (order.shippingRequired ? 'sylius.ui.address' : 'oma.checkout.no_delivery.step')|trans }}</div>

@@ -131,6 +131,9 @@ export async function completeAddressStep(page: Page, email: string): Promise<vo
   };
 
   await fill('customer][email', email);
+  await fill('customer][firstName', 'Test');
+  await fill('customer][lastName', 'Playwright');
+  await fill('customer][phoneNumber', '728761171');
   await fill('billingAddress][firstName', 'Test');
   await fill('billingAddress][lastName', 'Playwright');
   await fill('billingAddress][street', 'Karmelicka 1');
