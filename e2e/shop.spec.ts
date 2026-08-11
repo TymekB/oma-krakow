@@ -27,14 +27,14 @@ test.describe('Sklep', () => {
     });
 
     await page.getByRole('link', { name: 'Aromaterapia' }).first().click();
-    await expect(page).toHaveURL(/taxons\/aromaterapia/);
+    await expect(page).toHaveURL(/kategorie\/aromaterapia/);
 
     const survived = await page.evaluate(() => (window as unknown as { __alive?: boolean }).__alive === true);
     expect(survived, 'kontekst JS przetrwał nawigację, czyli Turbo obsłużyło klik').toBe(true);
   });
 
   test('karta produktu pokazuje cenę i przycisk dodania do koszyka', async ({ page }) => {
-    await page.goto('/sklep/taxons/aromaterapia');
+    await page.goto('/sklep/kategorie/aromaterapia');
     await page.locator('a[href*="/sklep/produkty/"]').first().click();
 
     await expect(page.locator('#add-to-cart-button')).toBeVisible();
@@ -63,7 +63,7 @@ test.describe('Sklep', () => {
     await page.goto('/sklep/');
 
     for (let i = 0; i < 3; i++) {
-      await page.goto('/sklep/taxons/aromaterapia');
+      await page.goto('/sklep/kategorie/aromaterapia');
       await page.locator('a[href*="/sklep/produkty/"]').first().click();
       await expect(page.locator('#add-to-cart-button')).toBeVisible();
       await page.goBack();
@@ -81,7 +81,7 @@ test.describe('Sklep', () => {
   });
 
   test('sortowanie działa i zachowuje kategorię', async ({ page }) => {
-    await page.goto('/sklep/taxons/aromaterapia?sorting%5Bprice%5D=asc');
+    await page.goto('/sklep/kategorie/aromaterapia?sorting%5Bprice%5D=asc');
 
     await expect(page).toHaveURL(/sorting/);
     await expect(page.getByRole('heading', { name: 'Aromaterapia' })).toBeVisible();

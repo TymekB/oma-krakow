@@ -19,6 +19,29 @@ sylius_shop_product_show:
                     - "expr:service('sylius.context.locale').getLocaleCode()"
                     - $slug
 
+sylius_shop_product_index:
+    path: /sklep/kategorie/{slug}
+    methods: [GET]
+    defaults:
+        _controller: sylius.controller.product::indexAction
+        _locale: pl_PL
+        _sylius:
+            template: '@SyliusShop/product/index.html.twig'
+            grid: sylius_shop_product
+    requirements:
+        slug: .+(?<!/)
+
+sylius_shop_product_index_legacy_redirect:
+    path: /sklep/taxons/{slug}
+    methods: [GET]
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::redirectAction
+    defaults:
+        route: sylius_shop_product_index
+        permanent: true
+        keepQueryParams: true
+    requirements:
+        slug: .+(?<!/)
+
 sylius_shop_product_review_index:
     path: /sklep/produkty/{slug}/recenzje/
     methods: [GET]

@@ -48,7 +48,7 @@ export async function findEmailFor(recipient: string): Promise<{ subject: string
 }
 
 export async function addFirstProductToCart(page: Page): Promise<string> {
-  await page.goto('/sklep/taxons/aromaterapia');
+  await page.goto('/sklep/kategorie/aromaterapia');
   await page.locator('a[href*="/sklep/produkty/"]').first().click();
   await expect(page.locator('#add-to-cart-button')).toBeVisible();
 
