@@ -189,6 +189,8 @@ services:
       REGISTRATION_OPEN: 'False'
       SECRET_KEY: ${OMA_HC_SECRET_KEY:?OMA_HC_SECRET_KEY is required}
       UWSGI_PROCESSES: ${OMA_HC_PROCESSES:-2}
+      UWSGI_MAX_REQUESTS: ${OMA_HC_MAX_REQUESTS:-400}
+      UWSGI_RELOAD_ON_RSS: ${OMA_HC_RELOAD_ON_RSS:-128}
       SITE_NAME: 'OMA Cron Management'
       SITE_ROOT: ${OMA_HC_SITE_ROOT:?OMA_HC_SITE_ROOT is required}
       SITE_LOGO_URL: ${OMA_HC_SITE_ROOT:?OMA_HC_SITE_ROOT is required}/static/img/oma-logo.svg

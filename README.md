@@ -599,6 +599,29 @@ przy `mem_limit` **256m** — czyli kontener przekraczał limit zawsze i cgroup 
 Stąd `UWSGI_PROCESSES` (domyślnie `2`): dwa workery to **220 MiB** pod obciążeniem, więc limit `320m`
 daje realny zapas. Zmierzone przez `docker stats`, nie oszacowane.
 
+**To jednak nie wystarczyło — automat Mikrusa wyłączył serwer po 84 ubiciach.** Dwie rzeczy, które
+wyszły dopiero po zalogowaniu na serwer:
+
+- **`free -h` w tym VPS-ie kłamie.** To kontener **LXC**, więc `free` pokazuje pamięć *hosta*, nie nasz
+  limit — 7 GiB `buff/cache` obok 1,1 GiB `used` to cache całego hosta. Prawdziwe liczby czytaj z
+  `/sys/fs/cgroup/memory.current` i `memory.stat` (rozbicie `anon` / `file`). Plan naprawdę ma 8192 MB,
+  co potwierdza panel Mikrusa.
+- **Ubija `earlyoom.service`, nie cgroup kontenera.** To userspace'owy demon patrzący na *systemową*
+  dostępną pamięć; wybiera proces o najwyższym `oom_score`, dlatego ofiarą zawsze padał Python/uWSGI.
+  Kontener wcale nie musi przekraczać swojego `mem_limit`, żeby zginąć.
+
+Dlatego doszły dwa bezpieczniki recyklingu workerów — `uwsgi.ini` w obrazie **nie ma** ani
+`max-requests`, ani `reload-on-rss`, więc workery Pythona mogły rosnąć bez końca przez wiele godzin:
+
+| Zmienna | Domyślnie | Po co |
+|---|---|---|
+| `OMA_HC_MAX_REQUESTS` | 400 | worker kończy pracę po N żądaniach i wstaje czysty |
+| `OMA_HC_RELOAD_ON_RSS` | 128 | worker jest ubijany, gdy jego RSS przekroczy 128 MB |
+
+Sprawdzone, że to działa, a nie tylko jest tolerowane: przy `UWSGI_RELOAD_ON_RSS=1` obraz loguje
+`Respawned uWSGI worker 1`. Gdyby opcja była nieznana, `strict` w `uwsgi.ini` w ogóle nie pozwoliłby
+kontenerowi wstać.
+
 Każda usługa ma `mem_limit` — jedna bez limitu zniweczyłaby cały rachunek:
 
 | Usługa | Limit | Zmienna |
