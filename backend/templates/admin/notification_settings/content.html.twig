@@ -29,25 +29,41 @@
                 <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_id) }}">
 
                 <div class="card">
-                    <div class="list-group list-group-flush">
-                        {% for event in events %}
-                            <label class="list-group-item d-flex align-items-start gap-3 py-3" for="event-{{ event.value }}">
-                                <span class="form-check form-switch oma-switch flex-shrink-0">
-                                    <input
-                                        class="form-check-input"
-                                        type="checkbox"
-                                        id="event-{{ event.value }}"
-                                        name="events[]"
-                                        value="{{ event.value }}"
-                                        {{ enabled[event.value] ? 'checked' : '' }}
-                                    >
-                                </span>
-                                <span>
-                                    <span class="d-block">{{ event.label()|trans }}</span>
-                                    <span class="d-block text-secondary small">{{ event.description()|trans }}</span>
-                                </span>
-                            </label>
-                        {% endfor %}
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter">
+                            <thead>
+                                <tr>
+                                    <th class="w-1">{{ 'oma.notification.table.enabled'|trans }}</th>
+                                    <th>{{ 'oma.notification.table.event'|trans }}</th>
+                                    <th>{{ 'oma.notification.table.recipient'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                    <tr>
+                                        <td>
+                                            <span class="form-check form-switch oma-switch">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="event-{{ event.value }}"
+                                                    name="events[]"
+                                                    value="{{ event.value }}"
+                                                    {{ enabled[event.value] ? 'checked' : '' }}
+                                                >
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <label class="d-block mb-0" for="event-{{ event.value }}">
+                                                <span class="d-block">{{ event.label()|trans }}</span>
+                                                <span class="d-block text-secondary small">{{ event.description()|trans }}</span>
+                                            </label>
+                                        </td>
+                                        <td>{{ event.recipient().label()|trans }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
 
                     <div class="card-footer text-end">

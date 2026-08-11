@@ -23,4 +23,17 @@ enum NotificationEvent: string
     {
         return sprintf('oma.notification.%s.description', $this->value);
     }
+
+    public function recipient(): NotificationRecipient
+    {
+        return match ($this) {
+            self::ADMIN_ORDER_PLACED,
+            self::ADMIN_CUSTOMER_REGISTERED,
+            self::ADMIN_PRODUCT_REVIEW_CREATED,
+            self::ADMIN_PRODUCT_OUT_OF_STOCK,
+            self::CONTACT_REQUEST => NotificationRecipient::ADMINISTRATOR,
+            self::ORDER_CONFIRMATION,
+            self::SHIPMENT_CONFIRMATION => NotificationRecipient::USER,
+        };
+    }
 }

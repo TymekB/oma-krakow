@@ -47,6 +47,19 @@ test.describe('Zdarzenia w panelu', () => {
     await expect(page.locator('#event-order_confirmation')).toBeVisible();
   });
 
+  test('tabela pokazuje odbiorcę powiadomienia', async ({ page }) => {
+    await loginToAdmin(page);
+    await page.goto('/admin/zdarzenia');
+
+    await expect(page.getByRole('columnheader', { name: 'Powiadomienie dla' })).toBeVisible();
+
+    const adminRow = page.locator('tr', { has: page.locator('#event-admin_order_placed') });
+    await expect(adminRow, 'zdarzenie administratora ma odbiorcę Administrator').toContainText('Administrator');
+
+    const userRow = page.locator('tr', { has: page.locator('#event-order_confirmation') });
+    await expect(userRow, 'potwierdzenie zamówienia ma odbiorcę Użytkownik').toContainText('Użytkownik');
+  });
+
   test('wyłączone zdarzenie wstrzymuje maila, włączone znów go wysyła', async ({ page }) => {
     await loginToAdmin(page);
 

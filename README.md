@@ -295,9 +295,11 @@ Adres odbiorcy: `ADMIN_NOTIFICATION_EMAIL`, a gdy puste — **adres kontaktowy k
 powodu co klucze Google: pusta zmienna kontenera wygrałaby z `.env.local`.
 
 *Konfiguracja → **Zdarzenia*** (`/admin/zdarzenia`) pozwala włączyć i wyłączyć każdy z maili —
-trzy powyższe plus potwierdzenie zamówienia i wysyłki dla klienta oraz wiadomość z formularza
-kontaktowego. Ustawienia siedzą w `oma_notification_setting`; brak wiersza znaczy „włączone",
-więc świeża baza zachowuje się jak dotąd.
+trzy powyższe plus koniec stanu, potwierdzenie zamówienia i wysyłki dla klienta oraz wiadomość
+z formularza kontaktowego. To tabela: *Włączone* (przełącznik), *Zdarzenie* (nazwa i opis) oraz
+*Powiadomienie dla* — odbiorca bierze się z `NotificationEvent::recipient()`
+(`NotificationRecipient::ADMINISTRATOR` albo `USER`), a nie z nazwy zdarzenia. Ustawienia siedzą
+w `oma_notification_setting`; brak wiersza znaczy „włączone", więc świeża baza zachowuje się jak dotąd.
 
 Blokada działa w **dekoratorze `sylius.email_sender`** (`App\Notification\EnabledEmailsSender`), a nie
 w poszczególnych listenerach — dzięki temu jedno miejsce gasi maile niezależnie od tego, czy wysyła

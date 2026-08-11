@@ -138,23 +138,30 @@ oma:
         subheader: 'Zdecyduj, które maile mają wychodzić automatycznie.'
         saved: 'Zapisano ustawienia zdarzeń.'
         invalid_token: 'Sesja wygasła, spróbuj zapisać ponownie.'
+        table:
+            enabled: 'Włączone'
+            event: 'Zdarzenie'
+            recipient: 'Powiadomienie dla'
+        recipient:
+            administrator: 'Administrator'
+            user: 'Użytkownik'
         admin_order_placed:
-            label: 'Nowe zamówienie — powiadomienie dla administratora'
+            label: 'Nowe zamówienie'
             description: 'Mail na adres administratora z listą kupionych produktów i danymi kupującego.'
         admin_customer_registered:
-            label: 'Nowy użytkownik — powiadomienie dla administratora'
+            label: 'Nowy użytkownik'
             description: 'Mail na adres administratora, gdy klient założy konto w sklepie.'
         admin_product_review_created:
-            label: 'Nowa opinia — powiadomienie dla administratora'
+            label: 'Nowa opinia'
             description: 'Mail na adres administratora z oceną i treścią nowej opinii o produkcie.'
         admin_product_out_of_stock:
-            label: 'Koniec stanu — powiadomienie dla administratora'
+            label: 'Koniec stanu'
             description: 'Mail na adres administratora, gdy produkt ze śledzonym stanem przestaje być dostępny — po sprzedaży ostatniej sztuki lub po zmianie stanu w panelu.'
         order_confirmation:
-            label: 'Potwierdzenie zamówienia — do klienta'
+            label: 'Potwierdzenie zamówienia'
             description: 'Mail wysyłany klientowi po złożeniu zamówienia. Nie blokuje ręcznego wysłania ponownie z widoku zamówienia.'
         shipment_confirmation:
-            label: 'Potwierdzenie wysyłki — do klienta'
+            label: 'Potwierdzenie wysyłki'
             description: 'Mail wysyłany klientowi po oznaczeniu przesyłki jako wysłanej.'
         contact_request:
             label: 'Wiadomość z formularza kontaktowego'
