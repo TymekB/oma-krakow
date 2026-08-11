@@ -33,6 +33,27 @@ export async function loginCustomer(page: Page, email: string, password = 'Haslo
   await page.locator('form[action*="login"] button[type="submit"]').last().click();
 }
 
+export async function registerVerifiedCustomer(page: Page, email: string, password = 'Haslo123!'): Promise<void> {
+  await registerCustomer(page, email, password);
+
+  const message = await findEmailFor(email);
+  const link = message.html.match(/https?:\/\/[^"'\s<>]*\/sklep\/verify\/[^"'\s<>]+/)?.[0];
+
+  if (!link) {
+    throw new Error(`Brak linku weryfikacyjnego w mailu do ${email}`);
+  }
+
+  await page.goto(link);
+  await page.goto('/sklep/login');
+
+  if (await page.locator('input[name="_username"]').count()) {
+    await loginCustomer(page, email, password);
+  }
+
+  await page.goto('/sklep/account/dashboard');
+  await expect(page, `konto ${email} jest zalogowane`).not.toHaveURL(/\/sklep\/login/);
+}
+
 export async function findEmailFor(recipient: string): Promise<{ subject: string; html: string }> {
   const response = await fetch(`${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:${recipient}`)}`);
   const found = await response.json();
@@ -58,6 +79,41 @@ export async function addFirstProductToCart(page: Page): Promise<string> {
   await page.waitForTimeout(2000);
 
   return productName;
+}
+
+export async function placeOfflineOrder(page: Page, email: string): Promise<string> {
+  await completeAddressStep(page, email);
+
+  if (page.url().includes('select-shipping')) {
+    await page.getByRole('button', { name: 'Dalej' }).first().click();
+  }
+
+  await page.locator('input[type="radio"]:visible').last().check();
+  await page.getByRole('button', { name: 'Dalej' }).first().click();
+  await expect(page).toHaveURL(/complete/);
+
+  await page.getByRole('button', { name: /Złóż zamówienie/i }).click();
+  await expect(page).toHaveURL(/thank-you|after-pay|order/, { timeout: 30_000 });
+
+  await page.goto('/sklep/account/orders');
+  const href = await page.getByRole('link', { name: 'Pokaż' }).first().getAttribute('href');
+  const number = href?.split('/').pop();
+
+  if (!number) {
+    throw new Error(`Brak zamówienia na liście konta ${email}`);
+  }
+
+  return number;
+}
+
+export async function completeOrderPaymentInAdmin(page: Page, orderNumber: string): Promise<void> {
+  await loginToAdmin(page);
+  await page.goto(`/admin/orders/?criteria[number][value]=${orderNumber}`);
+  await page.getByRole('link', { name: `#${orderNumber}` }).first().click();
+
+  const completePayment = page.locator('form[action*="/payments/"][action$="/complete"]');
+  await completePayment.locator('button[type="submit"]').first().click();
+  await expect(completePayment).toHaveCount(0);
 }
 
 export async function completeAddressStep(page: Page, email: string): Promise<void> {

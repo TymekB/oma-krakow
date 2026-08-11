@@ -166,6 +166,30 @@ je nasz kod, czy Sylius. Świadomie **nie da się wyłączyć** maili od resetu 
 wyłączenie ich zablokowałoby rejestrację i odzyskiwanie dostępu. Ręczne „wyślij ponownie"
 z widoku zamówienia też działa mimo wyłączonego zdarzenia — to jawna decyzja obsługi, nie automat.
 
+## Zweryfikowane opinie
+
+Opinię o produkcie może wystawić **tylko zalogowany klient**, a opinia autora, który ten produkt
+faktycznie kupił, dostaje badge **„Zweryfikowano zakupem"**.
+
+Blokada dla gości siedzi w `access_control` (`security.yaml`) na ścieżce formularza
+`/sklep/produkty/{slug}/recenzje/nowa`, a nie w szablonie — adres da się zgadnąć, więc samo ukrycie
+przycisku niczego by nie chroniło. Gość, który wejdzie tam wprost, ląduje na logowaniu i po
+zalogowaniu wraca na formularz (zapamiętany target path). Trzy miejsca z przyciskiem
+„Dodaj swoją recenzję" (podsumowanie produktu, akordeon opinii, lista opinii) renderują dla gościa link
+„Zaloguj się, aby dodać opinię" z `_target_path` — jeden szablon
+`shop/product_review/add_review_link.html.twig` podpięty pod trzy hooki Syliusa.
+
+Skutek uboczny wymuszenia logowania: autorem jest zawsze konto klienta, więc z formularza znika pole
+na e-mail, a w mailu do administratora autor opinii jest zawsze rozpoznany.
+
+Badge wylicza `App\Review\PurchaseConfirmation` — sprawdza, czy autor jest wśród klientów z
+**opłaconym i nieanulowanym** zamówieniem zawierającym ten produkt. Lista kupujących jest trzymana
+w pamięci per produkt na czas requestu, bo lista opinii pyta o to samo dla każdego wiersza. Twig
+sięga po to przez `oma_review_confirmed_by_purchase(review)`.
+
+Testy: `e2e/reviews.spec.ts` — gość odbity na logowanie, zalogowany dodaje opinię bez pola e-mail,
+badge pojawia się po opłaconym zamówieniu i nie pojawia się bez zakupu.
+
 ## Wdrożenie (produkcja)
 
 Produkcja stoi na VPS Mikrus (`kate123`, 8 GB RAM / 2 vCPU, SSH na porcie `10123`) — projekt

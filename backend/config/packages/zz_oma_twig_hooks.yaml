@@ -8,6 +8,23 @@ sylius_twig_hooks:
                 template: 'shop/checkout/guest_address_memory.html.twig'
                 priority: -250
 
+        'sylius.shop.product_review.index.content.main.list.review.footer':
+            confirmed_by_purchase:
+                template: 'shop/product_review/confirmed_by_purchase.html.twig'
+                priority: -100
+
+        'sylius_shop.product.show.content.info.summary.average_rating':
+            add_review:
+                template: 'shop/product_review/product_summary_add_review.html.twig'
+
+        'sylius_shop.product.show.content.info.overview.accordion.reviews.content':
+            add_review:
+                template: 'shop/product_review/product_accordion_add_review.html.twig'
+
+        'sylius.shop.product_review.index.content.main.header.buttons':
+            add_review:
+                template: 'shop/product_review/index_add_review.html.twig'
+
         'sylius_shop.account.login.content.login_container.form':
             target_path:
                 template: 'shop/security/login_target_path.html.twig'

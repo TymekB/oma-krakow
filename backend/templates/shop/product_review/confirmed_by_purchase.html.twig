@@ -1,0 +1,5 @@
+{% set review = hookable_metadata.context.review %}
+
+{% if oma_review_confirmed_by_purchase(review) %}
+    <span class="badge text-bg-success ms-1">{{ 'oma.review.confirmed_by_purchase'|trans }}</span>
+{% endif %}
