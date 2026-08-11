@@ -27,9 +27,7 @@ final class ProductOutOfStockAdminNotifier
 
     private const ON_HOLD = 'onHold';
 
-    /**
-     * @var list<ProductVariantInterface>
-     */
+    /** @var list<ProductVariantInterface> */
     private array $soldOut = [];
 
     public function __construct(
