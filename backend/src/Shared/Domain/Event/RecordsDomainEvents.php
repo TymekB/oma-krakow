@@ -6,9 +6,7 @@ namespace App\Shared\Domain\Event;
 
 trait RecordsDomainEvents
 {
-    /**
-     * @var list<DomainEvent> 
-     */
+    /** @var list<DomainEvent> */
     private array $domainEvents = [];
 
     /**

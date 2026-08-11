@@ -18,12 +18,13 @@ final readonly class LogPayUPaymentStatus
     public function __invoke(PayUPaymentStatusChanged $event): void
     {
         $this->logger->info(
-            'Status płatności PayU zmieniony.', [
+            'Status płatności PayU zmieniony.',
+            [
             'payment' => $event->paymentId,
             'payu_status' => $event->status->value,
             'transition' => $event->transition->value,
             'occurred_at' => $event->occurredAt()->format(\DateTimeInterface::ATOM),
-            ]
+            ],
         );
     }
 }

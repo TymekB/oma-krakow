@@ -39,7 +39,7 @@ final class NotificationSettingsMenuListener
             array_filter(
                 array_keys($configuration->getChildren()),
                 static fn (string $name): bool => self::NAME !== $name,
-            )
+            ),
         );
 
         return [self::NAME, ...$remaining];

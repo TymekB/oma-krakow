@@ -23,8 +23,8 @@ final readonly class DoctrineContentRevisionRepository implements ContentRevisio
     public function findLatest(int $limit): array
     {
         /**
- * @var list<ContentRevision> $revisions 
-*/
+         * @var list<ContentRevision> $revisions
+         */
         $revisions = $this->entityManager->createQueryBuilder()
             ->select('r')
             ->from(ContentRevision::class, 'r')

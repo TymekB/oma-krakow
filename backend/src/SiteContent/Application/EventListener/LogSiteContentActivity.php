@@ -20,11 +20,12 @@ final readonly class LogSiteContentActivity
     public function onContentChanged(SiteContentChanged $event): void
     {
         $this->logger->info(
-            'Treść strony zmieniona.', [
+            'Treść strony zmieniona.',
+            [
             'key' => $event->key->value,
             'first_value' => $event->isFirstValue(),
             'occurred_at' => $event->occurredAt()->format(\DateTimeInterface::ATOM),
-            ]
+            ],
         );
     }
 
@@ -32,10 +33,11 @@ final readonly class LogSiteContentActivity
     public function onContentRemoved(SiteContentRemoved $event): void
     {
         $this->logger->info(
-            'Treść strony usunięta.', [
+            'Treść strony usunięta.',
+            [
             'key' => $event->key->value,
             'occurred_at' => $event->occurredAt()->format(\DateTimeInterface::ATOM),
-            ]
+            ],
         );
     }
 
@@ -43,12 +45,13 @@ final readonly class LogSiteContentActivity
     public function onContentRestored(ContentRestoredFromRevision $event): void
     {
         $this->logger->info(
-            'Treść strony przywrócona z wersji.', [
+            'Treść strony przywrócona z wersji.',
+            [
             'revision' => $event->revisionId,
             'author' => $event->author,
             'restored_keys' => $event->restoredKeys,
             'occurred_at' => $event->occurredAt()->format(\DateTimeInterface::ATOM),
-            ]
+            ],
         );
     }
 }

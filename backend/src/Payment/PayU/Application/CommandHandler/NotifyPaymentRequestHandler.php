@@ -40,9 +40,10 @@ final readonly class NotifyPaymentRequestHandler
 
         if (null === $order) {
             $this->logger->warning(
-                'PayU notification without an order payload.', [
+                'PayU notification without an order payload.',
+                [
                 'paymentRequest' => $paymentRequest->getId(),
-                ]
+                ],
             );
 
             $paymentRequest->setResponseData(['error' => 'Notification has no order payload.']);

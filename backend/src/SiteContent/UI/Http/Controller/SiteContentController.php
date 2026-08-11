@@ -132,7 +132,7 @@ final readonly class SiteContentController
                 [
                 'restored' => 0,
                 'message' => 'Ta wersja jest identyczna z obecną treścią strony.',
-                ]
+                ],
             );
         }
 

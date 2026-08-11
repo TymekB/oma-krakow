@@ -16,9 +16,7 @@ class ContentRevision
 
     private ContentSnapshot $snapshot;
 
-    /**
-     * @var list<string> 
-     */
+    /** @var list<string> */
     private array $changedKeys;
 
     private Author $author;

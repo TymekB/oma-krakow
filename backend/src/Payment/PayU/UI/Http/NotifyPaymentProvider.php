@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Payment\PayU\UI\Http;
 
-use App\Payment\PayU\Infrastructure\Sylius\GatewayConfigCredentialsProvider;
-use App\Payment\PayU\Infrastructure\Sylius\NotificationExtractor;
 use App\Payment\PayU\Domain\PayUGateway;
 use App\Payment\PayU\Domain\Service\SignatureVerifier;
+use App\Payment\PayU\Infrastructure\Sylius\GatewayConfigCredentialsProvider;
+use App\Payment\PayU\Infrastructure\Sylius\NotificationExtractor;
 use Psr\Log\LoggerInterface;
 use Sylius\Bundle\PaymentBundle\Attribute\AsNotifyPaymentProvider;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;

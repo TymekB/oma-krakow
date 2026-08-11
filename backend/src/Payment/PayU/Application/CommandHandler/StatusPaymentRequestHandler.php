@@ -55,11 +55,12 @@ final readonly class StatusPaymentRequestHandler
             );
         } catch (PayUApiException $exception) {
             $this->logger->error(
-                'PayU order status could not be retrieved.', [
+                'PayU order status could not be retrieved.',
+                [
                 'paymentRequest' => $paymentRequest->getId(),
                 'payuOrderId' => $orderId,
                 'exception' => $exception->getMessage(),
-                ]
+                ],
             );
 
             $this->fail($paymentRequest, $exception->getMessage());
