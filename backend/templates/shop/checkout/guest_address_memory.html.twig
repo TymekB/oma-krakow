@@ -1,0 +1,129 @@
+{% if app.user is null %}
+    <script>
+        (function () {
+            if (window.omaGuestAddressMemory) {
+                return;
+            }
+
+            window.omaGuestAddressMemory = true;
+
+            var FORM_NAME = 'sylius_shop_checkout_address';
+            var STORAGE_KEY = 'oma.checkout.guest_address';
+
+            function storage() {
+                try {
+                    return window.localStorage;
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            function fieldsOf(form) {
+                return Array.prototype.filter.call(form.querySelectorAll('input, select, textarea'), function (field) {
+                    return field.name.indexOf(FORM_NAME + '[') === 0
+                        && field.type !== 'hidden'
+                        && field.type !== 'password';
+                });
+            }
+
+            function readStored() {
+                var store = storage();
+
+                if (!store) {
+                    return {};
+                }
+
+                try {
+                    return JSON.parse(store.getItem(STORAGE_KEY)) || {};
+                } catch (error) {
+                    return {};
+                }
+            }
+
+            function save(form) {
+                var store = storage();
+
+                if (!store) {
+                    return;
+                }
+
+                var data = {};
+
+                fieldsOf(form).forEach(function (field) {
+                    data[field.name] = field.type === 'checkbox' ? field.checked : field.value;
+                });
+
+                try {
+                    store.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (error) {
+                    /* quota / private mode */
+                }
+            }
+
+            function hasOption(select, value) {
+                return Array.prototype.some.call(select.options, function (option) {
+                    return option.value === value;
+                });
+            }
+
+            function restore(form) {
+                var data = readStored();
+                var done = form.omaRestoredFields;
+
+                fieldsOf(form).forEach(function (field) {
+                    if (done[field.name] || !(field.name in data)) {
+                        return;
+                    }
+
+                    var value = data[field.name];
+
+                    if (field.type === 'checkbox') {
+                        if (field.checked !== value) {
+                            field.checked = value;
+                        }
+                    } else if (value !== '' && field.value === '') {
+                        if (field.tagName === 'SELECT' && !hasOption(field, value)) {
+                            return;
+                        }
+
+                        field.value = value;
+                    }
+
+                    done[field.name] = true;
+                    field.dispatchEvent(new Event('input', { bubbles: true }));
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+
+            function init() {
+                var form = document.querySelector('form[name="' + FORM_NAME + '"]');
+
+                if (!form || form.omaRestoredFields) {
+                    return;
+                }
+
+                form.omaRestoredFields = {};
+
+                restore(form);
+
+                new MutationObserver(function () {
+                    restore(form);
+                }).observe(form, { childList: true, subtree: true });
+
+                form.addEventListener('change', function () {
+                    save(form);
+                });
+
+                form.addEventListener('submit', function () {
+                    save(form);
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+            document.addEventListener('turbo:load', init);
+            document.addEventListener('turbo:frame-render', init);
+
+            init();
+        })();
+    </script>
+{% endif %}
