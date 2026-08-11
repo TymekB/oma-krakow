@@ -33,33 +33,39 @@ final class AdminMenuListener
 
     private const SALES = 'sales';
 
-    private const MARKETING = 'marketing';
+    private const SECTION_ORDER = [
+        'catalog',
+        'sales',
+        'marketing',
+        'configuration',
+        'customers',
+    ];
 
     public function __invoke(MenuBuilderEvent $event): void
     {
         $this->moveToSales($event->getMenu());
         $this->removeFrom($event->getMenu());
-        $this->putMarketingAfterSales($event->getMenu());
+        $this->orderSections($event->getMenu());
     }
 
-    private function putMarketingAfterSales(ItemInterface $menu): void
+    private function orderSections(ItemInterface $menu): void
     {
-        if (null === $menu->getChild(self::SALES) || null === $menu->getChild(self::MARKETING)) {
+        $wanted = array_values(
+            array_filter(
+                self::SECTION_ORDER,
+                static fn (string $name): bool => null !== $menu->getChild($name),
+            ),
+        );
+
+        if ([] === $wanted) {
             return;
         }
 
         $order = [];
+        $taken = 0;
 
         foreach (array_keys($menu->getChildren()) as $name) {
-            if (self::MARKETING === $name) {
-                continue;
-            }
-
-            $order[] = $name;
-
-            if (self::SALES === $name) {
-                $order[] = self::MARKETING;
-            }
+            $order[] = in_array($name, $wanted, true) ? $wanted[$taken++] : $name;
         }
 
         $menu->reorderChildren($order);

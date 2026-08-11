@@ -155,7 +155,7 @@ oma:
             label: 'Nowa opinia'
             description: 'Mail na adres administratora z oceną i treścią nowej opinii o produkcie.'
         admin_product_out_of_stock:
-            label: 'Koniec stanu'
+            label: 'Koniec stanu magazynowego produktu'
             description: 'Mail na adres administratora, gdy produkt ze śledzonym stanem przestaje być dostępny — po sprzedaży ostatniej sztuki lub po zmianie stanu w panelu.'
         order_confirmation:
             label: 'Potwierdzenie zamówienia'

@@ -10,21 +10,19 @@ async function sectionOrder(page: import('@playwright/test').Page): Promise<stri
 }
 
 test.describe('Kolejnosc sekcji w menu panelu', () => {
-  test('Marketing stoi nad Klient i pod Sprzedaz', async ({ page }) => {
+  test('sekcje ida w kolejnosci Katalog, Sprzedaz, Marketing, Konfiguracja, Klient', async ({ page }) => {
     await loginToAdmin(page);
 
     const order = await sectionOrder(page);
+    const wanted = ['Katalog', 'Sprzedaż', 'Marketing', 'Konfiguracja', 'Klient'];
 
-    const sales = order.indexOf('Sprzedaż');
-    const marketing = order.indexOf('Marketing');
-    const customers = order.indexOf('Klient');
+    for (const label of wanted) {
+      expect(order, `sekcja ${label} jest w menu`).toContain(label);
+    }
 
-    expect(sales, 'sekcja Sprzedaż jest w menu').toBeGreaterThan(-1);
-    expect(marketing, 'sekcja Marketing jest w menu').toBeGreaterThan(-1);
-    expect(customers, 'sekcja Klient jest w menu').toBeGreaterThan(-1);
+    const positions = wanted.map((label) => order.indexOf(label));
 
-    expect(marketing, 'Marketing pod Sprzedaz').toBeGreaterThan(sales);
-    expect(marketing, 'Marketing nad Klient').toBeLessThan(customers);
+    expect(positions, 'kolejnosc sekcji rosnie').toEqual([...positions].sort((a, b) => a - b));
   });
 
   test('sekcje usuniete przez AdminMenuListener nie wracaja', async ({ page }) => {
