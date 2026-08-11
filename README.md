@@ -417,7 +417,11 @@ Kontener Healthchecks dostaje `LANG=C.UTF-8` i to nie jest ozdoba: uwsgi startuj
 interpreter Pythona bez ustawionego locale, więc `SITE_NAME` z półpauzą dekodowało się na surogaty
 i **każda strona panelu zwracała 500** (pingi i API działały normalnie, bo nie renderują szablonu).
 
-Panel Healthchecks: http://localhost:8010 (na produkcji tylko przez `127.0.0.1`, wystaw tunelem).
+Panel Healthchecks: lokalnie http://localhost:8010, na produkcji https://hc-oma.byst.re
+(publiczny port `OMA_HC_PUBLIC_PORT`, domyślnie `20123`; `127.0.0.1:8010` nadal działa przez tunel).
+Za proxy Mikrusa Django dostaje HTTP, więc `local_settings.py` ustawia `SECURE_PROXY_SSL_HEADER`
+i `CSRF_TRUSTED_ORIGINS` z `SITE_ROOT` — bez tego logowanie kończyłoby się błędem CSRF.
+`OMA_HC_SITE_ROOT` musi być pełnym `https://` adresem, inaczej linki w mailach prowadzą w pustkę.
 Pierwsze uruchomienie zakłada konto, projekt, klucz pingowania i trzy checki z właściwymi
 harmonogramami:
 
@@ -569,8 +573,10 @@ Wymagania po stronie serwera:
 - Pamięć: `OMA_RABBITMQ_MEM` (domyślnie `512m`) plus watermark w `deploy/rabbitmq-oma.conf`
   (`256MiB` absolutnie, nie relatywnie — wartość relatywna liczyłaby się od RAM-u maszyny i przy
   `mem_limit` skończyłaby się OOM-em).
-- Panel RabbitMQ wisi na `127.0.0.1:15672`, czyli tylko przez tunel SSH — Mikrus wystawia publicznie
-  jedynie dwa porty TCP i broker do nich nie należy.
+- Panel RabbitMQ słucha na `127.0.0.1:15672` (tunel SSH) **oraz** na publicznym porcie
+  `OMA_RABBITMQ_PUBLIC_PORT` (domyślnie `30123`), do którego przypisana jest subdomena
+  `mq-oma.byst.re`. TLS kończy się na proxy Mikrusa, ale goły `http://<IP>:30123` też odpowiada —
+  jedyną ochroną panelu jest hasło `OMA_RABBITMQ_PASSWORD`, więc nie skracaj go i nie reużywaj.
 
 **Przy pierwszym wdrożeniu po tej zmianie** transport przechodzi z `doctrine://default` na AMQP.
 Komunikaty zaplanowane wcześniej siedzą w tabeli `messenger_messages` i nikt ich już nie odbierze —

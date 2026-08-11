@@ -1,8 +1,15 @@
 from __future__ import annotations
 
+import os
+
 import hc.settings as _upstream
 
 STYLESHEET = '<link rel="stylesheet" href="/static/css/oma.css">'
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+_SITE_ROOT = os.environ.get("SITE_ROOT", "")
+CSRF_TRUSTED_ORIGINS = [_SITE_ROOT] if _SITE_ROOT.startswith("https://") else []
 
 
 class OmaBrandingMiddleware:
