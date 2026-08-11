@@ -66,15 +66,31 @@ docker compose exec app php bin/console messenger:stats
 
 ## Konfiguracja usług zewnętrznych
 
-Klucze podaje się przez zmienne środowiskowe czytane w `backend/compose.yaml`:
+Klucze bramek podaje się przez zmienne środowiskowe czytane w `backend/compose.yaml`:
 
 ```bash
-OMA_GOOGLE_CLIENT_ID=... OMA_GOOGLE_CLIENT_SECRET=... docker compose up -d app
+OMA_PAYU_POS_ID=... docker compose up -d app
 ```
 
+**Sekrety trzymamy w `backend/.env.local`** — repozytorium jest publiczne, a `backend/.env` i reszta
+`.env.*` są w nim wersjonowane, więc mogą zawierać wyłącznie puste wartości albo publiczne klucze
+testowe. `.env.local` jest w `.gitignore`, katalog projektu montujemy do kontenera, a Symfony
+nadpisuje nim `.env` — dlatego wystarczy `docker compose up -d app`, bez dodatkowych flag:
+
+```bash
+# backend/.env.local
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
+
+Kluczy Google celowo nie ma w `compose.yaml` w formie `${OMA_GOOGLE_CLIENT_ID:-}` — pusta zmienna
+środowiskowa kontenera wygrywa z `.env.local` i Symfony nigdy by go nie wczytał.
+
 **Logowanie Google** — w Google Cloud Console dodaj *Authorized redirect URI*
-`http://localhost:8080/sklep/connect/google/check`. Dopóki klucze są puste, przycisk „Kontynuuj z Google"
-się nie renderuje, a `/sklep/connect/google` zwraca 404 (zamiast wysypywać się na pustym kluczu).
+`http://localhost:8080/sklep/connect/google/check` oraz produkcyjny odpowiednik na `/sklep/connect/google/check`.
+Dopóki klucze są puste, przycisk „Kontynuuj z Google" się nie renderuje, a `/sklep/connect/google`
+zwraca 404 (zamiast wysypywać się na pustym kluczu). Dopóki ekran zgody OAuth jest w trybie
+*Testing*, zalogują się tylko konta z listy użytkowników testowych.
 
 **PayU (główna bramka)** — metoda `payu` jest włączona i pierwsza na liście, na kluczach
 **publicznego POS-u testowego PayU** (sandbox, PLN: `pos_id`/`client_id` `300746`). Klucze siedzą

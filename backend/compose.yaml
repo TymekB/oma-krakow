@@ -6,8 +6,6 @@ x-app-env: &app-env
   APP_RUNTIME: Runtime\FrankenPhpSymfony\Runtime
   DATABASE_URL: mysql://sylius:sylius@mysql:3306/sylius_oma?serverVersion=8.0&charset=utf8mb4
   DEFAULT_URI: ${OMA_DEFAULT_URI:-http://localhost:8080}
-  GOOGLE_CLIENT_ID: ${OMA_GOOGLE_CLIENT_ID:-}
-  GOOGLE_CLIENT_SECRET: ${OMA_GOOGLE_CLIENT_SECRET:-}
   MAILER_DSN: smtp://mailpit:1025
   PAYU_ENVIRONMENT: ${OMA_PAYU_ENVIRONMENT:-sandbox}
   PAYU_POS_ID: ${OMA_PAYU_POS_ID:-300746}
