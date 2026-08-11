@@ -127,7 +127,7 @@ Uwaga na wartości PayU: **`jp` to Apple Pay, a `ap` to Google Pay** (wbrew intu
 przez `GET /api/v2_1/paymethods` na sandboxie, gdzie oba są `ENABLED`).
 
 Apple Pay pokazuje się w checkoucie tylko wtedy, gdy przeglądarka je obsługuje — skrypt
-w `templates/shop/javascripts.html.twig` chowa metodę, gdy `window.ApplePaySession.canMakePayments()`
+w `templates/shop/apple_pay/script.html.twig` chowa metodę, gdy `window.ApplePaySession.canMakePayments()`
 jest niedostępne (Chrome, Firefox, Windows). Sprawdzenie musi być po stronie klienta, bo o dostępności
 decyduje urządzenie i Wallet, a nie User-Agent.
 
@@ -135,6 +135,50 @@ Do faktycznego zapłacenia potrzebne są: Safari na urządzeniu Apple, region ws
 [konto sandbox testera](https://developer.apple.com/apple-pay/sandbox-testing/) (App Store Connect →
 Users and Access → Sandbox → Testers), karta testowa Apple dodana ręcznie do Wallet oraz **HTTPS**
 (czyli nie `localhost` — potrzebny tunel i `OMA_DEFAULT_URI`).
+
+### Apple Pay express checkout (adres z arkusza zamiast formularza)
+
+Moduł `src/Checkout/ApplePay/` pozwala kupić bez wypełniania adresu: arkusz Apple Pay oddaje kontakt
+i adres wysyłki, a my składamy z tego zamówienie i od razu wchodzimy w płatność.
+
+W koszyku przycisk siedzi **u góry** — zaraz pod nagłówkiem, nad listą produktów i nad podsumowaniem
+(`shop/apple_pay/express.html.twig`, priorytet 90 w hooku `sylius_shop.cart.index.content.form.sections`,
+czyli za `flashes` 200 i `header` 100, przed `general` 0). Chodzi o to, żeby najszybsza ścieżka była
+pierwszą rzeczą, jaką klient widzi, zanim zacznie klikać „Przejdź do kasy" i formularz adresu.
+Drugie miejsce to nad formularzem adresu w checkoucie — dla kogoś, kto już tam trafił. Oba hooki
+w `config/packages/oma_apple_pay.yaml`.
+
+Cała zachęta w koszyku startuje z `hidden` i odsłania ją JS dopiero po `ApplePaySession.canMakePayments()`
+— na Chrome czy Windows nie zostaje nagłówek obiecujący płatność bez przycisku, którym można ją zrobić.
+
+Trzy endpointy (`src/Checkout/ApplePay/UI/Http/Controller/ApplePayController.php`):
+
+| Endpoint | Po co |
+|---|---|
+| `POST /sklep/apple-pay/merchant-session` | walidacja merchanta u Apple, certyfikatem Merchant Identity |
+| `POST /sklep/apple-pay/shipping-methods` | metody wysyłki i ich ceny dla adresu wybranego w arkuszu |
+| `POST /sklep/apple-pay/order` | adres z arkusza → adres + wysyłka + płatność → `completed`, zwraca URL płatności |
+
+**To wymaga rzeczy, których jeszcze nie mamy** — bez nich arkusz się nie otworzy:
+
+1. Apple Developer Program, Merchant ID i **certyfikat Merchant Identity** (`APPLE_PAY_CERT_PATH`,
+   `APPLE_PAY_CERT_KEY_PATH`, `APPLE_PAY_CERT_PASSPHRASE`),
+2. plik `apple-developer-merchantid-domain-association.txt` z Apple wrzucony do
+   `backend/public/.well-known/` (Caddy serwuje go statycznie),
+3. HTTPS na zarejestrowanej domenie — Apple Pay JS nie działa na `localhost`,
+4. Apple Pay włączone na POS PayU **z tokenami** (osobne zgłoszenie do supportu PayU).
+
+Dopóki `APPLE_PAY_MERCHANT_ID` jest puste, przycisk się nie renderuje i sklep zachowuje się jak wcześniej.
+
+Punkt 4 ma zabezpieczenie: token z arkusza leci do PayU jako `payMethods.payMethod.authorizationCode`,
+a gdy PayU go odrzuci (na sandboxie `ERROR_VALUE_INVALID` / `APPLE_PAY_CLIENT_ERROR`, bo POS nie ma
+włączonych tokenów), `CapturePaymentRequestHandler` **ponawia zamówienie bez tokenu** jako pay-by-link.
+Klient traci na tym jedno dodatkowe potwierdzenie na stronie PayU, ale checkout nie pada, a adres i tak
+przyszedł z arkusza. Po włączeniu tokenów u PayU fallback przestanie się odpalać sam z siebie.
+
+Endpointy da się testować bez Safari i bez certyfikatów — `e2e/apple-pay-express.spec.ts` woła je
+z sesji koszyka takim payloadem, jaki wysyła arkusz (łącznie z okrojonym kontaktem, który Apple daje
+na etapie wyboru wysyłki).
 
 **Stripe (karta, BLIK, Przelewy24)** — metoda płatności `stripe` jest **wyłączona**, bo w bazie
 zapisane są zaszyfrowane puste klucze. Żeby ją uruchomić: wpisz klucze testowe w panelu

@@ -73,6 +73,12 @@ oma:
         button: 'Kontynuuj z Google'
         or: 'albo'
         failed: 'Logowanie przez Google nie powiodło się. Spróbuj ponownie.'
+    apple_pay:
+        button: 'Zapłać przez Apple Pay'
+        hint: 'Adres i dane kontaktowe pobierzemy z Apple Pay — nie musisz nic wpisywać.'
+        express:
+            title: 'Kup w kilka sekund'
+            lead: 'Apple Pay poda Twój adres i dane kontaktowe — pomijasz formularz i od razu płacisz.'
     payu:
         gateway: 'PayU'
         form:

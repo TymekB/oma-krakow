@@ -495,3 +495,69 @@ a.link-reset:hover,
 .accordion-button::after {
   transition-duration: 0.12s;
 }
+
+.oma-apple-pay {
+  margin-bottom: 1rem;
+}
+
+.oma-apple-pay__button {
+  display: -apple-pay-button;
+  -apple-pay-button-type: buy;
+  -apple-pay-button-style: black;
+  width: 100%;
+  height: 3rem;
+  border: 0;
+  border-radius: 2rem;
+  cursor: pointer;
+}
+
+.oma-apple-pay__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: var(--oma-ink-soft);
+}
+
+.oma-express {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
+  background: var(--oma-sand-100);
+  border: 1px solid var(--oma-sand-200);
+  border-radius: var(--bs-border-radius-lg);
+}
+
+.oma-express__copy {
+  flex: 1 1 16rem;
+}
+
+.oma-express__title {
+  margin: 0;
+  font-family: var(--oma-display);
+  font-size: 1.4rem;
+  line-height: 1.2;
+  color: var(--oma-wine-800);
+}
+
+.oma-express__lead {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--oma-ink-soft);
+}
+
+.oma-express__action {
+  flex: 1 1 14rem;
+}
+
+.oma-express .oma-apple-pay {
+  margin-bottom: 0;
+}
+
+@media (min-width: 576px) {
+  .oma-express__action {
+    max-width: 16rem;
+  }
+}

@@ -7,6 +7,7 @@ namespace App\Shared\Infrastructure\Bus;
 use App\Shared\Application\Bus\Query;
 use App\Shared\Application\Bus\QueryBus;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Messenger\Exception\HandlerFailedException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
 
@@ -20,7 +21,11 @@ final readonly class MessengerQueryBus implements QueryBus
 
     public function ask(Query $query): mixed
     {
-        $handled = $this->queryBus->dispatch($query)->last(HandledStamp::class);
+        try {
+            $handled = $this->queryBus->dispatch($query)->last(HandledStamp::class);
+        } catch (HandlerFailedException $exception) {
+            throw $exception->getPrevious() ?? $exception;
+        }
 
         if (!$handled instanceof HandledStamp) {
             throw new \LogicException(sprintf('Zapytanie "%s" nie zostało obsłużone.', $query::class));
