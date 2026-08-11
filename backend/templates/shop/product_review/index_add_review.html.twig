@@ -1,0 +1,4 @@
+{% include 'shop/product_review/add_review_link.html.twig' with {
+    slug: app.request.get('slug'),
+    link_class: 'btn btn-primary',
+} only %}

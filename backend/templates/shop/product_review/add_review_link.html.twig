@@ -1,0 +1,11 @@
+{% set create_path = path('sylius_shop_product_review_create', { slug: slug }) %}
+
+{% if app.user is null %}
+    <a class="{{ link_class }}" href="{{ path('sylius_shop_login', { '_target_path': create_path }) }}">
+        {{ 'oma.review.login_to_add'|trans }}
+    </a>
+{% else %}
+    <a class="{{ link_class }}" href="{{ create_path }}">
+        {{ 'sylius.ui.add_your_review'|trans }}
+    </a>
+{% endif %}

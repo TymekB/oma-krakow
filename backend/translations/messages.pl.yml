@@ -69,6 +69,9 @@ oma:
             question: 'Masz konto?'
             action: 'Zaloguj się'
             reason: 'i wypełnij formularz tylko za pierwszym razem.'
+    review:
+        confirmed_by_purchase: 'Zweryfikowano zakupem'
+        login_to_add: 'Zaloguj się, aby dodać opinię'
     google_login:
         button: 'Kontynuuj z Google'
         or: 'albo'
