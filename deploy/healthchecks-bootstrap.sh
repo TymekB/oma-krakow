@@ -15,6 +15,17 @@ sys.exit(0 if User.objects.filter(email='$EMAIL').exists() else 1)
     echo "utworzono konto $EMAIL"
 fi
 
+if ! docker compose exec -T -e PW="$PASSWORD" healthchecks ./manage.py shell -c "
+import os, sys
+from django.contrib.auth.models import User
+
+user = User.objects.get(email='$EMAIL')
+sys.exit(0 if user.has_usable_password() and user.check_password(os.environ['PW']) else 1)
+" >/dev/null 2>&1; then
+    echo "konto $EMAIL nie ma hasla z OMA_HC_ADMIN_PASSWORD — hashowanie zginelo po drodze (sprawdz OMA_HC_MEM i 'docker inspect --format {{.State.OOMKilled}}')" >&2
+    exit 1
+fi
+
 docker compose exec -T healthchecks ./manage.py shell -c "
 from datetime import timedelta
 

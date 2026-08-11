@@ -417,11 +417,21 @@ Kontener Healthchecks dostaje `LANG=C.UTF-8` i to nie jest ozdoba: uwsgi startuj
 interpreter Pythona bez ustawionego locale, więc `SITE_NAME` z półpauzą dekodowało się na surogaty
 i **każda strona panelu zwracała 500** (pingi i API działały normalnie, bo nie renderują szablonu).
 
-Panel Healthchecks: lokalnie http://localhost:8010, na produkcji https://hc-oma.byst.re
-(publiczny port `OMA_HC_PUBLIC_PORT`, domyślnie `20123`; `127.0.0.1:8010` nadal działa przez tunel).
+Panel Healthchecks: lokalnie http://localhost:8010, na produkcji
+**https://handsome-whale2858.byst.re** (publiczny port `OMA_HC_PUBLIC_PORT`, domyślnie `20123`;
+`127.0.0.1:8010` nadal działa przez tunel). Subdomenę przypisuje `domena 20123` na serwerze —
+własnej nazwy pod `byst.re` nie da się wybrać, API Mikrusa przyjmuje tylko pełne domeny spoza
+`byst.re` albo generuje losową nazwę.
+
 Za proxy Mikrusa Django dostaje HTTP, więc `local_settings.py` ustawia `SECURE_PROXY_SSL_HEADER`
 i `CSRF_TRUSTED_ORIGINS` z `SITE_ROOT` — bez tego logowanie kończyłoby się błędem CSRF.
 `OMA_HC_SITE_ROOT` musi być pełnym `https://` adresem, inaczej linki w mailach prowadzą w pustkę.
+
+**`OMA_HC_MEM` nie schodź poniżej `448m`.** Django hashuje hasło Argonem przy każdym logowaniu
+i przy zakładaniu konta, a ten skok dochodzi do ~64 MiB ponad ~243 MiB, które kontener trzyma po
+zalogowaniu. Przy `320m` logowanie zwracało **502 z `OOMKilled=true`**, a `set_password`
+w `manage.py shell` ginęło z kodem 137 — bez żadnego błędu w logach, zostawiając konto
+**bez ustawionego hasła**. Liczby z `docker stats`, nie z sufitu.
 Pierwsze uruchomienie zakłada konto, projekt, klucz pingowania i trzy checki z właściwymi
 harmonogramami:
 
@@ -577,7 +587,7 @@ Wymagania po stronie serwera:
   publikujących, a limit kontenera zabija.
 - Panel RabbitMQ słucha na `127.0.0.1:15672` (tunel SSH) **oraz** na publicznym porcie
   `OMA_RABBITMQ_PUBLIC_PORT` (domyślnie `30123`), do którego przypisana jest subdomena
-  `mq-oma.byst.re`. TLS kończy się na proxy Mikrusa, ale goły `http://<IP>:30123` też odpowiada —
+  **https://closed-whale8141.byst.re**. TLS kończy się na proxy Mikrusa, ale goły `http://<IP>:30123` też odpowiada —
   jedyną ochroną panelu jest hasło `OMA_RABBITMQ_PASSWORD`, więc nie skracaj go i nie reużywaj.
 
 ### Budżet pamięci
