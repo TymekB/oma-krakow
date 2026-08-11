@@ -32,3 +32,110 @@
         new MutationObserver(decorate).observe(document.documentElement, { childList: true, subtree: true });
     })();
 </script>
+
+<script>
+    (function () {
+        const FIELD_SUFFIXES = ['_price', '_originalPrice', '_minimumPrice'];
+
+        function parseAmount(raw) {
+            const normalized = String(raw).replace(/[\s ]/g, '').replace(',', '.');
+
+            if (normalized === '') {
+                return null;
+            }
+
+            const value = Number(normalized);
+
+            return Number.isFinite(value) ? value : null;
+        }
+
+        function formatAmount(value) {
+            return (Math.round(value * 100) / 100).toFixed(2).replace('.', ',');
+        }
+
+        function buildMirror(label) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'oma-price-mirror';
+
+            const caption = document.createElement('small');
+            caption.className = 'oma-price-mirror__label';
+            caption.textContent = label;
+
+            const group = document.createElement('div');
+            group.className = 'input-group';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.inputMode = 'decimal';
+            input.autocomplete = 'off';
+            input.setAttribute('aria-label', label);
+
+            const suffix = document.createElement('span');
+            suffix.className = 'input-group-text';
+            suffix.textContent = 'zł';
+
+            group.append(input, suffix);
+            wrapper.append(caption, group);
+
+            return { wrapper: wrapper, input: input };
+        }
+
+        function bind(container) {
+            const rate = Number(container.dataset.rate);
+
+            if (!Number.isFinite(rate) || rate <= 0) {
+                return;
+            }
+
+            const multiplier = 1 + rate;
+            const storedIsGross = container.dataset.included === '1';
+            const label = container.dataset.mirrorLabel || '';
+
+            FIELD_SUFFIXES.forEach(function (suffix) {
+                container.querySelectorAll('input[id$="' + suffix + '"]').forEach(function (field) {
+                    if (field.dataset.omaPriceMirror) {
+                        return;
+                    }
+
+                    field.dataset.omaPriceMirror = '1';
+
+                    const mirror = buildMirror(label);
+                    const anchor = field.closest('.input-group') || field;
+                    anchor.parentNode.insertBefore(mirror.wrapper, anchor.nextSibling);
+
+                    const sync = function (source, target, convert) {
+                        const value = parseAmount(source.value);
+                        target.value = value === null ? '' : formatAmount(convert(value));
+                    };
+
+                    const toMirror = function (value) {
+                        return storedIsGross ? value / multiplier : value * multiplier;
+                    };
+
+                    const fromMirror = function (value) {
+                        return storedIsGross ? value * multiplier : value / multiplier;
+                    };
+
+                    sync(field, mirror.input, toMirror);
+
+                    field.addEventListener('input', function () {
+                        sync(field, mirror.input, toMirror);
+                    });
+
+                    mirror.input.addEventListener('input', function () {
+                        sync(mirror.input, field, fromMirror);
+                    });
+                });
+            });
+        }
+
+        function decoratePrices() {
+            document.querySelectorAll('[data-oma-price-tax]').forEach(bind);
+        }
+
+        document.addEventListener('DOMContentLoaded', decoratePrices);
+        document.addEventListener('live:render', decoratePrices);
+        new MutationObserver(decoratePrices).observe(document.documentElement, { childList: true, subtree: true });
+    })();
+</script>

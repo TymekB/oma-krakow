@@ -269,6 +269,45 @@ je nasz kod, czy Sylius. Świadomie **nie da się wyłączyć** maili od resetu 
 wyłączenie ich zablokowałoby rejestrację i odzyskiwanie dostępu. Ręczne „wyślij ponownie"
 z widoku zamówienia też działa mimo wyłączonego zdarzenia — to jawna decyzja obsługi, nie automat.
 
+## Ceny netto i brutto w panelu
+
+> **Uwaga na konfigurację podatków.** Obie stawki VAT w bazie mają `included_in_price = 0`, czyli
+> **cena wpisana w panelu jest ceną netto**, a 23% dolicza się dopiero w koszyku. Produkt z ceną
+> `39,00` kosztuje klienta `47,97` i taką kwotę widać dopiero w podsumowaniu koszyka — na karcie
+> produktu i liście widnieje `39,00`. Dla sklepu B2C w Polsce to najpewniej nie jest to, o co chodzi
+> (konsument ma widzieć cenę końcową), ale zmiana tego to decyzja biznesowa, nie techniczna:
+> przestawienie `included_in_price` na `1` **nie przelicza istniejących cen**, tylko zmienia ich
+> znaczenie, więc `39,00` z dnia na dzień stanie się ceną brutto i przychód spadnie o 23%. Jeśli
+> ceny mają zostać takie, jakie klient płaci dziś, trzeba je najpierw przemnożyć przez `1,23`.
+
+Póki co panel pomaga w tym żyć: pod **każdym** polem ceny (*Cena*, *Cena wyjściowa*, *Cena
+minimalna*) w zakładce **Ceny** siedzi lustrzane pole z kwotą po drugiej stronie VAT-u, opisane
+`brutto (VAT 23%)`. Działa **w obie strony** — wpiszesz netto, dostajesz brutto; wpiszesz brutto,
+przelicza się netto i to ono trafia do zapisu. Lustro nie ma atrybutu `name`, więc nigdy nie leci
+w formularzu; jedynym źródłem prawdy zostaje pole Syliusa.
+
+Kierunek nie jest zaszyty na sztywno — bierze się z `included_in_price` rozwiązanej stawki. Gdy
+kiedyś przestawicie sklep na ceny brutto, ten sam widget sam zacznie pokazywać `netto (VAT 23%)`,
+bez zmiany kodu.
+
+Jak to jest złożone:
+
+| Element | Rola |
+|---|---|
+| `src/Twig/PriceTaxExtension.php` | `oma_price_tax(variant, channel_code)` — rozwiązuje stawkę przez `TaxRateResolverInterface`, zawężoną do domyślnej strefy podatkowej kanału |
+| `templates/bundles/SyliusAdminBundle/shared/helper/channel_pricings.html.twig` | opakowuje panel w `data-oma-price-tax` ze stawką, kierunkiem i etykietą |
+| `templates/admin/javascripts.html.twig` | wstrzykuje lustro i pilnuje przeliczeń w obie strony |
+
+Lustro wstrzykuje JS, a nie Twig, bo trzy pola cen renderuje hook (`body` przekazywane do makra),
+więc nadpisywanie pojedynczych pól w makrze byłoby martwym kodem. Stąd też `MutationObserver` —
+formularz produktu to Live Component i po każdym przerysowaniu lustro trzeba wstawić od nowa.
+
+Stawka pochodzi z **zapisanej** kategorii podatkowej wariantu. Jeśli zmienisz ją w zakładce
+*Podatki* i jeszcze nie zapiszesz, lustro liczy po staremu aż do zapisu.
+
+Pokrywa to `e2e/admin-price-net-gross.spec.ts` (oba kierunki, zaokrąglanie groszy, puste pole)
+oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki, kierunek, formatowanie procentu).
+
 ## Zweryfikowane opinie
 
 Opinię o produkcie może wystawić **tylko zalogowany klient**, a opinia autora, który ten produkt

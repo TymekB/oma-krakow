@@ -79,6 +79,9 @@ oma:
         button: 'Kontynuuj z Google'
         or: 'albo'
         failed: 'Logowanie przez Google nie powiodło się. Spróbuj ponownie.'
+    pricing:
+        gross: 'brutto (VAT %rate%%)'
+        net: 'netto (VAT %rate%%)'
     apple_pay:
         button: 'Zapłać przez Apple Pay'
         hint: 'Adres i dane kontaktowe pobierzemy z Apple Pay — nie musisz nic wpisywać.'

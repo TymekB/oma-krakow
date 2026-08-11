@@ -1,15 +1,26 @@
+{% macro pricing_body(channel_pricing_form, product_variant, channel_code, body) %}
+    {% set tax = oma_price_tax(product_variant, channel_code) %}
+
+    <div{% if tax.rate is not null %} data-oma-price-tax data-rate="{{ tax.rate }}" data-included="{{ tax.included ? '1' : '0' }}" data-mirror-label="{{ (tax.included ? 'oma.pricing.net' : 'oma.pricing.gross')|trans({'%rate%': tax.percentage}) }}"{% endif %}>
+        {% if body is not null %}
+            {{ include(template_from_string(body), { channel_code: channel_code, channel_pricing_form: channel_pricing_form, product_variant: product_variant }) }}
+        {% else %}
+            {% for field in channel_pricing_form %}
+                {{ form_row(field) }}
+            {% endfor %}
+        {% endif %}
+    </div>
+{% endmacro %}
+
 {% macro channel_pricings(channel_pricing_forms, product_variant, body = null, options = {}) %}
+    {# Twig 3 nie udostepnia makr przez _self, wiec import musi byc w ciele makra. #}
+    {% import _self as pricing %}
+
     {# Sklep ma jeden kanal, wiec akordeon z jego nazwa tylko zasmieca formularz. #}
     {% if channel_pricing_forms|length == 1 %}
         <div class="p-3">
             {% for channel_code, channel_pricing_form in channel_pricing_forms %}
-                {% if body is not null %}
-                    {{ include(template_from_string(body), { channel_code: channel_code, channel_pricing_form: channel_pricing_form, product_variant: product_variant }) }}
-                {% else %}
-                    {% for field in channel_pricing_form %}
-                        {{ form_row(field) }}
-                    {% endfor %}
-                {% endif %}
+                {{ pricing.pricing_body(channel_pricing_form, product_variant, channel_code, body) }}
             {% endfor %}
         </div>
     {% else %}
@@ -40,13 +51,7 @@
                 </h2>
                 <div id="channel-pricing-{{ channel_code }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#product-channel-pricings">
                     <div class="accordion-body" {{ sylius_test_html_attribute('product-channel-pricings-accordion-body') }}>
-                        {% if body is not null %}
-                            {{ include(template_from_string(body), { channel_code: channel_code, channel_pricing_form: channel_pricing_form, product_variant: product_variant}) }}
-                        {% else %}
-                            {% for field in channel_pricing_form %}
-                                {{ form_row(field) }}
-                            {% endfor %}
-                        {% endif %}
+                        {{ pricing.pricing_body(channel_pricing_form, product_variant, channel_code, body) }}
                     </div>
                 </div>
             </div>

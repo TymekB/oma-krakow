@@ -399,3 +399,28 @@ body.antialiased,
   border-color: var(--oma-wine-600);
   box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
 }
+
+.oma-price-mirror {
+  margin-top: 0.4rem;
+}
+
+.oma-price-mirror__label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--oma-ink-faint, #9c8d83);
+}
+
+.oma-price-mirror .form-control,
+.oma-price-mirror .input-group-text {
+  background: transparent;
+  color: var(--oma-ink-soft, #6f6259);
+}
+
+.oma-price-mirror .form-control:focus {
+  border-color: var(--oma-wine-600);
+  box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
+  color: inherit;
+}
