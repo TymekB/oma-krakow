@@ -1,0 +1,58 @@
+{% import '@SyliusAdmin/shared/helper/header.html.twig' as header %}
+
+{% set events = hookable_metadata.context.events %}
+{% set enabled = hookable_metadata.context.enabled %}
+{% set csrf_token_id = hookable_metadata.context.csrf_token_id %}
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <div class="container-fluid">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type == 'error' ? 'danger' : type }}">{{ message|trans }}</div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="row align-items-center">
+                <div class="col-12 col-md">
+                    <div class="d-md-flex gap-2 align-items-center">
+                        {{ header.h1('oma.ui.notification_settings'|trans, 'tabler:bell', 'oma.notification.subheader'|trans) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-fluid">
+            <form method="post" action="{{ path('oma_admin_notification_settings') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token(csrf_token_id) }}">
+
+                <div class="card">
+                    <div class="list-group list-group-flush">
+                        {% for event in events %}
+                            <label class="list-group-item d-flex align-items-start gap-3 py-3" for="event-{{ event.value }}">
+                                <input
+                                    class="form-check-input m-0 mt-1 flex-shrink-0"
+                                    type="checkbox"
+                                    id="event-{{ event.value }}"
+                                    name="events[]"
+                                    value="{{ event.value }}"
+                                    {{ enabled[event.value] ? 'checked' : '' }}
+                                >
+                                <span>
+                                    <span class="d-block">{{ event.label()|trans }}</span>
+                                    <span class="d-block text-secondary small">{{ event.description()|trans }}</span>
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <button type="submit" class="btn btn-primary">{{ 'sylius.ui.save_changes'|trans }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

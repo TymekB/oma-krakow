@@ -1,0 +1,79 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'oma.email.admin_order_placed.subject'|trans({'%number%': order.number}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {% set label_style = 'font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8d83; padding-bottom: 4px;' %}
+    {% set cell_style = 'padding: 12px 0; border-bottom: 1px solid #ece9e4; vertical-align: top;' %}
+
+    {{ oma.greeting('oma.email.admin_order_placed.heading'|trans({}, null, localeCode)) }}
+
+    <div style="text-align: center; margin-bottom: 28px;">
+        <span style="display: inline-block; padding: 12px 26px; background: #f4f3f0; border: 1px solid #dcd9d4; border-radius: 8px; font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-size: 30px; line-height: 1; color: #5a1f2c;">{{ order.number }}</span>
+    </div>
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_order_placed.customer'|trans({}, null, localeCode) }}</div>
+    <div style="padding-bottom: 24px;">
+        {% set customer_name = order.customer.fullName|default('')|trim %}
+        {% if customer_name is empty and order.billingAddress is not null %}
+            {% set customer_name = order.billingAddress.fullName|default('')|trim %}
+        {% endif %}
+
+        {% if customer_name is not empty %}
+            <div style="color: #2a2320;">{{ customer_name }}</div>
+        {% endif %}
+
+        <div><a href="mailto:{{ order.customer.email }}" style="color: #8a3746; text-decoration: none;">{{ order.customer.email }}</a></div>
+
+        {% set phone = order.customer.phoneNumber|default('')|trim %}
+        {% if phone is empty and order.billingAddress is not null %}
+            {% set phone = order.billingAddress.phoneNumber|default('')|trim %}
+        {% endif %}
+        {% if phone is not empty %}
+            <div style="color: #6f6259;">{{ phone }}</div>
+        {% endif %}
+    </div>
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_order_placed.items'|trans({}, null, localeCode) }}</div>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px;">
+        {% for item in order.items %}
+            <tr>
+                <td style="{{ cell_style }}">
+                    <div style="color: #2a2320;">{{ item.productName }}</div>
+                    {% if item.variantName is not empty and item.variantName != item.productName %}
+                        <div style="font-size: 13px; color: #9c8d83;">{{ item.variantName }}</div>
+                    {% endif %}
+                    <div style="font-size: 13px; color: #6f6259;">
+                        {{ 'oma.email.admin_order_placed.quantity'|trans({'%count%': item.quantity}, null, localeCode) }}
+                    </div>
+                </td>
+                <td style="{{ cell_style }} text-align: right; white-space: nowrap; color: #2a2320;">
+                    {{ item.total|sylius_format_money(order.currencyCode, localeCode) }}
+                </td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td style="padding: 14px 0 0; color: #2a2320;">{{ 'sylius.ui.order_total'|trans({}, null, localeCode) }}</td>
+            <td style="padding: 14px 0 0; text-align: right; white-space: nowrap; font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif; font-size: 24px; color: #5a1f2c;">
+                {{ order.total|sylius_format_money(order.currencyCode, localeCode) }}
+            </td>
+        </tr>
+    </table>
+
+    <div style="padding-top: 24px;">
+        <div style="{{ label_style }}">{{ 'oma.email.admin_order_placed.payment'|trans({}, null, localeCode) }}</div>
+        <div style="color: #2a2320;">
+            {% set payment = order.payments|last %}
+            {% if payment and payment.method %}{{ payment.method.name }} — {% endif %}
+            {{ ('sylius.ui.' ~ order.paymentState)|trans({}, null, localeCode) }}
+        </div>
+    </div>
+
+    <div style="text-align: center; padding-top: 32px;">
+        {{ oma.button(url('sylius_admin_order_show', {'id': order.id}), 'oma.email.admin_order_placed.open_in_admin'|trans({}, null, localeCode)) }}
+    </div>
+{% endblock %}

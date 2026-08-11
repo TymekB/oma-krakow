@@ -1,0 +1,7 @@
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
+
+{% block title %}{{ 'oma.ui.notification_settings'|trans }} | Sylius{% endblock %}
+
+{% block body %}
+    {% hook 'oma_admin.notification_settings' with { events: events, enabled: enabled, csrf_token_id: csrf_token_id } %}
+{% endblock %}

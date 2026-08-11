@@ -62,6 +62,7 @@ oma:
     ui:
         view_site: 'Zobacz stronę'
         site_edit: 'Edycja strony'
+        notification_settings: 'Zdarzenia'
         manual: 'Instrukcja'
     checkout:
         login_hint:
@@ -84,7 +85,31 @@ oma:
             signature_key: 'Drugi klucz (MD5)'
             pay_method: 'Wymuszona metoda płatności'
             pay_method_any: 'Wybór po stronie PayU'
-            pay_method_apple_pay: 'Apple Pay'
             pay_method_google_pay: 'Google Pay'
             pay_method_blik: 'BLIK'
             pay_method_card: 'Karta płatnicza'
+    email:
+        admin_order_placed:
+            subject: 'Nowe zamówienie %number% w sklepie OMA'
+            heading: 'Nowe zamówienie'
+            customer: 'Kupujący'
+            items: 'Zamówione produkty'
+            quantity: '%count% szt.'
+            payment: 'Płatność'
+            open_in_admin: 'Otwórz w panelu'
+    notification:
+        subheader: 'Zdecyduj, które maile mają wychodzić automatycznie.'
+        saved: 'Zapisano ustawienia zdarzeń.'
+        invalid_token: 'Sesja wygasła, spróbuj zapisać ponownie.'
+        admin_order_placed:
+            label: 'Nowe zamówienie — powiadomienie dla administratora'
+            description: 'Mail na adres administratora z listą kupionych produktów i danymi kupującego.'
+        order_confirmation:
+            label: 'Potwierdzenie zamówienia — do klienta'
+            description: 'Mail wysyłany klientowi po złożeniu zamówienia. Nie blokuje ręcznego wysłania ponownie z widoku zamówienia.'
+        shipment_confirmation:
+            label: 'Potwierdzenie wysyłki — do klienta'
+            description: 'Mail wysyłany klientowi po oznaczeniu przesyłki jako wysłanej.'
+        contact_request:
+            label: 'Wiadomość z formularza kontaktowego'
+            description: 'Mail z treścią wiadomości wysłanej przez formularz kontaktowy w sklepie.'

@@ -1,0 +1,5 @@
+sylius_mailer:
+    emails:
+        admin_order_placed:
+            subject: oma.email.admin_order_placed.subject
+            template: 'email/adminOrderPlaced.html.twig'
