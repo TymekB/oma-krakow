@@ -21,6 +21,8 @@ final class AdminMenuListener
         'countries',
         'zones',
         'currencies',
+        'exchange_rates',
+        'locales',
     ];
 
     private const MOVED_TO_SALES = [
