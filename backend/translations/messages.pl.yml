@@ -122,6 +122,15 @@ oma:
             review: 'Treść opinii'
             author: 'Autor'
             open_in_admin: 'Otwórz w panelu'
+        admin_product_out_of_stock:
+            subject: 'Produkt wyprzedany w sklepie OMA'
+            heading: 'Koniec stanu'
+            lead: 'Tego produktu nie da się już kupić — uzupełnij stan lub wyłącz go w panelu.'
+            product: 'Produkt'
+            stock: 'Stan magazynowy'
+            on_hand: '{0} Na stanie: 0 szt.|{1} Na stanie: 1 szt.|]1,Inf[ Na stanie: %count% szt.'
+            on_hold: '{0} zarezerwowane w zamówieniach: 0 szt.|{1} zarezerwowane w zamówieniach: 1 szt.|]1,Inf[ zarezerwowane w zamówieniach: %count% szt.'
+            open_in_admin: 'Otwórz w panelu'
     notification:
         subheader: 'Zdecyduj, które maile mają wychodzić automatycznie.'
         saved: 'Zapisano ustawienia zdarzeń.'
@@ -135,6 +144,9 @@ oma:
         admin_product_review_created:
             label: 'Nowa opinia — powiadomienie dla administratora'
             description: 'Mail na adres administratora z oceną i treścią nowej opinii o produkcie.'
+        admin_product_out_of_stock:
+            label: 'Koniec stanu — powiadomienie dla administratora'
+            description: 'Mail na adres administratora, gdy produkt ze śledzonym stanem przestaje być dostępny — po sprzedaży ostatniej sztuki lub po zmianie stanu w panelu.'
         order_confirmation:
             label: 'Potwierdzenie zamówienia — do klienta'
             description: 'Mail wysyłany klientowi po złożeniu zamówienia. Nie blokuje ręcznego wysłania ponownie z widoku zamówienia.'

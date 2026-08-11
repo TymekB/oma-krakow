@@ -9,3 +9,6 @@ sylius_mailer:
         admin_product_review_created:
             subject: oma.email.admin_product_review_created.subject
             template: 'email/adminProductReviewCreated.html.twig'
+        admin_product_out_of_stock:
+            subject: oma.email.admin_product_out_of_stock.subject
+            template: 'email/adminProductOutOfStock.html.twig'
