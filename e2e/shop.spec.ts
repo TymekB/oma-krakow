@@ -19,6 +19,19 @@ test.describe('Sklep', () => {
     expect(grain).toContain('feTurbulence');
   });
 
+  test('baner strony głównej ma istniejącą teksturę w tle', async ({ page }) => {
+    await page.goto('/sklep/');
+
+    const banner = page.locator('.oma-banner').first();
+    const background = await banner.evaluate((element) => getComputedStyle(element).backgroundImage);
+
+    const url = background.match(/url\("([^"]+)"\)/)?.[1];
+    expect(url, 'baner ma ustawioną teksturę').toBeTruthy();
+
+    const response = await page.request.get(url!);
+    expect(response.status(), 'plik tekstury jest serwowany, a nie 404').toBe(200);
+  });
+
   test('nawigacja po kategorii idzie przez Turbo, bez przeładowania strony', async ({ page }) => {
     await page.goto('/sklep/');
 

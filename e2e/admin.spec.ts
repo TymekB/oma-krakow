@@ -20,6 +20,17 @@ test.describe('Panel admina', () => {
     expect(background).toBe('rgb(250, 249, 246)');
   });
 
+  test('logo w sidebarze ma teksturowane tło, a plik tekstury istnieje', async ({ page }) => {
+    const brand = page.locator('.navbar-vertical .navbar-brand').first();
+    const background = await brand.evaluate((element) => getComputedStyle(element).backgroundImage);
+
+    const url = background.match(/url\("([^"]+)"\)/)?.[1];
+    expect(url, 'brand ma ustawione tło').toBeTruthy();
+
+    const response = await page.request.get(url!);
+    expect(response.status(), 'plik tekstury jest serwowany, a nie 404').toBe(200);
+  });
+
   test('drzewo kategorii nie dubluje się po wejściu w edycję', async ({ page }) => {
     await page.goto('/admin/taxons/');
     await page.waitForLoadState('networkidle');
@@ -62,10 +73,12 @@ test.describe('Panel admina', () => {
     }
   });
 
-  test('metody płatności: Stripe jest na liście', async ({ page }) => {
+  test('metody płatności: lista zawiera PayU i płatność przy odbiorze', async ({ page }) => {
     await page.goto('/admin/payment-methods/');
 
-    await expect(page.locator('body')).toContainText('Karta, BLIK');
+    const body = page.locator('body');
+    await expect(body).toContainText('PayU');
+    await expect(body).toContainText('Płatność przy odbiorze');
   });
 
   test('najnowsze zamówienie ma 4-cyfrowy numer', async ({ page }) => {
