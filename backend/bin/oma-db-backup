@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+umask 077
+
 BACKUP_DIR="${OMA_BACKUP_DIR:-/backup}"
 KEEP_DAYS="${OMA_BACKUP_KEEP_DAYS:-7}"
 
@@ -23,6 +25,7 @@ printf(
 ')"
 
 mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
 
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 DUMP="$BACKUP_DIR/$DB_NAME-$STAMP.sql"
@@ -41,6 +44,7 @@ MYSQL_PWD="$DB_PASSWORD" mysqldump \
 gzip -9 "$DUMP"
 
 find "$BACKUP_DIR" -maxdepth 1 -name "$DB_NAME-*.sql.gz" -type f -mtime "+$KEEP_DAYS" -delete
+find "$BACKUP_DIR" -maxdepth 1 -name "$DB_NAME-*.sql.gz" -type f -exec chmod 600 {} +
 
 printf 'backup: %s (%s)\n' "$ARCHIVE" "$(du -h "$ARCHIVE" | cut -f1)"
 printf 'kopie w %s: %s\n' "$BACKUP_DIR" "$(find "$BACKUP_DIR" -maxdepth 1 -name "$DB_NAME-*.sql.gz" -type f | wc -l | tr -d ' ')"

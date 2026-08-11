@@ -430,13 +430,20 @@ Nowe zadanie dodaje się w dwóch miejscach: etykieta `ofelia.job-exec.<slug>` w
 w `JOBS` w `deploy/healthchecks-bootstrap.sh`. Bez wpisu w skrypcie check i tak powstanie przy
 pierwszym pingu (`create=1`), ale z domyślnym okresem 1 dnia — dlatego harmonogramy trzymamy w kodzie.
 
-Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`). To kopia **lokalna**, na tym
-samym dysku co baza — chroni przed pomyłką w danych, nie przed utratą serwera. Wysyłka poza VPS jest
-do zrobienia osobno.
+Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`), czyli w
+`/var/lib/docker/volumes/oma-prod_db_backup/_data` — poza `public/`, więc żaden URL tam nie sięga,
+i pod rootem, bo `/var/lib/docker` nie jest dostępne dla zwykłego użytkownika. Skrypt pracuje
+z `umask 077` i pilnuje katalogu (`700`) oraz plików (`600`).
+
+Czego to **nie** daje: dump nie jest zaszyfrowany, a w środku są dane osobowe klientów i hashe haseł.
+`gzip` to kompresja, nie ochrona — od momentu, w którym plik opuści serwer (snapshot VPS-a, `docker cp`,
+wysyłka na dysk), chroni go już tylko to, gdzie wylądował. Kopia leży też na tym samym dysku co baza,
+więc ratuje przed pomyłką w danych, nie przed utratą serwera. Wysyłka poza VPS z szyfrowaniem
+(np. `age` + osobny check w Healthchecks na sam upload) jest do zrobienia osobno.
 
 ### Branding OMA w Healthchecks
 
-Instancja nazywa się **OMA Cron Managment** (`SITE_NAME`) i chodzi w kolorystyce sklepu: winny navbar,
+Instancja nazywa się **OMA Cron Management** (`SITE_NAME`) i chodzi w kolorystyce sklepu: winny navbar,
 papierowe tło, Cormorant Garamond w nagłówkach, Jost w treści, logo „oma KRAKÓW" w kremie. Trzy pliki
 w `backend/docker/healthchecks/`, montowane do kontenera:
 
