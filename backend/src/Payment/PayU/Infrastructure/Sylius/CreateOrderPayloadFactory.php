@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Payment\PayU\Infrastructure\Sylius;
 
 use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\PayUGateway;
 use App\Payment\PayU\Domain\ValueObject\PayUCredentials;
 use Sylius\Bundle\CoreBundle\OrderPay\Provider\UrlProviderInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -99,15 +100,34 @@ final readonly class CreateOrderPayloadFactory
         }
 
         if (null !== $credentials->payMethod) {
-            $payload['payMethods'] = [
-                'payMethod' => [
-                    'type' => self::PAY_BY_LINK_TYPE,
-                    'value' => $credentials->payMethod,
-                ],
+            $payMethod = [
+                'type' => self::PAY_BY_LINK_TYPE,
+                'value' => $credentials->payMethod,
             ];
+
+            $authorizationCode = $this->authorizationCode($payment);
+
+            if (null !== $authorizationCode) {
+                $payMethod['authorizationCode'] = $authorizationCode;
+            }
+
+            $payload['payMethods'] = ['payMethod' => $payMethod];
         }
 
         return $payload;
+    }
+
+    private function authorizationCode(PaymentInterface $payment): ?string
+    {
+        $details = $payment->getDetails()[PayUGateway::DETAILS_KEY] ?? null;
+
+        if (!is_array($details)) {
+            return null;
+        }
+
+        $authorizationCode = $details['authorizationCode'] ?? null;
+
+        return is_string($authorizationCode) && '' !== $authorizationCode ? $authorizationCode : null;
     }
 
     /**

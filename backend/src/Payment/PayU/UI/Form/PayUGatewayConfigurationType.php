@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Payment\PayU\UI\Form;
 
+use App\Payment\PayU\Domain\PayUGateway;
 use App\Payment\PayU\Domain\ValueObject\PayUEnvironment;
 use App\Payment\PayU\Domain\ValueObject\PayUPayMethod;
-use App\Payment\PayU\Domain\PayUGateway;
 use Sylius\Bundle\PaymentBundle\Attribute\AsGatewayConfigurationType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

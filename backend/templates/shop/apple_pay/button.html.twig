@@ -1,0 +1,19 @@
+{% set apple_pay = apple_pay is defined ? apple_pay : oma_apple_pay() %}
+{% set with_hint = with_hint is defined ? with_hint : true %}
+
+{% if apple_pay.enabled %}
+    <div class="oma-apple-pay"
+         data-oma-apple-pay
+         data-display-name="{{ apple_pay.displayName }}"
+         data-country="{{ apple_pay.countryCode }}"
+         data-currency="{{ apple_pay.currencyCode }}"
+         data-subtotal="{{ apple_pay.subtotal }}"
+         data-merchant-session-url="{{ path('oma_apple_pay_merchant_session') }}"
+         data-shipping-methods-url="{{ path('oma_apple_pay_shipping_methods') }}"
+         data-order-url="{{ path('oma_apple_pay_order') }}">
+        <button type="button" class="oma-apple-pay__button" hidden aria-label="{{ 'oma.apple_pay.button'|trans }}"></button>
+        {% if with_hint %}
+            <p class="oma-apple-pay__hint" hidden>{{ 'oma.apple_pay.hint'|trans }}</p>
+        {% endif %}
+    </div>
+{% endif %}

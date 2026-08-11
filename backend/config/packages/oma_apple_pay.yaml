@@ -1,0 +1,11 @@
+sylius_twig_hooks:
+    hooks:
+        'sylius_shop.cart.index.content.form.sections':
+            oma_apple_pay_express:
+                template: 'shop/apple_pay/express.html.twig'
+                priority: 90
+
+        'sylius_shop.checkout.address.content.form':
+            oma_apple_pay:
+                template: 'shop/apple_pay/button.html.twig'
+                priority: 250

@@ -1,0 +1,14 @@
+{% set apple_pay = oma_apple_pay() %}
+
+{% if apple_pay.enabled %}
+    <div class="oma-express" data-oma-apple-pay-express hidden>
+        <div class="oma-express__copy">
+            <p class="oma-express__title">{{ 'oma.apple_pay.express.title'|trans }}</p>
+            <p class="oma-express__lead">{{ 'oma.apple_pay.express.lead'|trans }}</p>
+        </div>
+
+        <div class="oma-express__action">
+            {{ include('shop/apple_pay/button.html.twig', { with_hint: false }) }}
+        </div>
+    </div>
+{% endif %}

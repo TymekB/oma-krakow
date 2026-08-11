@@ -1,0 +1,202 @@
+<script>
+    (function () {
+        if (window.omaApplePayExpress) {
+            return;
+        }
+
+        window.omaApplePayExpress = true;
+
+        var API_VERSION = 3;
+        var NETWORKS = ['visa', 'masterCard', 'maestro'];
+        var METHOD_CODE = 'payu_apple_pay';
+
+        function available() {
+            try {
+                return typeof window.ApplePaySession !== 'undefined' &&
+                    window.ApplePaySession.canMakePayments() &&
+                    window.ApplePaySession.supportsVersion(API_VERSION);
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function money(amount) {
+            return (Math.round(amount * 100) / 100).toFixed(2);
+        }
+
+        function post(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify(body),
+            }).then(function (response) {
+                if (!response.ok) {
+                    return response.json().catch(function () { return {}; }).then(function (data) {
+                        throw new Error(data.error || 'Apple Pay: ' + response.status);
+                    });
+                }
+
+                return response.json();
+            });
+        }
+
+        function totals(root, shippingMethod) {
+            var subtotal = parseFloat(root.dataset.subtotal || '0');
+            var shipping = shippingMethod ? parseFloat(shippingMethod.amount || '0') : 0;
+
+            var lineItems = [{ label: 'Produkty', amount: money(subtotal), type: 'final' }];
+
+            if (shippingMethod) {
+                lineItems.push({ label: shippingMethod.label, amount: money(shipping), type: 'final' });
+            }
+
+            return {
+                lineItems: lineItems,
+                total: { label: root.dataset.displayName, amount: money(subtotal + shipping), type: 'final' },
+            };
+        }
+
+        function begin(root) {
+            var session = new ApplePaySession(API_VERSION, {
+                countryCode: root.dataset.country,
+                currencyCode: root.dataset.currency,
+                merchantCapabilities: ['supports3DS'],
+                supportedNetworks: NETWORKS,
+                requiredBillingContactFields: ['postalAddress', 'name'],
+                requiredShippingContactFields: ['postalAddress', 'name', 'email', 'phone'],
+                total: totals(root, null).total,
+            });
+
+            var shippingMethod = null;
+
+            session.onvalidatemerchant = function (event) {
+                post(root.dataset.merchantSessionUrl, { validationUrl: event.validationURL })
+                    .then(function (merchantSession) { session.completeMerchantValidation(merchantSession); })
+                    .catch(function (error) { console.error(error); session.abort(); });
+            };
+
+            session.onshippingcontactselected = function (event) {
+                post(root.dataset.shippingMethodsUrl, { shippingContact: event.shippingContact })
+                    .then(function (data) {
+                        var methods = data.shippingMethods || [];
+                        shippingMethod = methods.length ? methods[0] : null;
+                        var amounts = totals(root, shippingMethod);
+
+                        session.completeShippingContactSelection({
+                            newShippingMethods: methods,
+                            newTotal: amounts.total,
+                            newLineItems: amounts.lineItems,
+                        });
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        var amounts = totals(root, null);
+
+                        session.completeShippingContactSelection({
+                            errors: [new ApplePayError('shippingContactInvalid', 'postalAddress', error.message)],
+                            newTotal: amounts.total,
+                            newLineItems: amounts.lineItems,
+                        });
+                    });
+            };
+
+            session.onshippingmethodselected = function (event) {
+                shippingMethod = event.shippingMethod;
+                var amounts = totals(root, shippingMethod);
+
+                session.completeShippingMethodSelection({
+                    newTotal: amounts.total,
+                    newLineItems: amounts.lineItems,
+                });
+            };
+
+            session.onpaymentauthorized = function (event) {
+                post(root.dataset.orderUrl, {
+                    shippingContact: event.payment.shippingContact,
+                    billingContact: event.payment.billingContact,
+                    shippingMethod: shippingMethod ? shippingMethod.identifier : null,
+                    paymentToken: event.payment.token ? event.payment.token.paymentData : null,
+                })
+                    .then(function (data) {
+                        session.completePayment({ status: ApplePaySession.STATUS_SUCCESS });
+                        window.location.href = data.redirectUrl;
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                        session.completePayment({ status: ApplePaySession.STATUS_FAILURE });
+                    });
+            };
+
+            session.begin();
+        }
+
+        function hideUnavailableMethod() {
+            if (available()) {
+                return;
+            }
+
+            document.querySelectorAll('input[type="radio"][value="' + METHOD_CODE + '"]').forEach(function (input) {
+                var choice = input.closest('.card') || input.parentElement;
+
+                if (!choice) {
+                    return;
+                }
+
+                choice.hidden = true;
+
+                if (!input.checked) {
+                    return;
+                }
+
+                input.checked = false;
+
+                var fallback = document.querySelector('input[type="radio"][name="' + input.name + '"]:not([value="' + METHOD_CODE + '"])');
+
+                if (fallback) {
+                    fallback.checked = true;
+                }
+            });
+        }
+
+        function setup() {
+            hideUnavailableMethod();
+
+            if (!available()) {
+                return;
+            }
+
+            document.querySelectorAll('[data-oma-apple-pay]').forEach(function (root) {
+                if (root.dataset.omaApplePayReady) {
+                    return;
+                }
+
+                root.dataset.omaApplePayReady = '1';
+
+                var button = root.querySelector('.oma-apple-pay__button');
+                var hint = root.querySelector('.oma-apple-pay__hint');
+                var express = root.closest('[data-oma-apple-pay-express]');
+
+                if (!button) {
+                    return;
+                }
+
+                button.hidden = false;
+
+                if (hint) {
+                    hint.hidden = false;
+                }
+
+                if (express) {
+                    express.hidden = false;
+                }
+
+                button.addEventListener('click', function () { begin(root); });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', setup);
+        document.addEventListener('turbo:load', setup);
+        document.addEventListener('turbo:frame-render', setup);
+    })();
+</script>
