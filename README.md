@@ -176,19 +176,23 @@ Do faktycznego zapłacenia potrzebne są: Safari na urządzeniu Apple, region ws
 Users and Access → Sandbox → Testers), karta testowa Apple dodana ręcznie do Wallet oraz **HTTPS**
 (czyli nie `localhost` — potrzebny tunel i `OMA_DEFAULT_URI`).
 
-**Sentry (monitoring błędów)** — bundle `sentry/sentry-symfony` jest w `config/bundles.php` włączony
-tylko dla `prod`, a lokalny docker i tak chodzi na `APP_ENV=prod` (`OMA_ENV`), więc działa też na
-localu. DSN idzie przez `SENTRY_DSN`: lokalnie w `backend/.env.local`, na produkcji przez
-`OMA_SENTRY_DSN` w `/opt/oma-prod/.env` (stąd `SENTRY_DSN: ${OMA_SENTRY_DSN:-}` w
-`deploy/compose.prod.yaml`). W `compose.yaml` dla lokala tej zmiennej celowo nie ma — z tego samego
-powodu co przy kluczach Google. Pusty DSN = SDK wyłączone i nic nie wychodzi na zewnątrz, więc brak
-zmiennej nigdy nie wywala aplikacji.
+**Sentry (monitoring błędów) — tylko produkcja.** Bundle `sentry/sentry-symfony` jest
+w `config/bundles.php` włączony dla `prod`, ale sam wpis nic nie daje: lokalny docker też chodzi na
+`APP_ENV=prod` (`OMA_ENV`), więc jedyne, co trzyma Sentry wyłączone na localu, to **pusty DSN**.
+Dlatego `SENTRY_DSN` w `.env` jest puste i **nie wpisujemy go w `backend/.env.local`** — lokalne
+błędy nie mają lecieć do projektu ani przepalać limitu zdarzeń. Pusty DSN = brak klienta = SDK nic
+nie wysyła i nigdy nie wywala aplikacji. W `compose.yaml` tej zmiennej celowo nie ma, tak jak przy
+kluczach Google.
 
-Konfiguracja w `config/packages/sentry.yaml`: `enable_logs: true` (logi obok wyjątków) plus
-`environment` z `%kernel.environment%`. W `deploy/php-prod.ini` jest
-`zend.exception_ignore_args = Off`, bez tego stack trace w Sentry nie ma argumentów funkcji.
+Prawdziwy DSN żyje tylko na produkcji: `OMA_SENTRY_DSN` w `/opt/oma-prod/.env`, stąd
+`SENTRY_DSN: ${OMA_SENTRY_DSN:-}` w `deploy/compose.prod.yaml`.
 
-Sprawdzenie, że DSN działa (wysyła prawdziwe zdarzenie do projektu):
+Konfiguracja w `config/packages/sentry.yaml`: `enable_logs: true` (logi obok wyjątków), `environment`
+z `%kernel.environment%` oraz `ignore_exceptions` z 404/405 — bez tego każdy bot skanujący sklep
+generuje zdarzenie. W `deploy/php-prod.ini` jest `zend.exception_ignore_args = Off`, bez tego stack
+trace w Sentry nie ma argumentów funkcji.
+
+Sprawdzenie DSN-u **na serwerze produkcyjnym** (wysyła prawdziwe zdarzenie do projektu):
 
 ```bash
 docker compose exec app php bin/console sentry:test
