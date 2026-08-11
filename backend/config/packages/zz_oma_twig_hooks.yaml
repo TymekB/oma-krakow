@@ -13,6 +13,13 @@ sylius_twig_hooks:
                 template: 'shop/security/login_target_path.html.twig'
                 priority: 150
 
+        'sylius_shop.account.profile_update.update.content.main.form.additional_information':
+            gender: { enabled: false }
+        'sylius_admin.customer.create.content.form.sections.extra_information':
+            gender: { enabled: false }
+        'sylius_admin.customer.update.content.form.sections.extra_information':
+            gender: { enabled: false }
+
         'sylius_admin.product.create.content.form.side_navigation':
             esd: { enabled: false }
             mollie: { enabled: false }
