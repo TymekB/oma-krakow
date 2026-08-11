@@ -31,15 +31,43 @@ final class AdminMenuListener
         'shipping_categories',
     ];
 
+    private const SALES = 'sales';
+
+    private const MARKETING = 'marketing';
+
     public function __invoke(MenuBuilderEvent $event): void
     {
         $this->moveToSales($event->getMenu());
         $this->removeFrom($event->getMenu());
+        $this->putMarketingAfterSales($event->getMenu());
+    }
+
+    private function putMarketingAfterSales(ItemInterface $menu): void
+    {
+        if (null === $menu->getChild(self::SALES) || null === $menu->getChild(self::MARKETING)) {
+            return;
+        }
+
+        $order = [];
+
+        foreach (array_keys($menu->getChildren()) as $name) {
+            if (self::MARKETING === $name) {
+                continue;
+            }
+
+            $order[] = $name;
+
+            if (self::SALES === $name) {
+                $order[] = self::MARKETING;
+            }
+        }
+
+        $menu->reorderChildren($order);
     }
 
     private function moveToSales(ItemInterface $menu): void
     {
-        $sales = $menu->getChild('sales');
+        $sales = $menu->getChild(self::SALES);
         $configuration = $menu->getChild('configuration');
 
         if (null === $sales || null === $configuration) {
