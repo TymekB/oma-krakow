@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Payment\PayU\Api;
+namespace App\Tests\Payment\PayU\Domain\Model;
 
-use App\Payment\PayU\Api\PayUOrderStatus;
+use App\Payment\PayU\Domain\Model\PaymentTransition;
+use App\Payment\PayU\Domain\Model\PayUOrderStatus;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Sylius\Component\Payment\PaymentTransitions;
 
 final class PayUOrderStatusTest extends TestCase
 {
     #[DataProvider('statuses')]
-    public function testShouldMapPayUStatusToPaymentTransition(string $status, string $expectedTransition): void
-    {
+    public function testShouldMapPayUStatusToPaymentTransition(
+        string $status,
+        PaymentTransition $expectedTransition,
+    ): void {
         self::assertSame($expectedTransition, PayUOrderStatus::from($status)->paymentTransition());
     }
 
@@ -24,7 +26,7 @@ final class PayUOrderStatusTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{string}> 
+     * @return iterable<string, array{string}>
      */
     public static function unknownStatuses(): iterable
     {
@@ -34,15 +36,15 @@ final class PayUOrderStatusTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{string, string}> 
+     * @return iterable<string, array{string, PaymentTransition}>
      */
     public static function statuses(): iterable
     {
-        yield 'new' => ['NEW', PaymentTransitions::TRANSITION_PROCESS];
-        yield 'pending' => ['PENDING', PaymentTransitions::TRANSITION_PROCESS];
-        yield 'waiting for confirmation' => ['WAITING_FOR_CONFIRMATION', PaymentTransitions::TRANSITION_AUTHORIZE];
-        yield 'completed' => ['COMPLETED', PaymentTransitions::TRANSITION_COMPLETE];
-        yield 'canceled' => ['CANCELED', PaymentTransitions::TRANSITION_CANCEL];
-        yield 'rejected' => ['REJECTED', PaymentTransitions::TRANSITION_FAIL];
+        yield 'new' => ['NEW', PaymentTransition::Process];
+        yield 'pending' => ['PENDING', PaymentTransition::Process];
+        yield 'waiting for confirmation' => ['WAITING_FOR_CONFIRMATION', PaymentTransition::Authorize];
+        yield 'completed' => ['COMPLETED', PaymentTransition::Complete];
+        yield 'canceled' => ['CANCELED', PaymentTransition::Cancel];
+        yield 'rejected' => ['REJECTED', PaymentTransition::Fail];
     }
 }

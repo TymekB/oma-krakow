@@ -54,7 +54,13 @@ W trybie prod zmiany w PHP/Twig wymagają `make restart` (opcache nie sprawdza t
 
 ## Struktura zmian względem czystego Syliusa
 
+Kod własny jest ułożony w kontekstach z podziałem na warstwy (DDD + Hexagonal + CQRS +
+Event Driven) — opis w [docs/architektura.md](docs/architektura.md).
+
 ```
+src/Shared/            Shared Kernel — magistrale komend/zapytań/zdarzeń, zegar
+src/SiteContent/       Kontekst treści landingu (Domain/Application/Infrastructure/UI)
+src/Payment/PayU/      Kontekst płatności PayU (Domain/Application/Infrastructure/UI)
 docker/frankenphp/     Dockerfile, Caddyfile, php.ini, entrypoint.sh
 docker/sql/            demo-prices.sql (ceny produktów testowych)
 config/packages/sylius_fixtures.yaml   suite "oma" — kanał, waluta, taksonomia, admin, 3 produkty

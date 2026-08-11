@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Processor;
+namespace App\Payment\PayU\Infrastructure\Sylius;
 
-use App\Payment\PayU\Api\PayUOrderStatus;
-use App\Payment\PayU\Payment\PaymentDetailsUpdater;
+use App\Payment\PayU\Domain\Model\PaymentTransition;
+use App\Payment\PayU\Domain\Model\PayUOrderStatus;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
 use Sylius\Component\Payment\Model\PaymentRequestInterface;
 use Sylius\Component\Payment\PaymentTransitions;
@@ -13,30 +13,45 @@ use Sylius\Component\Payment\PaymentTransitions;
 final readonly class PaymentTransitionProcessor
 {
     public function __construct(
-        private PaymentDetailsUpdater $paymentDetailsUpdater,
+        private PaymentDetails $paymentDetails,
         private StateMachineInterface $stateMachine,
     ) {
     }
 
-    public function process(PaymentRequestInterface $paymentRequest): void
+    public function process(PaymentRequestInterface $paymentRequest): ?PayUOrderStatus
     {
         $payment = $paymentRequest->getPayment();
-        $status = $this->paymentDetailsUpdater->status($payment);
+        $rawStatus = $this->paymentDetails->status($payment);
+
+        if (null === $rawStatus) {
+            return null;
+        }
+
+        $status = PayUOrderStatus::tryFrom($rawStatus);
 
         if (null === $status) {
-            return;
+            return null;
         }
 
-        $transition = PayUOrderStatus::tryFrom($status)?->paymentTransition();
-
-        if (null === $transition) {
-            return;
-        }
+        $transition = $this->syliusTransition($status->paymentTransition());
 
         if (!$this->stateMachine->can($payment, PaymentTransitions::GRAPH, $transition)) {
-            return;
+            return null;
         }
 
         $this->stateMachine->apply($payment, PaymentTransitions::GRAPH, $transition);
+
+        return $status;
+    }
+
+    private function syliusTransition(PaymentTransition $transition): string
+    {
+        return match ($transition) {
+            PaymentTransition::Process => PaymentTransitions::TRANSITION_PROCESS,
+            PaymentTransition::Authorize => PaymentTransitions::TRANSITION_AUTHORIZE,
+            PaymentTransition::Complete => PaymentTransitions::TRANSITION_COMPLETE,
+            PaymentTransition::Cancel => PaymentTransitions::TRANSITION_CANCEL,
+            PaymentTransition::Fail => PaymentTransitions::TRANSITION_FAIL,
+        };
     }
 }

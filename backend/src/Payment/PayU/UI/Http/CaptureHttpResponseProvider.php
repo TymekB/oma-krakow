@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\OrderPay;
+namespace App\Payment\PayU\UI\Http;
 
 use Sylius\Bundle\PaymentBundle\Provider\HttpResponseProviderInterface;
 use Sylius\Bundle\ResourceBundle\Controller\RequestConfiguration;

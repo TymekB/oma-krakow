@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\CommandProvider;
+namespace App\Payment\PayU\UI\CommandProvider;
 
-use App\Payment\PayU\Command\NotifyPaymentRequest;
+use App\Payment\PayU\Application\Command\NotifyPaymentRequest;
 use Sylius\Bundle\PaymentBundle\CommandProvider\PaymentRequestCommandProviderInterface;
 use Sylius\Component\Payment\Model\PaymentRequestInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;

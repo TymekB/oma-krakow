@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU;
+namespace App\Payment\PayU\Domain;
 
 final class PayUGateway
 {

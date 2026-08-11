@@ -9,6 +9,11 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         use_savepoints: true
+        types:
+            oma_site_content_key: App\SiteContent\Infrastructure\Doctrine\Type\ContentKeyType
+            oma_site_content_value: App\SiteContent\Infrastructure\Doctrine\Type\ContentValueType
+            oma_site_content_author: App\SiteContent\Infrastructure\Doctrine\Type\AuthorType
+            oma_site_content_snapshot: App\SiteContent\Infrastructure\Doctrine\Type\ContentSnapshotType
     orm:
         auto_generate_proxy_classes: true
         auto_mapping: true
@@ -19,6 +24,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+            SiteContent:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/SiteContent/Infrastructure/Doctrine/Mapping'
+                prefix: 'App\SiteContent\Domain\Model'
+                alias: SiteContent
 
 when@prod: &doctrine_prod
     doctrine:

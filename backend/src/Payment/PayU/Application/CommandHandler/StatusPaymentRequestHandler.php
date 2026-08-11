@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\CommandHandler;
+namespace App\Payment\PayU\Application\CommandHandler;
 
-use App\Payment\PayU\Api\PayUApiException;
-use App\Payment\PayU\Api\PayUClientInterface;
-use App\Payment\PayU\Api\PayUCredentialsProvider;
-use App\Payment\PayU\Command\StatusPaymentRequest;
-use App\Payment\PayU\Payment\PaymentDetailsUpdater;
-use App\Payment\PayU\Processor\PaymentTransitionProcessor;
+use App\Payment\PayU\Application\Command\StatusPaymentRequest;
+use App\Payment\PayU\Domain\Event\PayUPaymentStatusChanged;
+use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\Port\PayUApi;
+use App\Payment\PayU\Infrastructure\Sylius\GatewayConfigCredentialsProvider;
+use App\Payment\PayU\Infrastructure\Sylius\PaymentDetails;
+use App\Payment\PayU\Infrastructure\Sylius\PaymentTransitionProcessor;
+use App\Shared\Application\Event\EventPublisher;
+use App\Shared\Domain\Clock;
 use Psr\Log\LoggerInterface;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
 use Sylius\Bundle\PaymentBundle\Provider\PaymentRequestProviderInterface;
@@ -22,11 +25,13 @@ final readonly class StatusPaymentRequestHandler
 {
     public function __construct(
         private PaymentRequestProviderInterface $paymentRequestProvider,
-        private PayUCredentialsProvider $credentialsProvider,
-        private PayUClientInterface $client,
-        private PaymentDetailsUpdater $paymentDetailsUpdater,
+        private GatewayConfigCredentialsProvider $credentialsProvider,
+        private PayUApi $payU,
+        private PaymentDetails $paymentDetails,
         private PaymentTransitionProcessor $paymentTransitionProcessor,
         private StateMachineInterface $stateMachine,
+        private EventPublisher $eventPublisher,
+        private Clock $clock,
         private LoggerInterface $logger,
     ) {
     }
@@ -35,7 +40,7 @@ final readonly class StatusPaymentRequestHandler
     {
         $paymentRequest = $this->paymentRequestProvider->provide($command);
         $payment = $paymentRequest->getPayment();
-        $orderId = $this->paymentDetailsUpdater->orderId($payment);
+        $orderId = $this->paymentDetails->orderId($payment);
 
         if (null === $orderId) {
             $this->fail($paymentRequest, 'Payment has no PayU order identifier.');
@@ -44,18 +49,17 @@ final readonly class StatusPaymentRequestHandler
         }
 
         try {
-            $order = $this->client->retrieveOrder(
+            $order = $this->payU->retrieveOrder(
                 $this->credentialsProvider->provide($paymentRequest->getMethod()),
                 $orderId,
             );
         } catch (PayUApiException $exception) {
             $this->logger->error(
-                'PayU order status could not be retrieved.',
-                [
+                'PayU order status could not be retrieved.', [
                 'paymentRequest' => $paymentRequest->getId(),
                 'payuOrderId' => $orderId,
                 'exception' => $exception->getMessage(),
-                ],
+                ]
             );
 
             $this->fail($paymentRequest, $exception->getMessage());
@@ -63,8 +67,8 @@ final readonly class StatusPaymentRequestHandler
             return;
         }
 
-        $this->paymentDetailsUpdater->update($payment, $order);
-        $this->paymentTransitionProcessor->process($paymentRequest);
+        $this->paymentDetails->update($payment, $order);
+        $this->publishStatus($paymentRequest);
 
         $this->stateMachine->apply(
             $paymentRequest,
@@ -81,6 +85,24 @@ final readonly class StatusPaymentRequestHandler
             $paymentRequest,
             PaymentRequestTransitions::GRAPH,
             PaymentRequestTransitions::TRANSITION_FAIL,
+        );
+    }
+
+    private function publishStatus(PaymentRequestInterface $paymentRequest): void
+    {
+        $status = $this->paymentTransitionProcessor->process($paymentRequest);
+
+        if (null === $status) {
+            return;
+        }
+
+        $this->eventPublisher->publishOne(
+            new PayUPaymentStatusChanged(
+                $paymentRequest->getPayment()->getId(),
+                $status,
+                $status->paymentTransition(),
+                $this->clock->now(),
+            ),
         );
     }
 }

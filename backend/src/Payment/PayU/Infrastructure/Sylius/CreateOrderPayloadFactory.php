@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Payload;
+namespace App\Payment\PayU\Infrastructure\Sylius;
 
-use App\Payment\PayU\Api\PayUApiException;
-use App\Payment\PayU\Api\PayUCredentials;
+use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\ValueObject\PayUCredentials;
 use Sylius\Bundle\CoreBundle\OrderPay\Provider\UrlProviderInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\PaymentInterface;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\SiteContent\Domain\Model\ContentRevision" table="oma_landing_revision">
+        <id name="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="snapshot" column="snapshot" type="oma_site_content_snapshot"/>
+        <field name="changedKeys" column="changedKeys" type="json"/>
+        <field name="author" column="author" type="oma_site_content_author" length="128"/>
+        <field name="reason" column="reason" type="string" length="32"
+               enum-type="App\SiteContent\Domain\ValueObject\RevisionReason"/>
+        <field name="createdAt" column="createdAt" type="datetime_immutable"/>
+    </entity>
+
+</doctrine-mapping>

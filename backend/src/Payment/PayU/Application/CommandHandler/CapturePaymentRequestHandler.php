@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\CommandHandler;
+namespace App\Payment\PayU\Application\CommandHandler;
 
-use App\Payment\PayU\Api\PayUApiException;
-use App\Payment\PayU\Api\PayUClientInterface;
-use App\Payment\PayU\Api\PayUCredentialsProvider;
-use App\Payment\PayU\Api\PayUOrderStatus;
-use App\Payment\PayU\Command\CapturePaymentRequest;
-use App\Payment\PayU\Payload\CreateOrderPayloadFactory;
-use App\Payment\PayU\Payment\PaymentDetailsUpdater;
-use App\Payment\PayU\Processor\PaymentTransitionProcessor;
+use App\Payment\PayU\Application\Command\CapturePaymentRequest;
+use App\Payment\PayU\Domain\Event\PayUPaymentStatusChanged;
+use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\Model\PayUOrderStatus;
+use App\Payment\PayU\Domain\Port\PayUApi;
+use App\Payment\PayU\Infrastructure\Sylius\CreateOrderPayloadFactory;
+use App\Payment\PayU\Infrastructure\Sylius\GatewayConfigCredentialsProvider;
+use App\Payment\PayU\Infrastructure\Sylius\PaymentDetails;
+use App\Payment\PayU\Infrastructure\Sylius\PaymentTransitionProcessor;
+use App\Shared\Application\Event\EventPublisher;
+use App\Shared\Domain\Clock;
 use Psr\Log\LoggerInterface;
 use Sylius\Abstraction\StateMachine\StateMachineInterface;
 use Sylius\Bundle\PaymentBundle\Provider\PaymentRequestProviderInterface;
@@ -24,12 +27,14 @@ final readonly class CapturePaymentRequestHandler
 {
     public function __construct(
         private PaymentRequestProviderInterface $paymentRequestProvider,
-        private PayUCredentialsProvider $credentialsProvider,
+        private GatewayConfigCredentialsProvider $credentialsProvider,
         private CreateOrderPayloadFactory $createOrderPayloadFactory,
-        private PayUClientInterface $client,
-        private PaymentDetailsUpdater $paymentDetailsUpdater,
+        private PayUApi $payU,
+        private PaymentDetails $paymentDetails,
         private PaymentTransitionProcessor $paymentTransitionProcessor,
         private StateMachineInterface $stateMachine,
+        private EventPublisher $eventPublisher,
+        private Clock $clock,
         private LoggerInterface $logger,
     ) {
     }
@@ -44,18 +49,17 @@ final readonly class CapturePaymentRequestHandler
 
         try {
             $credentials = $this->credentialsProvider->provide($paymentRequest->getMethod());
-            $createdOrder = $this->client->createOrder(
+            $createdOrder = $this->payU->createOrder(
                 $credentials,
                 $this->createOrderPayloadFactory->create($paymentRequest, $credentials),
             );
         } catch (PayUApiException $exception) {
             $this->logger->error(
-                'PayU order creation failed.',
-                [
+                'PayU order creation failed.', [
                 'paymentRequest' => $paymentRequest->getId(),
                 'payment' => $paymentRequest->getPayment()->getId(),
                 'exception' => $exception->getMessage(),
-                ],
+                ]
             );
 
             $paymentRequest->setResponseData(['error' => $exception->getMessage()]);
@@ -70,21 +74,38 @@ final readonly class CapturePaymentRequestHandler
 
         $paymentRequest->setResponseData(['redirectUri' => $createdOrder->redirectUri]);
 
-        $this->paymentDetailsUpdater->update(
-            $paymentRequest->getPayment(),
-            [
+        $this->paymentDetails->update(
+            $paymentRequest->getPayment(), [
             'orderId' => $createdOrder->orderId,
             'extOrderId' => $createdOrder->extOrderId,
             'status' => PayUOrderStatus::New->value,
-            ],
+            ]
         );
 
-        $this->paymentTransitionProcessor->process($paymentRequest);
+        $this->publishStatus($paymentRequest);
 
         $this->stateMachine->apply(
             $paymentRequest,
             PaymentRequestTransitions::GRAPH,
             PaymentRequestTransitions::TRANSITION_PROCESS,
+        );
+    }
+
+    private function publishStatus(PaymentRequestInterface $paymentRequest): void
+    {
+        $status = $this->paymentTransitionProcessor->process($paymentRequest);
+
+        if (null === $status) {
+            return;
+        }
+
+        $this->eventPublisher->publishOne(
+            new PayUPaymentStatusChanged(
+                $paymentRequest->getPayment()->getId(),
+                $status,
+                $status->paymentTransition(),
+                $this->clock->now(),
+            ),
         );
     }
 }

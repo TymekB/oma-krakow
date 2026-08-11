@@ -1,0 +1,19 @@
+framework:
+    messenger:
+        buses:
+            oma.command_bus:
+                middleware:
+                    - 'dispatch_after_current_bus'
+                    - 'validation'
+                    - 'doctrine_transaction'
+
+            oma.query_bus:
+                middleware:
+                    - 'validation'
+
+            # dispatch_after_current_bus musi być też tutaj: to ta magistrala
+            # odbiera ostemplowane zdarzenia i wstrzymuje je do czasu commitu
+            oma.event_bus:
+                default_middleware: allow_no_handlers
+                middleware:
+                    - 'dispatch_after_current_bus'

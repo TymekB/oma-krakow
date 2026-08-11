@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Api;
+namespace App\Payment\PayU\Domain\ValueObject;
 
 enum PayUPayMethod: string
 {

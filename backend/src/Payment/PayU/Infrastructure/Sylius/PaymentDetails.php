@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Payment;
+namespace App\Payment\PayU\Infrastructure\Sylius;
 
-use App\Payment\PayU\PayUGateway;
+use App\Payment\PayU\Domain\PayUGateway;
 use Sylius\Component\Payment\Model\PaymentInterface;
 
-final readonly class PaymentDetailsUpdater
+final readonly class PaymentDetails
 {
     /**
      * @param array<array-key, mixed> $payuOrder

@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Api;
-
-use Sylius\Component\Payment\PaymentTransitions;
+namespace App\Payment\PayU\Domain\Model;
 
 enum PayUOrderStatus: string
 {
@@ -15,14 +13,14 @@ enum PayUOrderStatus: string
     case Canceled = 'CANCELED';
     case Rejected = 'REJECTED';
 
-    public function paymentTransition(): string
+    public function paymentTransition(): PaymentTransition
     {
         return match ($this) {
-            self::New, self::Pending => PaymentTransitions::TRANSITION_PROCESS,
-            self::WaitingForConfirmation => PaymentTransitions::TRANSITION_AUTHORIZE,
-            self::Completed => PaymentTransitions::TRANSITION_COMPLETE,
-            self::Canceled => PaymentTransitions::TRANSITION_CANCEL,
-            self::Rejected => PaymentTransitions::TRANSITION_FAIL,
+            self::New, self::Pending => PaymentTransition::Process,
+            self::WaitingForConfirmation => PaymentTransition::Authorize,
+            self::Completed => PaymentTransition::Complete,
+            self::Canceled => PaymentTransition::Cancel,
+            self::Rejected => PaymentTransition::Fail,
         };
     }
 }

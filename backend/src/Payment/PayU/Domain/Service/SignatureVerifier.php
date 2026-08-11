@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Signature;
+namespace App\Payment\PayU\Domain\Service;
 
 final readonly class SignatureVerifier
 {

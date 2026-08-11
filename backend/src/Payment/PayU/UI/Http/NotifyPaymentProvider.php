@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Provider;
+namespace App\Payment\PayU\UI\Http;
 
-use App\Payment\PayU\Api\PayUCredentialsProvider;
-use App\Payment\PayU\Payload\NotificationExtractor;
-use App\Payment\PayU\PayUGateway;
-use App\Payment\PayU\Signature\SignatureVerifier;
+use App\Payment\PayU\Infrastructure\Sylius\GatewayConfigCredentialsProvider;
+use App\Payment\PayU\Infrastructure\Sylius\NotificationExtractor;
+use App\Payment\PayU\Domain\PayUGateway;
+use App\Payment\PayU\Domain\Service\SignatureVerifier;
 use Psr\Log\LoggerInterface;
 use Sylius\Bundle\PaymentBundle\Attribute\AsNotifyPaymentProvider;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;
@@ -32,7 +32,7 @@ final readonly class NotifyPaymentProvider implements NotifyPaymentProviderInter
      */
     public function __construct(
         private GatewayFactoryNameProviderInterface $gatewayFactoryNameProvider,
-        private PayUCredentialsProvider $credentialsProvider,
+        private GatewayConfigCredentialsProvider $credentialsProvider,
         private SignatureVerifier $signatureVerifier,
         private NotificationExtractor $notificationExtractor,
         #[Autowire(service: 'sylius.repository.payment_request')]

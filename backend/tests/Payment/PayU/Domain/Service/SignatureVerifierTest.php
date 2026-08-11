@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Payment\PayU\Signature;
+namespace App\Tests\Payment\PayU\Domain\Service;
 
-use App\Payment\PayU\Signature\SignatureVerifier;
+use App\Payment\PayU\Domain\Service\SignatureVerifier;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

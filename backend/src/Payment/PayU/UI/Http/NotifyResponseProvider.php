@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Provider;
+namespace App\Payment\PayU\UI\Http;
 
-use App\Payment\PayU\PayUGateway;
+use App\Payment\PayU\Domain\PayUGateway;
 use Sylius\Bundle\PaymentBundle\Provider\GatewayFactoryNameProviderInterface;
 use Sylius\Bundle\PaymentBundle\Provider\NotifyResponseProviderInterface;
 use Sylius\Component\Payment\Model\PaymentRequestInterface;

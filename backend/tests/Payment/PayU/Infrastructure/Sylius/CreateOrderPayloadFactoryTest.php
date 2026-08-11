@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Payment\PayU\Payload;
+namespace App\Tests\Payment\PayU\Infrastructure\Sylius;
 
-use App\Payment\PayU\Api\PayUCredentials;
-use App\Payment\PayU\Api\PayUEnvironment;
-use App\Payment\PayU\Api\PayUPayMethod;
-use App\Payment\PayU\Payload\CreateOrderPayloadFactory;
+use App\Payment\PayU\Domain\ValueObject\PayUCredentials;
+use App\Payment\PayU\Domain\ValueObject\PayUEnvironment;
+use App\Payment\PayU\Domain\ValueObject\PayUPayMethod;
+use App\Payment\PayU\Infrastructure\Sylius\CreateOrderPayloadFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 use Sylius\Bundle\CoreBundle\OrderPay\Provider\UrlProviderInterface;

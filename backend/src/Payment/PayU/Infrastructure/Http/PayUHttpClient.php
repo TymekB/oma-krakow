@@ -2,17 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Api;
+namespace App\Payment\PayU\Infrastructure\Http;
 
-use Symfony\Component\DependencyInjection\Attribute\AsAlias;
+use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\Port\PayUApi;
+use App\Payment\PayU\Domain\ValueObject\PayUCreatedOrder;
+use App\Payment\PayU\Domain\ValueObject\PayUCredentials;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[AsAlias(PayUClientInterface::class)]
-final readonly class PayUClient implements PayUClientInterface
+final readonly class PayUHttpClient implements PayUApi
 {
     private const OAUTH_PATH = '/pl/standard/user/oauth/authorize';
 

@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Payment\PayU\Api;
+namespace App\Payment\PayU\Infrastructure\Sylius;
 
+use App\Payment\PayU\Domain\Exception\PayUApiException;
+use App\Payment\PayU\Domain\ValueObject\PayUCredentials;
+use App\Payment\PayU\Domain\ValueObject\PayUEnvironment;
 use Sylius\Component\Payment\Model\GatewayConfigInterface;
 use Sylius\Component\Payment\Model\PaymentMethodInterface;
 
-final readonly class PayUCredentialsProvider
+final readonly class GatewayConfigCredentialsProvider
 {
     public function provide(?PaymentMethodInterface $paymentMethod): PayUCredentials
     {
