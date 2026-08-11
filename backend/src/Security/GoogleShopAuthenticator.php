@@ -81,10 +81,11 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
         $this->logger->error(
-            'Logowanie przez Google nie powiodlo sie.', [
+            'Logowanie przez Google nie powiodlo sie.',
+            [
             'exception' => $exception,
             'google_error' => $request->query->get('error'),
-            ]
+            ],
         );
 
         $session = $request->getSession();
@@ -117,11 +118,6 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
         return $this->createShopUser($googleUser, $email, $canonicalEmail);
     }
 
-    /**
-     * Konto zalozone w sklepie i nigdy niepotwierdzone mailem jest wylaczone, wiec
-     * logowanie przez Google konczylo sie bledem. Google potwierdza wlasnosc adresu,
-     * wiec taka weryfikacja jest rownowazna klknieciu w link z maila.
-     */
     private function activateUnverifiedUser(ShopUserInterface $shopUser, GoogleUser $googleUser): void
     {
         if ($shopUser->isEnabled() && $shopUser->isVerified()) {
