@@ -24,11 +24,11 @@ x-app-env: &app-env
   APPLE_PAY_CERT_PATH: ${OMA_APPLE_PAY_CERT_PATH:-}
   APPLE_PAY_CERT_KEY_PATH: ${OMA_APPLE_PAY_CERT_KEY_PATH:-}
   APPLE_PAY_CERT_PASSPHRASE: ${OMA_APPLE_PAY_CERT_PASSPHRASE:-}
-  MESSENGER_TRANSPORT_DSN: doctrine://default
-  SYLIUS_MESSENGER_TRANSPORT_MAIN_DSN: doctrine://default
-  SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: doctrine://default?queue_name=main_failed
-  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: doctrine://default?queue_name=catalog_promotion_removal
-  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: doctrine://default?queue_name=catalog_promotion_removal_failed
+  MESSENGER_TRANSPORT_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/messages
+  SYLIUS_MESSENGER_TRANSPORT_MAIN_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/main
+  SYLIUS_MESSENGER_TRANSPORT_MAIN_FAILED_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/main_failed
+  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/catalog_promotion_removal
+  SYLIUS_MESSENGER_TRANSPORT_CATALOG_PROMOTION_REMOVAL_FAILED_DSN: amqp://${OMA_RABBITMQ_USER:-oma}:${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}@rabbitmq:5672/%2f/catalog_promotion_removal_failed
 
 services:
   app:
@@ -55,6 +55,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   worker:
     image: ${OMA_IMAGE:?OMA_IMAGE is required}
@@ -80,6 +82,27 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    mem_limit: ${OMA_RABBITMQ_MEM:-512m}
+    environment:
+      RABBITMQ_DEFAULT_USER: ${OMA_RABBITMQ_USER:-oma}
+      RABBITMQ_DEFAULT_PASS: ${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}
+    ports:
+      - '127.0.0.1:${OMA_RABBITMQ_UI_PORT:-15672}:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq-oma.conf:/etc/rabbitmq/conf.d/10-oma.conf:ro
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 90s
 
   mailpit:
     image: axllent/mailpit:latest
@@ -131,6 +154,7 @@ services:
 
 volumes:
   mysql_data:
+  rabbitmq_data:
   mailpit_data:
   media:
   jwt:

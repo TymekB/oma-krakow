@@ -48,6 +48,8 @@ services:
   worker:
     build:
       context: ./docker/frankenphp
+    restart: unless-stopped
+    stop_grace_period: 30s
     command:
       - php
       - bin/console
@@ -96,10 +98,10 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
-      interval: 10s
-      timeout: 10s
+      interval: 15s
+      timeout: 30s
       retries: 12
-      start_period: 30s
+      start_period: 60s
 
   mailpit:
     image: axllent/mailpit:latest

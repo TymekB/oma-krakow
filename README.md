@@ -51,18 +51,44 @@ dodaje jedną sztukę". Panelu to nie dotyczy — admin chodzi na pełnych prze�
 
 ## Kolejki i promocje z datami
 
-Transporty messengera na localu idą na **RabbitMQ** (`symfony/amqp-messenger`, rozszerzenie `amqp`
-w obrazie). Nie jest to kosmetyka: Sylius planuje start i koniec **promocji katalogowej** przez
+Transporty messengera idą na **RabbitMQ na obu środowiskach** (`symfony/amqp-messenger`, rozszerzenie
+`amqp` w obrazie). Nie jest to kosmetyka: Sylius planuje start i koniec **promocji katalogowej** przez
 `DelayStamp` — wylicza opóźnienie do daty startu i do daty końca i wysyła komunikaty z tym
 opóźnieniem. Respektują je tylko transporty asynchroniczne. Na `sync://` opóźnienie jest ignorowane,
 komunikaty wykonują się od razu przy zapisie i **daty promocji przestają cokolwiek znaczyć**.
 
-Dlatego promocje z terminem wymagają działającego konsumenta:
+Jak to wygląda w RabbitMQ: komunikat z opóźnieniem nie leci od razu na kolejkę `main`, tylko na
+tymczasową kolejkę `delay_main__<ms>_delay` z `x-message-ttl` równym opóźnieniu. Po wygaśnięciu TTL
+broker przerzuca go przez dead-letter exchange na `main`, a kolejka opóźniająca kasuje się sama.
+Dlatego zaplanowaną promocję widać w panelu RabbitMQ jako osobną kolejkę z jedną wiadomością:
 
 ```bash
+docker compose exec rabbitmq rabbitmqctl list_queues name messages
+```
+
+Sprawdzone w tym stacku (RabbitMQ 3.13.7): opóźnienie do **roku** przechodzi bez problemu, więc
+praktycznego limitu na daty promocji nie ma (błąd `PRECONDITION_FAILED` na `x-expires` pojawia się
+przy wartościach rzędu 10 lat).
+
+**Promocje z terminem wymagają działającego konsumenta** — i to jest najczęstsza przyczyna „daty nie
+działają". Worker chodzi z `--time-limit=3600`, czyli po godzinie kończy pracę z kodem 0. Bez
+`restart: unless-stopped` nie wstaje ponownie: komunikaty spokojnie lądują na `main` i tam zostają,
+bo nikt ich nie zdejmuje. Oba compose'y mają tę politykę ustawioną — jeśli kiedyś ją usuniesz, daty
+promocji przestaną działać po pierwszej godzinie od startu stacku.
+
+```bash
+docker compose ps -a worker                      # Exited = promocje z datami nie zadziałają
 docker compose logs -f worker
 docker compose exec app php bin/console messenger:stats
 ```
+
+Uwaga na `list_queues consumers` — transport AMQP Symfony **odpytuje** kolejkę (`basic_get`), a nie
+subskrybuje, więc zdrowy worker pokazuje tam `0`. Żywotność sprawdzaj stanem kontenera i logiem
+`Consuming messages from transports`; tak robi to `deploy/smoke-test.sh`.
+
+Wiadomość, której worker nie potrafi zdeserializować (np. wrzucona ręcznie, bez podpisu), wywala
+`messenger:consume` i przy `restart: unless-stopped` daje pętlę restartów. Kolejkę czyści się wtedy
+`rabbitmqctl purge_queue main`.
 
 ## Konfiguracja usług zewnętrznych
 
@@ -282,8 +308,8 @@ Merge do `master` uruchamia `.github/workflows/deploy.yml`, który:
 2. kopiuje pliki stacku na serwer i wpisuje nowy tag obrazu do `/opt/oma-prod/.env`,
 3. odpala `deploy/remote-deploy.sh` (migracje przy zatrzymanym workerze, `compose up --wait`,
    `image prune`),
-4. odpala `deploy/smoke-test.sh` — stan kontenerów `app`/`worker`/`mysql` oraz `/`, `/sklep/`,
-   `/admin/login`.
+4. odpala `deploy/smoke-test.sh` — stan kontenerów `app`/`worker`/`mysql`/`rabbitmq`, potwierdzenie
+   że worker wszedł w pętlę konsumowania, oraz `/`, `/sklep/`, `/admin/login`.
 
 Obraz jest self-contained: `vendor/`, assety Encore i landing są w nim wypalone, więc na serwerze
 nie ma kodu z repo ani bind-mountów. Trwałe dane to wolumeny: baza, `public/media`, klucze JWT
@@ -292,6 +318,36 @@ i sesje.
 Skrypty wdrożeniowe są w plikach, nie inline w YAML-u, bo `docker compose run` przechwytuje stdin —
 skrypt podany przez `bash -s` zostałby po części zjedzony przez kontener migracji i reszta kroków
 nigdy by się nie wykonała (przy zerowym kodzie wyjścia, czyli fałszywie „zielono").
+
+### RabbitMQ na produkcji
+
+Produkcja stoi na tym samym brokerze co local — to świadoma decyzja o parytecie środowisk: kolejki
+zachowują się identycznie tam, gdzie testujesz, i tam, gdzie sprzedajesz.
+
+Wymagania po stronie serwera:
+
+- **`OMA_RABBITMQ_PASSWORD` w `/opt/oma-prod/.env`** (obowiązkowe — bez niego `compose config` się nie
+  złoży). Użyj hasła alfanumerycznego: trafia do DSN-a `amqp://user:haslo@rabbitmq:5672/...`, więc
+  `@`, `:` albo `/` rozjechałyby URL. Login to `OMA_RABBITMQ_USER` (domyślnie `oma`); użytkownik
+  `guest` nie jest używany.
+- Pamięć: `OMA_RABBITMQ_MEM` (domyślnie `512m`) plus watermark w `deploy/rabbitmq-oma.conf`
+  (`256MiB` absolutnie, nie relatywnie — wartość relatywna liczyłaby się od RAM-u maszyny i przy
+  `mem_limit` skończyłaby się OOM-em).
+- Panel RabbitMQ wisi na `127.0.0.1:15672`, czyli tylko przez tunel SSH — Mikrus wystawia publicznie
+  jedynie dwa porty TCP i broker do nich nie należy.
+
+**Przy pierwszym wdrożeniu po tej zmianie** transport przechodzi z `doctrine://default` na AMQP.
+Komunikaty zaplanowane wcześniej siedzą w tabeli `messenger_messages` i nikt ich już nie odbierze —
+nowy worker patrzy tylko na RabbitMQ. Sprawdź, czy coś tam czeka:
+
+```bash
+docker compose exec -T mysql mysql -usylius -p"$OMA_DB_PASSWORD" sylius_oma \
+  -e "select queue_name, count(*), min(available_at) from messenger_messages group by queue_name"
+```
+
+Jeśli są tam zaplanowane starty/końce promocji, po wdrożeniu wejdź w panelu w każdą promocję z datą
+i zapisz ją — Sylius przy zapisie wysyła zdarzenia od nowa (`CatalogPromotionAnnouncer`), tym razem
+na RabbitMQ. Tabelę `messenger_messages` można potem wyczyścić.
 
 ### Hostname kanału
 
@@ -320,7 +376,8 @@ TLS-a, więc nieużywane).
 
 Limity pamięci (`mem_limit`) zostają, choć maszyna jest dedykowana: bez swapa (LXC) wyciek w PHP
 ubija wtedy kontener, a nie cały serwer. Budżet jest ustawiony z dużym zapasem — przy normalnym
-ruchu stack bierze ~600 MB z 8 GB (`app` ~290 MB, `worker` ~120 MB, `mysql` ~175 MB).
+ruchu stack bierze ~600 MB z 8 GB (`app` ~290 MB, `worker` ~120 MB, `mysql` ~175 MB), do czego
+dochodzi `rabbitmq` z limitem `512m` i watermarkiem `256MiB`.
 
 **Worker mode FrankenPHP jest wyłączony i musi taki zostać** — psuł dodawanie do koszyka. Kernel
 Symfony żyje wtedy między requestami, a `Sylius\Component\Channel\Context\CachedPerRequestChannelContext`
