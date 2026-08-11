@@ -1,0 +1,38 @@
+{% extends '@SyliusCore/Email/layout.html.twig' %}
+
+{% block subject %}
+    {{ 'oma.email.admin_customer_registered.subject'|trans({}, null, localeCode)|raw }}
+{% endblock %}
+
+{% block content %}
+    {% import 'email/_components.html.twig' as oma %}
+
+    {% set label_style = 'font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8d83; padding-bottom: 4px;' %}
+
+    {{ oma.greeting('oma.email.admin_customer_registered.heading'|trans({}, null, localeCode)) }}
+
+    <div style="{{ label_style }}">{{ 'oma.email.admin_customer_registered.account'|trans({}, null, localeCode) }}</div>
+    <div style="padding-bottom: 24px;">
+        {% set customer_name = customer.fullName|default('')|trim %}
+        {% if customer_name is not empty %}
+            <div style="color: #2a2320;">{{ customer_name }}</div>
+        {% endif %}
+
+        <div><a href="mailto:{{ customer.email }}" style="color: #8a3746; text-decoration: none;">{{ customer.email }}</a></div>
+
+        {% set phone = customer.phoneNumber|default('')|trim %}
+        {% if phone is not empty %}
+            <div style="color: #6f6259;">{{ phone }}</div>
+        {% endif %}
+
+        {% if customer.createdAt is not null %}
+            <div style="color: #6f6259;">{{ customer.createdAt|date('d.m.Y H:i') }}</div>
+        {% endif %}
+    </div>
+
+    {% if customer.id is not null %}
+        <div style="text-align: center; padding-top: 8px;">
+            {{ oma.button(url('sylius_admin_customer_show', {'id': customer.id}), 'oma.email.admin_customer_registered.open_in_admin'|trans({}, null, localeCode)) }}
+        </div>
+    {% endif %}
+{% endblock %}

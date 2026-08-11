@@ -107,6 +107,18 @@ oma:
             quantity: '%count% szt.'
             payment: 'Płatność'
             open_in_admin: 'Otwórz w panelu'
+        admin_customer_registered:
+            subject: 'Nowe konto klienta w sklepie OMA'
+            heading: 'Nowy użytkownik'
+            account: 'Założone konto'
+            open_in_admin: 'Otwórz w panelu'
+        admin_product_review_created:
+            subject: 'Nowa opinia o produkcie w sklepie OMA'
+            heading: 'Nowa opinia'
+            product: 'Produkt'
+            review: 'Treść opinii'
+            author: 'Autor'
+            open_in_admin: 'Otwórz w panelu'
     notification:
         subheader: 'Zdecyduj, które maile mają wychodzić automatycznie.'
         saved: 'Zapisano ustawienia zdarzeń.'
@@ -114,6 +126,12 @@ oma:
         admin_order_placed:
             label: 'Nowe zamówienie — powiadomienie dla administratora'
             description: 'Mail na adres administratora z listą kupionych produktów i danymi kupującego.'
+        admin_customer_registered:
+            label: 'Nowy użytkownik — powiadomienie dla administratora'
+            description: 'Mail na adres administratora, gdy klient założy konto w sklepie.'
+        admin_product_review_created:
+            label: 'Nowa opinia — powiadomienie dla administratora'
+            description: 'Mail na adres administratora z oceną i treścią nowej opinii o produkcie.'
         order_confirmation:
             label: 'Potwierdzenie zamówienia — do klienta'
             description: 'Mail wysyłany klientowi po złożeniu zamówienia. Nie blokuje ręcznego wysłania ponownie z widoku zamówienia.'

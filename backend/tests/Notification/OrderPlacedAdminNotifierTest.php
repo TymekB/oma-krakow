@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Notification;
 
+use App\Notification\AdminRecipient;
 use App\Notification\OrderPlacedAdminNotifier;
 use PHPUnit\Framework\TestCase;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\OrderInterface;
-use Sylius\Component\Mailer\Sender\SenderInterface;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 final class OrderPlacedAdminNotifierTest extends TestCase
@@ -20,9 +21,10 @@ final class OrderPlacedAdminNotifierTest extends TestCase
     public function testShouldSendNotificationToConfiguredRecipient(): void
     {
         $sender = new RecordingSender();
-        $order = $this->order();
 
-        (new OrderPlacedAdminNotifier($sender, self::CONFIGURED_RECIPIENT))(new GenericEvent($order));
+        (new OrderPlacedAdminNotifier($sender, $this->recipient(self::CONFIGURED_RECIPIENT)))(
+            new GenericEvent($this->order()),
+        );
 
         self::assertSame([[self::CONFIGURED_RECIPIENT]], $sender->recipients);
         self::assertSame([OrderPlacedAdminNotifier::EMAIL_CODE], $sender->codes);
@@ -32,7 +34,7 @@ final class OrderPlacedAdminNotifierTest extends TestCase
     {
         $sender = new RecordingSender();
 
-        (new OrderPlacedAdminNotifier($sender, ''))(new GenericEvent($this->order()));
+        (new OrderPlacedAdminNotifier($sender, $this->recipient('')))(new GenericEvent($this->order()));
 
         self::assertSame([[self::CHANNEL_CONTACT]], $sender->recipients);
     }
@@ -42,7 +44,7 @@ final class OrderPlacedAdminNotifierTest extends TestCase
         $sender = new RecordingSender();
         $order = $this->order();
 
-        (new OrderPlacedAdminNotifier($sender, self::CONFIGURED_RECIPIENT))(new GenericEvent($order));
+        (new OrderPlacedAdminNotifier($sender, $this->recipient(self::CONFIGURED_RECIPIENT)))(new GenericEvent($order));
 
         self::assertSame($order, $sender->data[0]['order']);
         self::assertSame($order->getChannel(), $sender->data[0]['channel']);
@@ -53,7 +55,9 @@ final class OrderPlacedAdminNotifierTest extends TestCase
     {
         $sender = new RecordingSender();
 
-        (new OrderPlacedAdminNotifier($sender, '   '))(new GenericEvent($this->order(channelContact: null)));
+        (new OrderPlacedAdminNotifier($sender, $this->recipient('   ')))(
+            new GenericEvent($this->order(channelContact: null)),
+        );
 
         self::assertSame([], $sender->codes);
     }
@@ -62,7 +66,9 @@ final class OrderPlacedAdminNotifierTest extends TestCase
     {
         $sender = new RecordingSender();
 
-        (new OrderPlacedAdminNotifier($sender, self::CONFIGURED_RECIPIENT))(new GenericEvent(new \stdClass()));
+        (new OrderPlacedAdminNotifier($sender, $this->recipient(self::CONFIGURED_RECIPIENT)))(
+            new GenericEvent(new \stdClass()),
+        );
 
         self::assertSame([], $sender->codes);
     }
@@ -77,5 +83,13 @@ final class OrderPlacedAdminNotifierTest extends TestCase
         $order->method('getLocaleCode')->willReturn('pl_PL');
 
         return $order;
+    }
+
+    private function recipient(string $configured): AdminRecipient
+    {
+        $channelContext = $this->createMock(ChannelContextInterface::class);
+        $channelContext->method('getChannel')->willReturn($this->createMock(ChannelInterface::class));
+
+        return new AdminRecipient($channelContext, $configured);
     }
 }

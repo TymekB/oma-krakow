@@ -186,23 +186,30 @@ zapisane są zaszyfrowane puste klucze. Żeby ją uruchomić: wpisz klucze testo
 w Stripe Dashboard dla PLN. Bramka jest ustawiona na `stripe_web_elements`, czyli osadzony
 Payment Element — kod BLIK wpisuje się na stronie sklepu, bez przekierowania.
 
-## Maile o zamówieniach i sekcja „Zdarzenia"
+## Powiadomienia dla administratora i sekcja „Zdarzenia"
 
-Po złożeniu zamówienia na adres administratora leci mail z numerem zamówienia, danymi kupującego
-(imię, e-mail, telefon), listą kupionych produktów, sumą oraz metodą i stanem płatności, plus
-przycisk otwierający zamówienie w panelu. Wysyłką zajmuje się `App\Notification\OrderPlacedAdminNotifier`
-podpięty pod `sylius.order.post_complete` — czyli **ten sam moment, w którym klient dostaje swoje
-potwierdzenie**: zamówienie jest złożone, ale niekoniecznie opłacone. Dlatego w mailu jest stan
-płatności, a nie założenie, że pieniądze wpłynęły.
+Trzy zdarzenia w sklepie wysyłają maila na adres administratora — każde ma własny notifier
+w `App\Notification\` i wspólne rozwiązywanie odbiorcy (`AdminRecipient`):
+
+| Zdarzenie | Wyzwalacz | Co jest w mailu |
+|---|---|---|
+| Nowe zamówienie | `sylius.order.post_complete` | numer, kupujący, produkty, suma, metoda i stan płatności |
+| Nowy użytkownik | `sylius.customer.post_register` | imię, e-mail, telefon, data założenia konta |
+| Nowa opinia | `sylius.product_review.post_create` | ocena, tytuł, treść, autor, produkt |
+
+Zamówienie leci **w tym samym momencie, w którym klient dostaje swoje potwierdzenie**: jest złożone,
+ale niekoniecznie opłacone. Dlatego w mailu jest stan płatności, a nie założenie, że pieniądze
+wpłynęły. Każdy mail ma przycisk otwierający rekord w panelu; link buduje `url()`, czyli bierze
+`DEFAULT_URI`, a nie hostname kanału — inaczej na localu wychodziłby adres bez portu.
 
 Adres odbiorcy: `ADMIN_NOTIFICATION_EMAIL`, a gdy puste — **adres kontaktowy kanału**
 (*Konfiguracja → Kanały*). Na produkcji zmiennej nie ma w `compose.prod.yaml` celowo, z tego samego
 powodu co klucze Google: pusta zmienna kontenera wygrałaby z `.env.local`.
 
-*Konfiguracja → **Zdarzenia*** (`/admin/zdarzenia`) pozwala włączyć i wyłączyć każdy z maili:
-powiadomienie dla administratora, potwierdzenie zamówienia i wysyłki dla klienta oraz wiadomość
-z formularza kontaktowego. Ustawienia siedzą w `oma_notification_setting`; brak wiersza znaczy
-„włączone", więc świeża baza zachowuje się jak dotąd.
+*Konfiguracja → **Zdarzenia*** (`/admin/zdarzenia`) pozwala włączyć i wyłączyć każdy z maili —
+trzy powyższe plus potwierdzenie zamówienia i wysyłki dla klienta oraz wiadomość z formularza
+kontaktowego. Ustawienia siedzą w `oma_notification_setting`; brak wiersza znaczy „włączone",
+więc świeża baza zachowuje się jak dotąd.
 
 Blokada działa w **dekoratorze `sylius.email_sender`** (`App\Notification\EnabledEmailsSender`), a nie
 w poszczególnych listenerach — dzięki temu jedno miejsce gasi maile niezależnie od tego, czy wysyła

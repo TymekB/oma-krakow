@@ -3,3 +3,9 @@ sylius_mailer:
         admin_order_placed:
             subject: oma.email.admin_order_placed.subject
             template: 'email/adminOrderPlaced.html.twig'
+        admin_customer_registered:
+            subject: oma.email.admin_customer_registered.subject
+            template: 'email/adminCustomerRegistered.html.twig'
+        admin_product_review_created:
+            subject: oma.email.admin_product_review_created.subject
+            template: 'email/adminProductReviewCreated.html.twig'
