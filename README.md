@@ -536,8 +536,9 @@ logo w mailach ma być pewne, podmień plik na PNG pod tą samą nazwą i ście�
 ## Wdrożenie (produkcja)
 
 Produkcja stoi na VPS Mikrus (`kate123`, 8 GB RAM / 2 vCPU, SSH na porcie `10123`) — projekt
-Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. Serwer jest dedykowany dla OMA,
-nie dzieli zasobów z innymi stackami.
+Compose `oma-prod` w `/opt/oma-prod`, własna sieć i wolumeny. **Serwer nie jest dedykowany dla OMA** —
+w przyszłości mają na nim stanąć inne aplikacje, więc stack musi trzymać się swojego budżetu pamięci
+(patrz „Budżet pamięci" niżej), a nie brać, ile się da.
 
 Adres: **https://strong-cow5239.byst.re** (landing `/`, sklep `/sklep/`, panel `/admin/`).
 
@@ -570,13 +571,50 @@ Wymagania po stronie serwera:
   złoży). Użyj hasła alfanumerycznego: trafia do DSN-a `amqp://user:haslo@rabbitmq:5672/...`, więc
   `@`, `:` albo `/` rozjechałyby URL. Login to `OMA_RABBITMQ_USER` (domyślnie `oma`); użytkownik
   `guest` nie jest używany.
-- Pamięć: `OMA_RABBITMQ_MEM` (domyślnie `512m`) plus watermark w `deploy/rabbitmq-oma.conf`
+- Pamięć: `OMA_RABBITMQ_MEM` (domyślnie `384m`) plus watermark w `deploy/rabbitmq-oma.conf`
   (`256MiB` absolutnie, nie relatywnie — wartość relatywna liczyłaby się od RAM-u maszyny i przy
-  `mem_limit` skończyłaby się OOM-em).
+  `mem_limit` skończyłaby się OOM-em). Watermark musi zostać **pod** `mem_limit`: on tylko dławi
+  publikujących, a limit kontenera zabija.
 - Panel RabbitMQ słucha na `127.0.0.1:15672` (tunel SSH) **oraz** na publicznym porcie
   `OMA_RABBITMQ_PUBLIC_PORT` (domyślnie `30123`), do którego przypisana jest subdomena
   `mq-oma.byst.re`. TLS kończy się na proxy Mikrusa, ale goły `http://<IP>:30123` też odpowiada —
   jedyną ochroną panelu jest hasło `OMA_RABBITMQ_PASSWORD`, więc nie skracaj go i nie reużywaj.
+
+### Budżet pamięci
+
+Support Mikrusa zgłosił **27 interwencji OOM-Killera w ciągu doby**, z listą zabitych procesów
+`uWSGIWorker1..4Cor` i `python`. To był Healthchecks: obraz odpala `processes = 4` w
+`docker/uwsgi.ini`, o ile nie ustawisz `UWSGI_PROCESSES`, a cztery workery Django zajmują **289 MiB**
+przy `mem_limit` **256m** — czyli kontener przekraczał limit zawsze i cgroup ubijał workery w pętli.
+Stąd `UWSGI_PROCESSES` (domyślnie `2`): dwa workery to **220 MiB** pod obciążeniem, więc limit `320m`
+daje realny zapas. Zmierzone przez `docker stats`, nie oszacowane.
+
+Każda usługa ma `mem_limit` — jedna bez limitu zniweczyłaby cały rachunek:
+
+| Usługa | Limit | Zmienna |
+|---|---|---|
+| `app` (FrankenPHP) | 1536m | `OMA_APP_MEM`, wątki `OMA_PHP_THREADS` (4 na 2 vCPU) |
+| `worker` | 512m | `OMA_WORKER_MEM` |
+| `mysql` | 640m | `OMA_DB_MEM`, pula InnoDB 256M w `deploy/mysql-oma.cnf` |
+| `rabbitmq` | 384m | `OMA_RABBITMQ_MEM` |
+| `healthchecks` | 320m | `OMA_HC_MEM`, workery `OMA_HC_PROCESSES` |
+| `mailpit` | 128m | `OMA_MAILPIT_MEM` |
+| `cron` (Ofelia) | 64m | `OMA_CRON_MEM` |
+| **Razem** | **3,5 GB z 8 GB** | zostaje ~4,5 GB dla przyszłych aplikacji |
+
+Dwie pułapki przy zmienianiu tych liczb:
+
+- **`worker` musi mieć limit wyraźnie wyższy niż `--memory-limit=256M`** w `messenger:consume`. PHP
+  sam kończy pracę po przekroczeniu 256 MB i wstaje na nowo — to jest wyjście łagodne. Gdyby limit
+  kontenera był bliżej 256M, kernel ubiłby proces w środku obsługi komunikatu, czyli zamienilibyśmy
+  restart na utratę wiadomości.
+- **`app` nie może zejść do 1g**, mimo że realnie trzyma ~480 MiB. `php.ini` daje `memory_limit = 512M`
+  **na żądanie**, więc dwa ciężkie żądania naraz to już ponad 1 GB i kernel ubiłby sklep — gorzej niż
+  problem, który naprawiamy. Jeśli kiedyś trzeba będzie zejść niżej, dźwignią jest `memory_limit`
+  w `backend/docker/frankenphp/php.ini`, nie sam `mem_limit`; build w `deploy/Dockerfile` i tak
+  chodzi z `-d memory_limit=-1`, więc jego to nie dotyczy.
+- Limity to **pułapy, nie rezerwacje**. Suma 3,5 GB nie znaczy, że stack zajmuje 3,5 GB — znaczy, że
+  nie wyjdzie ponad tyle. Realne zużycie sprawdzasz `docker stats --no-stream` na serwerze.
 
 **Przy pierwszym wdrożeniu po tej zmianie** transport przechodzi z `doctrine://default` na AMQP.
 Komunikaty zaplanowane wcześniej siedzą w tabeli `messenger_messages` i nikt ich już nie odbierze —

@@ -1,5 +1,5 @@
 [mysqld]
-innodb_buffer_pool_size = 512M
+innodb_buffer_pool_size = 256M
 innodb_redo_log_capacity = 128M
 innodb_flush_method = O_DIRECT
 performance_schema = OFF

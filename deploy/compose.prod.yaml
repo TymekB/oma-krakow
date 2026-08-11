@@ -39,11 +39,11 @@ services:
     restart: unless-stopped
     ports:
       - '${OMA_PORT:-40123}:80'
-    mem_limit: ${OMA_APP_MEM:-2g}
+    mem_limit: ${OMA_APP_MEM:-1536m}
     environment:
       <<: *app-env
       FRANKENPHP_CONFIG: |
-        num_threads ${OMA_PHP_THREADS:-8}
+        num_threads ${OMA_PHP_THREADS:-4}
     volumes:
       - media:/app/public/media
       - jwt:/app/config/jwt
@@ -101,7 +101,7 @@ services:
     image: rabbitmq:3.13-management-alpine
     hostname: rabbitmq
     restart: unless-stopped
-    mem_limit: ${OMA_RABBITMQ_MEM:-512m}
+    mem_limit: ${OMA_RABBITMQ_MEM:-384m}
     environment:
       RABBITMQ_DEFAULT_USER: ${OMA_RABBITMQ_USER:-oma}
       RABBITMQ_DEFAULT_PASS: ${OMA_RABBITMQ_PASSWORD:?OMA_RABBITMQ_PASSWORD is required}
@@ -140,7 +140,7 @@ services:
   mysql:
     image: mysql:8.0
     restart: unless-stopped
-    mem_limit: ${OMA_DB_MEM:-1g}
+    mem_limit: ${OMA_DB_MEM:-640m}
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: ${OMA_DB_ROOT_PASSWORD:?OMA_DB_ROOT_PASSWORD is required}
@@ -169,7 +169,7 @@ services:
   healthchecks:
     image: healthchecks/healthchecks:latest
     restart: unless-stopped
-    mem_limit: ${OMA_HC_MEM:-256m}
+    mem_limit: ${OMA_HC_MEM:-320m}
     ports:
       - '127.0.0.1:${OMA_HC_PORT:-8010}:8000'
       - '${OMA_HC_PUBLIC_PORT:-20123}:8000'
@@ -188,6 +188,7 @@ services:
       EMAIL_USE_VERIFICATION: 'False'
       REGISTRATION_OPEN: 'False'
       SECRET_KEY: ${OMA_HC_SECRET_KEY:?OMA_HC_SECRET_KEY is required}
+      UWSGI_PROCESSES: ${OMA_HC_PROCESSES:-2}
       SITE_NAME: 'OMA Cron Management'
       SITE_ROOT: ${OMA_HC_SITE_ROOT:?OMA_HC_SITE_ROOT is required}
       SITE_LOGO_URL: ${OMA_HC_SITE_ROOT:?OMA_HC_SITE_ROOT is required}/static/img/oma-logo.svg
@@ -200,7 +201,7 @@ services:
   cron:
     image: mcuadros/ofelia:latest
     restart: unless-stopped
-    mem_limit: ${OMA_CRON_MEM:-128m}
+    mem_limit: ${OMA_CRON_MEM:-64m}
     command: daemon --docker
     environment:
       TZ: ${OMA_HC_TZ:-Europe/Warsaw}
