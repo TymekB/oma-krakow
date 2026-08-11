@@ -435,6 +435,38 @@ Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`), czyli w
 i pod rootem, bo `/var/lib/docker` nie jest dostępne dla zwykłego użytkownika. Skrypt pracuje
 z `umask 077` i pilnuje katalogu (`700`) oraz plików (`600`).
 
+### Kopia na laptopie
+
+Poza VPS-em kopie trafiają na komputer, bo laptop i Mikrus to dwa niezależne worki ryzyk. Ściąga je
+**laptop**, nie serwer — `deploy/pull-backups.sh` przez `rsync` po SSH, uruchamiany agentem
+`launchd` o 04:15 (po nocnym dumpie o 03:00). Kierunek ma znaczenie: serwer nie musi wtedy nic
+wiedzieć o laptopie ani mieć do niego dostępu, więc przejęty VPS nie sięgnie do lokalnych kopii.
+
+```bash
+cp deploy/pl.oma.backup-pull.plist ~/Library/LaunchAgents/
+# podmień __SCIEZKA_DO_REPO__, __HOST_MIKRUSA__ i __HOME__
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/pl.oma.backup-pull.plist
+launchctl kickstart -p gui/$(id -u)/pl.oma.backup-pull      # test bez czekania do 4:15
+tail ~/Library/Logs/oma-backup-pull.log
+```
+
+`launchd`, nie cron: pominięte uruchomienie (uśpiony laptop) odpala się po wybudzeniu, cron by je
+zgubił. Klucz SSH musi działać bez pytania o hasło (`BatchMode=yes`) — albo bez passphrase, albo
+dodany do keychaina (`ssh-add --apple-use-keychain`).
+
+Skrypt **nie kasuje** tego, co zniknęło na serwerze (`rsync` bez `--delete`), więc laptop trzyma
+dłuższą historię niż siedem dni z VPS-a — domyślnie 30 dni, `OMA_KEEP_DAYS`. Każdą kopię sprawdza
+`gzip -t` i przerwany transfer albo uszkodzony plik kończy się kodem błędu w logu. Katalog i pliki
+dostają `700`/`600`, ale to **nie zastępuje FileVault** — bez szyfrowania dysku kopia z danymi
+klientów leży na laptopie czytelnym tekstem.
+
+Bez `OMA_SSH_TARGET` skrypt kopiuje z lokalnej ścieżki (`OMA_REMOTE_DIR`), co przydaje się do
+przetestowania rotacji i weryfikacji bez ruszania produkcji.
+
+Czego ta para kopii **nie** daje: nie ma trzeciego miejsca niezależnego od Ciebie, więc wyjazd
+z wyłączonym laptopem to dziura w historii, a jedna kradzież plus awaria VPS-a to koniec. Wysyłka
+do chmury (`age` + S3) zostaje jako opcja na później.
+
 Czego to **nie** daje: dump nie jest zaszyfrowany, a w środku są dane osobowe klientów i hashe haseł.
 `gzip` to kompresja, nie ochrona — od momentu, w którym plik opuści serwer (snapshot VPS-a, `docker cp`,
 wysyłka na dysk), chroni go już tylko to, gdzie wylądował. Kopia leży też na tym samym dysku co baza,

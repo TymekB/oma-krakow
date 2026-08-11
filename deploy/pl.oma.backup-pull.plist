@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>pl.oma.backup-pull</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>__SCIEZKA_DO_REPO__/deploy/pull-backups.sh</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>OMA_SSH_TARGET</key>
+        <string>root@__HOST_MIKRUSA__</string>
+        <key>OMA_SSH_PORT</key>
+        <string>10123</string>
+        <key>OMA_LOCAL_DIR</key>
+        <string>__HOME__/Backups/oma</string>
+        <key>OMA_KEEP_DAYS</key>
+        <string>30</string>
+    </dict>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>4</integer>
+        <key>Minute</key>
+        <integer>15</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__HOME__/Library/Logs/oma-backup-pull.log</string>
+    <key>StandardErrorPath</key>
+    <string>__HOME__/Library/Logs/oma-backup-pull.log</string>
+</dict>
+</plist>
