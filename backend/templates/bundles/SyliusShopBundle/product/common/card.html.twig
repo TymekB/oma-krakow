@@ -1,0 +1,9 @@
+{% set is_sold_out = oma_product_is_sold_out(product) %}
+
+<div class="oma-product-card{{ is_sold_out ? ' oma-product-card--sold-out' : '' }}" {{ sylius_test_html_attribute('product', '%s'|format(product.code)) }} >
+    {% if is_sold_out %}
+        <span class="oma-product-card__badge" {{ sylius_test_html_attribute('product-out-of-stock') }}>{{ 'sylius.ui.out_of_stock'|trans }}</span>
+    {% endif %}
+
+    {% hook 'card' with {_prefixes: hookable_metadata.prefixes|default([])|merge(['sylius_shop.shared.product'])} %}
+</div>
