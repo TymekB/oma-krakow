@@ -47,6 +47,23 @@ było nawigacji (zgłoszone jako „klikam raz, dodaje 6"). Dlatego tag skryptu 
 flagą na `window`. Pilnuje tego test `shop.spec.ts` → „po kilku nawigacjach Turbo jedno kliknięcie
 dodaje jedną sztukę". Panelu to nie dotyczy — admin chodzi na pełnych przeładowaniach.
 
+**Ten sam flagą trzeba było objąć bundle Syliusa (`shop-entry`)**, nie tylko nasz. Bootstrap rejestruje
+delegowany listener dla `data-bs-toggle` w momencie importu, więc po nawigacji Turbo istniały dwa —
+i akordeony na stronie produktu **dawały się tylko rozwijać**. Asymetria wynika z tego, jak Bootstrap
+broni się przed podwójnym wywołaniem: przy zwiniętej sekcji pierwsza instancja startuje `show()`,
+druga trafia na trwające przejście i odpada (netto: rozwinięte), a przy rozwiniętej pierwsza robi
+`hide()`, po czym druga uznaje sekcję za zwiniętą i **rozwija ją z powrotem** (netto: bez zmian).
+Widać to na liczniku zdarzeń: po Turbo jedno kliknięcie dawało `shown: 2`, a próba zwinięcia
+`hidden: 1` **i** `shown: 3`. Dlatego jest override
+`templates/bundles/SyliusShopBundle/shared/layout/base/scripts.html.twig`.
+
+Stary test akordeonu w `shop.spec.ts` tego nie łapał, bo wchodził na produkt przez `page.goto`, czyli
+pełnym przeładowaniem — a wtedy bundle wykonuje się raz i błędu nie ma. Nowy `shop-accordion.spec.ts`
+dochodzi do produktu **kliknięciem z listy kategorii** i dodatkowo pilnuje, że jedno kliknięcie daje
+dokładnie jedno zdarzenie `shown`/`hidden`. Testy akordeonów muszą czekać na koniec animacji: Bootstrap
+ustawia `aria-expanded` na **początku** przejścia i ignoruje kliknięcia w jego trakcie, więc sama
+asercja na atrybucie nie wystarcza — trzeba odczekać, aż zniknie klasa `collapsing`.
+
 **Yarn w `backend/`.** Rootowy `package.json` (Angular) deklaruje `packageManager: npm`, przez co yarn wychodził w górę drzewa i odmawiał startu — dlatego `backend/package.json` ma własne `packageManager: yarn@1.22.22`. Przy Node 23 instaluj z `--ignore-engines`.
 
 ## Kolejki i promocje z datami
