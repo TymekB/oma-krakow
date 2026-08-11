@@ -1,0 +1,46 @@
+#!/bin/sh
+set -eu
+
+BACKUP_DIR="${OMA_BACKUP_DIR:-/backup}"
+KEEP_DAYS="${OMA_BACKUP_KEEP_DAYS:-7}"
+
+eval "$(php -r '
+$url = getenv("DATABASE_URL");
+if (false === $url || "" === $url) {
+    fwrite(STDERR, "brak DATABASE_URL\n");
+    exit(1);
+}
+
+$parts = parse_url($url);
+printf(
+    "DB_HOST=%s DB_PORT=%s DB_USER=%s DB_PASSWORD=%s DB_NAME=%s",
+    escapeshellarg($parts["host"] ?? "127.0.0.1"),
+    escapeshellarg((string) ($parts["port"] ?? 3306)),
+    escapeshellarg(urldecode($parts["user"] ?? "")),
+    escapeshellarg(urldecode($parts["pass"] ?? "")),
+    escapeshellarg(ltrim($parts["path"] ?? "", "/")),
+);
+')"
+
+mkdir -p "$BACKUP_DIR"
+
+STAMP="$(date -u +%Y%m%d-%H%M%S)"
+DUMP="$BACKUP_DIR/$DB_NAME-$STAMP.sql"
+ARCHIVE="$DUMP.gz"
+
+MYSQL_PWD="$DB_PASSWORD" mysqldump \
+    --host="$DB_HOST" \
+    --port="$DB_PORT" \
+    --user="$DB_USER" \
+    --single-transaction \
+    --quick \
+    --routines \
+    --no-tablespaces \
+    "$DB_NAME" >"$DUMP"
+
+gzip -9 "$DUMP"
+
+find "$BACKUP_DIR" -maxdepth 1 -name "$DB_NAME-*.sql.gz" -type f -mtime "+$KEEP_DAYS" -delete
+
+printf 'backup: %s (%s)\n' "$ARCHIVE" "$(du -h "$ARCHIVE" | cut -f1)"
+printf 'kopie w %s: %s\n' "$BACKUP_DIR" "$(find "$BACKUP_DIR" -maxdepth 1 -name "$DB_NAME-*.sql.gz" -type f | wc -l | tr -d ' ')"
