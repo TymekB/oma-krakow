@@ -1,0 +1,6 @@
+sylius_grid:
+    grids:
+        sylius_shop_account_order:
+            actions:
+                item:
+                    cancel_subscription_mollie: { enabled: false }

@@ -13,6 +13,19 @@ sylius_twig_hooks:
                 template: 'shop/security/login_target_path.html.twig'
                 priority: 150
 
+        'sylius_shop.cart.index.content.form.sections.general.items.head':
+            recurring: { enabled: false }
+        'sylius_shop.cart.index.content.form.sections.general.items.body':
+            recurring_settings: { enabled: false }
+        'sylius_shop.shared.order.show.summary.table.header':
+            recurring: { enabled: false }
+        'sylius_shop.shared.order.show.summary.table.body':
+            recurring: { enabled: false }
+        'sylius_shop.product.show.content.info.summary':
+            variant_recurring_settings: { enabled: false }
+        'sylius_shop.account.order.show.content.main.header':
+            mollie_cancel_subscription: { enabled: false }
+
         'sylius_shop.account.profile_update.update.content.main.form.additional_information':
             gender: { enabled: false }
         'sylius_admin.customer.create.content.form.sections.extra_information':
