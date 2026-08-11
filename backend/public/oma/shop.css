@@ -222,6 +222,27 @@ footer {
   text-underline-offset: 0.2em;
 }
 
+.oma-google-login {
+  margin-bottom: 1.5rem;
+}
+
+.oma-google-login .btn {
+  --bs-btn-bg: #fff;
+  padding-block: 0.95rem;
+}
+
+.oma-google-login__note {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--oma-ink-faint);
+  margin: 0.7rem 0 0;
+}
+
+.oma-google-login__divider {
+  margin-top: 1.5rem;
+}
+
 .oma-pay-card {
   background: #fff;
   border: 1px solid var(--oma-sand-200);

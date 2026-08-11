@@ -3,9 +3,9 @@ sylius_twig_hooks:
         'sylius_shop.account.login.content.login_container':
             google_login:
                 template: 'shop/google_login_button.html.twig'
-                priority: -100
+                priority: 150
 
         'sylius_shop.account.register.content':
             google_login:
                 template: 'shop/google_login_button.html.twig'
-                priority: -100
+                priority: 50
