@@ -660,6 +660,36 @@ Dwie pułapki przy zmienianiu tych liczb:
 - Limity to **pułapy, nie rezerwacje**. Suma 3,5 GB nie znaczy, że stack zajmuje 3,5 GB — znaczy, że
   nie wyjdzie ponad tyle. Realne zużycie sprawdzasz `docker stats --no-stream` na serwerze.
 
+### Panel Mikrusa liczy cache, nie nasze procesy
+
+Zmierzone na produkcji, gdy panel pokazywał **97% z 8192 MB**:
+
+```
+memory.current 5250 MB  =  anon 719 MB + file(cache) 3920 MB + kernel 608 MB + slab 582 MB
+/proc/meminfo MemAvailable: 7157 MB
+```
+
+**Nasze procesy trzymają stabilne ~719 MB.** Rośnie `file`, czyli **page cache** — pamięć
+odzyskiwalna, którą jądro oddaje pod presją. Panel Mikrusa i `memory.current` liczą ją jako zużycie,
+`MemAvailable` nie. Dlatego „97% RAM" nie znaczy, że brakuje pamięci, i **upgrade instancji nie jest
+odpowiedzią na tę liczbę**. W 1,5 godziny `memory.current` rósł 2,08 → 5,25 GB przy niezmiennym
+`anon` i `MemAvailable` powyżej 7 GB.
+
+Żeby przy następnym incydencie nie zaczynać od zgadywania, `deploy/oma-memlog.sh` zapisuje co godzinę
+jedną linię CSV do `/opt/oma-prod/memlog.csv`: `memory.current`, rozbicie `anon`/`file`/`slab`/`shmem`,
+`MemAvailable` i zużycie każdego kontenera. Trzyma ostatnie 2000 wpisów, czyli ~83 dni.
+
+Skrypt dosyła deploy, ale wpis crona zakłada się **raz, ręcznie** na serwerze:
+
+```bash
+echo '0 * * * * root /opt/oma-prod/oma-memlog.sh' > /etc/cron.d/oma-memlog
+column -s, -t /opt/oma-prod/memlog.csv | tail -20        # podgląd
+```
+
+Czego szukać, gdy `earlyoom` znów zacznie strzelać: **czy rośnie `anon`, czy `file`**. Wzrost `anon`
+to prawdziwy wyciek w którymś kontenerze i wtedy kolumny per-kontener wskażą winowajcę. Wzrost samego
+`file` przy wysokim `MemAvailable` jest normalny i nie jest powodem do niczego.
+
 **Przy pierwszym wdrożeniu po tej zmianie** transport przechodzi z `doctrine://default` na AMQP.
 Komunikaty zaplanowane wcześniej siedzą w tabeli `messenger_messages` i nikt ich już nie odbierze —
 nowy worker patrzy tylko na RabbitMQ. Sprawdź, czy coś tam czeka:
