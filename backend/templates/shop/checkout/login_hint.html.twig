@@ -1,0 +1,7 @@
+{% if app.user is null %}
+    <p class="oma-login-hint">
+        {{ 'oma.checkout.login_hint.question'|trans }}
+        <a href="{{ path('sylius_shop_login', {'_target_path': path('sylius_shop_checkout_address')}) }}">{{ 'oma.checkout.login_hint.action'|trans }}</a>
+        {{ 'oma.checkout.login_hint.reason'|trans }}
+    </p>
+{% endif %}

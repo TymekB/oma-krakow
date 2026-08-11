@@ -1,5 +1,15 @@
 sylius_twig_hooks:
     hooks:
+        'sylius_shop.checkout.address.content.form':
+            login_hint:
+                template: 'shop/checkout/login_hint.html.twig'
+                priority: 250
+
+        'sylius_shop.account.login.content.login_container.form':
+            target_path:
+                template: 'shop/security/login_target_path.html.twig'
+                priority: 150
+
         'sylius_admin.product.create.content.form.side_navigation':
             esd: { enabled: false }
             mollie: { enabled: false }

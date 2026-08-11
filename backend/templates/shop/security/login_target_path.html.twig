@@ -1,0 +1,5 @@
+{% set target_path = app.request.query.get('_target_path')|default('') %}
+
+{% if target_path starts with '/' and not (target_path starts with '//') and not (target_path starts with '/\\') %}
+    <input type="hidden" name="_target_path" value="{{ target_path }}">
+{% endif %}

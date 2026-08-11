@@ -61,6 +61,11 @@ oma:
     ui:
         view_site: 'Zobacz stronę'
         site_edit: 'Edycja strony'
+    checkout:
+        login_hint:
+            question: 'Masz konto?'
+            action: 'Zaloguj się'
+            reason: 'i wypełnij formularz tylko za pierwszym razem.'
     google_login:
         button: 'Kontynuuj z Google'
         or: 'albo'
