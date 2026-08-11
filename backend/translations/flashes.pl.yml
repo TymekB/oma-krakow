@@ -1,3 +1,7 @@
 sylius:
     review:
         wait_for_the_acceptation: 'Dziękujemy! Twoja opinia została opublikowana.'
+
+oma:
+    google_login:
+        failed: 'Logowanie przez Google nie powiodło się. Spróbuj ponownie albo zaloguj się hasłem.'

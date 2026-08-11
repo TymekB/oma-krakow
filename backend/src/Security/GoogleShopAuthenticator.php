@@ -8,6 +8,7 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\GoogleClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use League\OAuth2\Client\Provider\GoogleUser;
+use Psr\Log\LoggerInterface;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\ShopUserInterface;
 use Sylius\Component\User\Canonicalizer\CanonicalizerInterface;
@@ -44,6 +45,7 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
         private readonly FactoryInterface $customerFactory,
         private readonly CanonicalizerInterface $canonicalizer,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -78,6 +80,13 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
+        $this->logger->error(
+            'Logowanie przez Google nie powiodlo sie.', [
+            'exception' => $exception,
+            'google_error' => $request->query->get('error'),
+            ]
+        );
+
         $session = $request->getSession();
 
         if ($session instanceof FlashBagAwareSessionInterface) {
