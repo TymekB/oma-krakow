@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const IMG = join(HERE, 'img');
-const PDF = join(HERE, '..', 'OMA-instrukcja-panelu.pdf');
+const PDF = join(HERE, '..', 'instrukcja-panelu.pdf');
 const BASE = process.env.OMA_BASE_URL ?? 'http://localhost:8080';
 const ADMIN = { username: 'admin', password: process.env.OMA_ADMIN_PASSWORD ?? 'oma2026!' };
 

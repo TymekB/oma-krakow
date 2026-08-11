@@ -62,6 +62,7 @@ oma:
     ui:
         view_site: 'Zobacz stronę'
         site_edit: 'Edycja strony'
+        manual: 'Instrukcja'
     checkout:
         login_hint:
             question: 'Masz konto?'
