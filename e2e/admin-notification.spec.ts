@@ -12,7 +12,7 @@ test.describe('Powiadomienie dla administratora', () => {
       await page.getByRole('button', { name: 'Dalej' }).first().click();
     }
 
-    await page.locator('input[type="radio"]').last().check();
+    await page.locator('input[type="radio"]:visible').last().check();
     await page.getByRole('button', { name: 'Dalej' }).first().click();
     await expect(page).toHaveURL(/complete/);
 
