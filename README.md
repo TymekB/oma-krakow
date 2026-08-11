@@ -410,9 +410,16 @@ OMA_HC_ADMIN_PASSWORD='...' ../deploy/healthchecks-bootstrap.sh
 # → PING_URL=http://healthchecks:8000/ping/<klucz>
 ```
 
-Marginesy (*grace*) są dobrane do tego, ile kosztuje spóźnienie: kopia bazy ma godzinę, sprzątanie
-koszyków i anulowanie zamówień po dwie. Oba sprzątające joby są dobowe, bo progi Syliusa to 2 i 5 dni
-— częstsze uruchamianie nic nie zmienia, a wąskie okno alertu tylko szumi.
+Kopia bazy jest checkiem **cron** (`0 3 * * *`, grace 1 h) — tu spóźnienie kosztuje najwięcej, więc
+pilnujemy konkretnej godziny. Sprzątanie koszyków i anulowanie zamówień to checki **okresowe**:
+period 24 h, grace 2 h, czyli alarm dopiero gdy przez 26 h nie przyszedł żaden ping. Progi Syliusa to
+2 i 5 dni, więc dla nich liczy się „raz na dobę", a nie „o 3:15 co do minuty" — restart stacku w środku
+nocy nie generuje wtedy fałszywego alarmu. Ofelia i tak odpala je o stałej godzinie.
+
+Ping, który nie doszedł, wrapper wypisuje na stderr (`ping ... nie doszedl do Healthchecks`) i nie
+przewraca zadania. Warto o tym pamiętać przy podmianie klucza: `OMA_HC_PING_URL` jest **per instancja**
+— każdy bootstrap na nowej bazie generuje własny klucz, a wartość w `backend/.env` to tylko lokalny
+placeholder. Na produkcji klucz trzyma `/opt/oma-prod/.env`, którego nie ma w repo.
 
 Zwrócony `PING_URL` wpisz do `.env` jako `OMA_HC_PING_URL` i przeładuj `app` oraz `cron`. Skrypt jest
 idempotentny — klucz raz wygenerowany zostaje, a kolejne uruchomienia tylko poprawiają harmonogramy
@@ -426,6 +433,45 @@ pierwszym pingu (`create=1`), ale z domyślnym okresem 1 dnia — dlatego harmon
 Kopie bazy leżą w wolumenie `db_backup` (`sylius_oma-<data>.sql.gz`). To kopia **lokalna**, na tym
 samym dysku co baza — chroni przed pomyłką w danych, nie przed utratą serwera. Wysyłka poza VPS jest
 do zrobienia osobno.
+
+### Branding OMA w Healthchecks
+
+Instancja nazywa się **OMA Cron Managment** (`SITE_NAME`) i chodzi w kolorystyce sklepu: winny navbar,
+papierowe tło, Cormorant Garamond w nagłówkach, Jost w treści, logo „oma KRAKÓW" w kremie. Trzy pliki
+w `backend/docker/healthchecks/`, montowane do kontenera:
+
+| Plik | Montowany jako | Rola |
+|---|---|---|
+| `oma-logo.svg` | `static-collected/img/oma-logo.svg` | logo w navbarze i w mailach, wskazywane przez `SITE_LOGO_URL` |
+| `oma.css` | `static-collected/css/oma.css` | paleta OMA |
+| `local_settings.py` | `hc/local_settings.py` | middleware wstrzykujący arkusz |
+
+**Kolorów statusów (up/down/grace) nie ruszamy.** W narzędziu do monitoringu zielony i czerwony muszą
+znaczyć to, co zwykle znaczą — przemalowanie ich na winno-piaskowo byłoby aktywnie szkodliwe.
+
+Dlaczego arkusz wchodzi middleware'em, a nie normalnie:
+
+- `{% block head %}` w `base.html` stoi **przed** arkuszami aplikacji, więc styl wstawiony tam
+  przegrywa kaskadę,
+- `{% compress %}` działa w trybie **offline** — podmiana pliku CSS w źródłach nic nie zmienia bez
+  ponownej kompresji przy starcie,
+- middleware nie dotyka żadnego pliku upstreamu, więc **przeżywa aktualizację obrazu**. Podmiana
+  szablonu albo `variables.css` wymagałaby wendorowania cudzego kodu.
+
+Pliki lądują w `static-collected/`, nie w `static/`, bo whitenoise serwuje właśnie ten katalog i tam
+nazwy nie są hashowane. Whitenoise skanuje katalog **przy starcie** — po edycji `oma.css` potrzebny
+jest `docker compose restart healthchecks`, inaczej serwuje wersję z pamięci.
+
+Jedna pułapka specyficzności: adres zalogowanego użytkownika Healthchecks koloruje regułą
+`#project-menu > .dropdown > a` na `var(--text-color)`. Selektor z ID bije zwykłe reguły navbara, więc
+`oma.css` musi dorównać specyficzności — inaczej e-mail zostaje ciemny na winnym tle (kontrast 1.2:1).
+Po poprawce jest 11.7:1.
+
+Na produkcję te trzy pliki wysyła krok *Sync stack files* w `deploy.yml` do `/opt/oma-prod/healthchecks/`
+— bez tego bind mount wskazywałby na nieistniejącą ścieżkę i kontener by nie wstał.
+
+Logo jest SVG, co wystarcza w przeglądarce, ale **część klientów pocztowych nie renderuje SVG**. Jeśli
+logo w mailach ma być pewne, podmień plik na PNG pod tą samą nazwą i ścieżką.
 
 ## Wdrożenie (produkcja)
 
