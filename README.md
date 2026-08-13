@@ -397,8 +397,8 @@ z widoku zamówienia też działa mimo wyłączonego zdarzenia — to jawna decy
 > ceny mają zostać takie, jakie klient płaci dziś, trzeba je najpierw przemnożyć przez `1,23`.
 
 Póki co panel pomaga w tym żyć: pod **każdym** polem ceny (*Cena*, *Cena wyjściowa*, *Cena
-minimalna*) w zakładce **Ceny** siedzi lustrzane pole z kwotą po drugiej stronie VAT-u, opisane
-`brutto (VAT 23%)`. Działa **w obie strony** — wpiszesz netto, dostajesz brutto; wpiszesz brutto,
+minimalna*) — w zakładce **Ceny** produktu, w formularzu wariantu i na stronie **Generuj warianty** —
+siedzi lustrzane pole z kwotą po drugiej stronie VAT-u, opisane `brutto (VAT 23%)`. Działa **w obie strony** — wpiszesz netto, dostajesz brutto; wpiszesz brutto,
 przelicza się netto i to ono trafia do zapisu. Lustro nie ma atrybutu `name`, więc nigdy nie leci
 w formularzu; jedynym źródłem prawdy zostaje pole Syliusa.
 
@@ -412,17 +412,36 @@ Jak to jest złożone:
 |---|---|
 | `src/Twig/PriceTaxExtension.php` | `oma_price_tax(variant, channel_code)` — rozwiązuje stawkę przez `TaxRateResolverInterface`, zawężoną do domyślnej strefy podatkowej kanału |
 | `templates/bundles/SyliusAdminBundle/shared/helper/channel_pricings.html.twig` | opakowuje panel w `data-oma-price-tax` ze stawką, kierunkiem i etykietą |
+| `templates/bundles/SyliusAdminBundle/product/generate_variants/form/variants/variant/channel_pricings.html.twig` | to samo dla strony *Generuj warianty*, gdzie Sylius renderuje ceny poza makrem |
 | `templates/admin/javascripts.html.twig` | wstrzykuje lustro i pilnuje przeliczeń w obie strony |
+
+Na *Generuj warianty* wariantów jeszcze nie ma, więc stawki nie da się rozwiązać z zapisanej encji.
+Stąd druga funkcja Twiga, `oma_new_variant_price_tax(channel_code)` — bierze wariant z fabryki
+`sylius.factory.product_variant`, czyli z tego samego miejsca, z którego weźmie go generator, i pyta
+o stawkę dla jego domyślnej kategorii podatkowej. Lustro pokazuje więc dokładnie tę stawkę, którą
+wygenerowane warianty faktycznie dostaną, bez duplikowania logiki domyślnej kategorii.
 
 Lustro wstrzykuje JS, a nie Twig, bo trzy pola cen renderuje hook (`body` przekazywane do makra),
 więc nadpisywanie pojedynczych pól w makrze byłoby martwym kodem. Stąd też `MutationObserver` —
 formularz produktu to Live Component i po każdym przerysowaniu lustro trzeba wstawić od nowa.
 
+> **Nie dopisuj atrybutów do pól, które renderuje Live Component.** Skrypt pilnował się przed
+> podwójnym bindowaniem znacznikiem `field.dataset.omaPriceMirror = '1'` — czyli mutował atrybut
+> `input`-a należącego do komponentu. Na formularzu produktu przechodziło to bez śladu, ale na
+> **Generuj warianty** kończyło się cicho: przy przerysowaniu komponentu Symfony UX kasowało wartość
+> ostatnio wpisanej ceny, submit wracał z 422 i „Należy zdefiniować cenę", a warianty nie powstawały.
+> Bez żadnego błędu w logu, bo formularz idzie przez Live Component. Znacznik siedzi teraz w `WeakSet`
+> po stronie JS-u i nie dotyka DOM-u. Pilnuje tego test „lustro nie psuje zapisu" — z powrotem
+> wstawionym `dataset` pada 5/5, z `WeakSet` przechodzi 5/5 (jeden przebieg to za mało, to wyścig
+> i zależy od tego, ile przerysowań zdąży wejść).
+
 Stawka pochodzi z **zapisanej** kategorii podatkowej wariantu. Jeśli zmienisz ją w zakładce
 *Podatki* i jeszcze nie zapiszesz, lustro liczy po staremu aż do zapisu.
 
-Pokrywa to `e2e/admin-price-net-gross.spec.ts` (oba kierunki, zaokrąglanie groszy, puste pole)
-oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki, kierunek, formatowanie procentu).
+Pokrywa to `e2e/admin-price-net-gross.spec.ts` (oba kierunki, zaokrąglanie groszy, puste pole),
+`e2e/admin-generate-variants-gross.spec.ts` (lustro pod każdą ceną każdego generowanego wariantu
+i to, że nie psuje zapisu) oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki,
+kierunek, formatowanie procentu).
 
 ### Domyślna kategoria podatkowa
 

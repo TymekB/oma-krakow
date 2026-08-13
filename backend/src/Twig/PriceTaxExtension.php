@@ -8,6 +8,7 @@ use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Taxation\Resolver\TaxRateResolverInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
+use Sylius\Resource\Factory\FactoryInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -16,11 +17,14 @@ final class PriceTaxExtension extends AbstractExtension
 {
     /**
      * @param RepositoryInterface<ChannelInterface> $channelRepository
+     * @param FactoryInterface<ProductVariantInterface> $productVariantFactory
      */
     public function __construct(
         private readonly TaxRateResolverInterface $taxRateResolver,
         #[Autowire(service: 'sylius.repository.channel')]
         private readonly RepositoryInterface $channelRepository,
+        #[Autowire(service: 'sylius.factory.product_variant')]
+        private readonly FactoryInterface $productVariantFactory,
     ) {
     }
 
@@ -28,7 +32,16 @@ final class PriceTaxExtension extends AbstractExtension
     {
         return [
             new TwigFunction('oma_price_tax', $this->context(...)),
+            new TwigFunction('oma_new_variant_price_tax', $this->contextForNewVariant(...)),
         ];
+    }
+
+    /**
+     * @return array{rate: float|null, included: bool, percentage: string}
+     */
+    public function contextForNewVariant(string $channelCode): array
+    {
+        return $this->context($this->productVariantFactory->createNew(), $channelCode);
     }
 
     /**

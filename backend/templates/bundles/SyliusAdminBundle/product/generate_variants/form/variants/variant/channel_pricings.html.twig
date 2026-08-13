@@ -1,0 +1,11 @@
+<div class="mb-3 field" {{ sylius_test_html_attribute('channel-pricings') }}>
+    {% for channel_code, channel_pricing_form in hookable_metadata.context.form.channelPricings %}
+        {% set tax = oma_new_variant_price_tax(channel_code) %}
+
+        <div{% if tax.rate is not null %} data-oma-price-tax data-rate="{{ tax.rate }}" data-included="{{ tax.included ? '1' : '0' }}" data-mirror-label="{{ (tax.included ? 'oma.pricing.net' : 'oma.pricing.gross')|trans({'%rate%': tax.percentage}) }}"{% endif %}>
+            {% for field in channel_pricing_form %}
+                {{ form_row(field) }}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>

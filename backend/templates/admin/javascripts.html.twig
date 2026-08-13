@@ -37,6 +37,8 @@
     (function () {
         const FIELD_SUFFIXES = ['_price', '_originalPrice', '_minimumPrice'];
 
+        const bound = new WeakSet();
+
         function parseAmount(raw) {
             const normalized = String(raw).replace(/[\s ]/g, '').replace(',', '.');
 
@@ -94,11 +96,11 @@
 
             FIELD_SUFFIXES.forEach(function (suffix) {
                 container.querySelectorAll('input[id$="' + suffix + '"]').forEach(function (field) {
-                    if (field.dataset.omaPriceMirror) {
+                    if (bound.has(field)) {
                         return;
                     }
 
-                    field.dataset.omaPriceMirror = '1';
+                    bound.add(field);
 
                     const mirror = buildMirror(label);
                     const anchor = field.closest('.input-group') || field;
