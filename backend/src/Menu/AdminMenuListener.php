@@ -33,6 +33,10 @@ final class AdminMenuListener
 
     private const SALES = 'sales';
 
+    private const CATALOG = 'catalog';
+
+    private const CATALOG_FIRST_ITEM = 'products';
+
     private const SECTION_ORDER = [
         'catalog',
         'sales',
@@ -46,6 +50,25 @@ final class AdminMenuListener
         $this->moveToSales($event->getMenu());
         $this->removeFrom($event->getMenu());
         $this->orderSections($event->getMenu());
+        $this->orderCatalog($event->getMenu());
+    }
+
+    private function orderCatalog(ItemInterface $menu): void
+    {
+        $catalog = $menu->getChild(self::CATALOG);
+
+        if (null === $catalog || null === $catalog->getChild(self::CATALOG_FIRST_ITEM)) {
+            return;
+        }
+
+        $remaining = array_values(
+            array_filter(
+                array_keys($catalog->getChildren()),
+                static fn (string $name): bool => self::CATALOG_FIRST_ITEM !== $name,
+            ),
+        );
+
+        $catalog->reorderChildren([self::CATALOG_FIRST_ITEM, ...$remaining]);
     }
 
     private function orderSections(ItemInterface $menu): void
