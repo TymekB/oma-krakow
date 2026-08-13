@@ -13,6 +13,7 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Taxation\Model\TaxRateInterface;
 use Sylius\Component\Taxation\Resolver\TaxRateResolverInterface;
 use Sylius\Resource\Doctrine\Persistence\RepositoryInterface;
+use Sylius\Resource\Factory\FactoryInterface;
 
 final class PriceTaxExtensionTest extends TestCase
 {
@@ -23,7 +24,7 @@ final class PriceTaxExtensionTest extends TestCase
         // Given
         $resolver = $this->createMock(TaxRateResolverInterface::class);
         $resolver->expects(self::never())->method('resolve');
-        $extension = new PriceTaxExtension($resolver, $this->channelRepository(null));
+        $extension = new PriceTaxExtension($resolver, $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context(null, self::CHANNEL_CODE);
@@ -36,7 +37,7 @@ final class PriceTaxExtensionTest extends TestCase
     public function testShouldReportNoRateWhenResolverFindsNothing(): void
     {
         // Given
-        $extension = new PriceTaxExtension($this->resolver(null), $this->channelRepository(null));
+        $extension = new PriceTaxExtension($this->resolver(null), $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context($this->createMock(ProductVariantInterface::class), self::CHANNEL_CODE);
@@ -48,7 +49,7 @@ final class PriceTaxExtensionTest extends TestCase
     public function testShouldReportNoRateForZeroPercentTax(): void
     {
         // Given
-        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.0, false)), $this->channelRepository(null));
+        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.0, false)), $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context($this->createMock(ProductVariantInterface::class), self::CHANNEL_CODE);
@@ -60,7 +61,7 @@ final class PriceTaxExtensionTest extends TestCase
     public function testShouldMarkStoredPriceAsNetWhenTaxIsAddedOnTop(): void
     {
         // Given
-        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.23, false)), $this->channelRepository(null));
+        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.23, false)), $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context($this->createMock(ProductVariantInterface::class), self::CHANNEL_CODE);
@@ -73,7 +74,7 @@ final class PriceTaxExtensionTest extends TestCase
     public function testShouldMarkStoredPriceAsGrossWhenTaxIsIncluded(): void
     {
         // Given
-        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.23, true)), $this->channelRepository(null));
+        $extension = new PriceTaxExtension($this->resolver($this->taxRate(0.23, true)), $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context($this->createMock(ProductVariantInterface::class), self::CHANNEL_CODE);
@@ -86,7 +87,7 @@ final class PriceTaxExtensionTest extends TestCase
     public function testShouldFormatPercentageWithoutTrailingZeros(float $rate, string $expected): void
     {
         // Given
-        $extension = new PriceTaxExtension($this->resolver($this->taxRate($rate, false)), $this->channelRepository(null));
+        $extension = new PriceTaxExtension($this->resolver($this->taxRate($rate, false)), $this->channelRepository(null), $this->variantFactory());
 
         // When
         $context = $extension->context($this->createMock(ProductVariantInterface::class), self::CHANNEL_CODE);
@@ -118,13 +119,34 @@ final class PriceTaxExtensionTest extends TestCase
             ->with($variant, ['zone' => $zone])
             ->willReturn($this->taxRate(0.23, false));
 
-        $extension = new PriceTaxExtension($resolver, $this->channelRepository($zone));
+        $extension = new PriceTaxExtension($resolver, $this->channelRepository($zone), $this->variantFactory());
 
         // When
         $context = $extension->context($variant, self::CHANNEL_CODE);
 
         // Then
         self::assertSame(0.23, $context['rate']);
+    }
+
+    public function testShouldResolveRateForNewVariantFromTheVariantFactory(): void
+    {
+        // Given
+        $variant = $this->createMock(ProductVariantInterface::class);
+
+        $resolver = $this->createMock(TaxRateResolverInterface::class);
+        $resolver->expects(self::once())
+            ->method('resolve')
+            ->with($variant, [])
+            ->willReturn($this->taxRate(0.23, false));
+
+        $extension = new PriceTaxExtension($resolver, $this->channelRepository(null), $this->variantFactory($variant));
+
+        // When
+        $context = $extension->contextForNewVariant(self::CHANNEL_CODE);
+
+        // Then
+        self::assertSame(0.23, $context['rate']);
+        self::assertFalse($context['included']);
     }
 
     private function resolver(?TaxRateInterface $taxRate): TaxRateResolverInterface
@@ -142,6 +164,17 @@ final class PriceTaxExtensionTest extends TestCase
         $taxRate->method('isIncludedInPrice')->willReturn($includedInPrice);
 
         return $taxRate;
+    }
+
+    /**
+     * @return FactoryInterface<ProductVariantInterface>
+     */
+    private function variantFactory(?ProductVariantInterface $variant = null): FactoryInterface
+    {
+        $factory = $this->createMock(FactoryInterface::class);
+        $factory->method('createNew')->willReturn($variant ?? $this->createMock(ProductVariantInterface::class));
+
+        return $factory;
     }
 
     /**
