@@ -81,10 +81,10 @@ test.describe('Powiadomienie dla administratora', () => {
       `/admin/products/${OIL_PRODUCT_ID}/edit`,
     );
 
-    await page.goto(`/sklep/produkty/${OIL_SLUG}`);
-    await expect(page.locator('body'), 'sklep pokazuje brak stanu').toContainText('Brak na stanie');
+    const soldOutCard = await page.request.get(`/sklep/produkty/${OIL_SLUG}`);
+    expect(soldOutCard.status(), 'wyprzedany produkt znika ze sklepu, nie wisi z komunikatem').toBe(404);
 
-    await setProductStock(page, OIL_PRODUCT_ID, 10, true);
+    await setProductStock(page, OIL_PRODUCT_ID, 50, true);
   });
 
   test('wyłączone zdarzenie nie wysyła maila o pustym stanie', async ({ page }) => {

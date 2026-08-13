@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\QueryBuilder;
 use Sylius\Bundle\CoreBundle\Doctrine\ORM\ProductRepository as BaseProductRepository;
 use Sylius\Component\Core\Model\ChannelInterface;
@@ -13,6 +14,14 @@ use Sylius\Component\Core\Model\TaxonInterface;
 /** @phpstan-ignore missingType.generics */
 class ProductRepository extends BaseProductRepository
 {
+    private const AVAILABLE_VARIANT_EXISTS = 'EXISTS (
+        SELECT available_variant.id
+        FROM ' . ProductVariant::class . ' available_variant
+        WHERE available_variant.product = o
+          AND available_variant.enabled = true
+          AND (available_variant.tracked = false OR available_variant.onHand - available_variant.onHold > 0)
+    )';
+
     #[\Override]
     public function createShopListQueryBuilder(
         ChannelInterface $channel,
@@ -22,7 +31,7 @@ class ProductRepository extends BaseProductRepository
         bool $includeAllDescendants = false,
     ): QueryBuilder {
         return parent::createShopListQueryBuilder($channel, $taxon, $locale, $sorting, $includeAllDescendants)
-            ->andWhere('SIZE(o.variants) > 0');
+            ->andWhere(self::AVAILABLE_VARIANT_EXISTS);
     }
 
     /**
@@ -31,10 +40,13 @@ class ProductRepository extends BaseProductRepository
     #[\Override]
     public function findLatestByChannel(ChannelInterface $channel, string $locale, int $count): array
     {
+        $products = parent::findLatestByChannel($channel, $locale, $count);
+        $available = $this->availableIdsAmong($products);
+
         return array_values(
             array_filter(
-                parent::findLatestByChannel($channel, $locale, $count),
-                static fn (ProductInterface $product): bool => $product->hasVariants(),
+                $products,
+                static fn (ProductInterface $product): bool => isset($available[$product->getId()]),
             ),
         );
     }
@@ -44,6 +56,33 @@ class ProductRepository extends BaseProductRepository
     {
         $product = parent::findOneByChannelAndSlug($channel, $locale, $slug);
 
-        return null !== $product && $product->hasVariants() ? $product : null;
+        if (null === $product) {
+            return null;
+        }
+
+        return [] === $this->availableIdsAmong([$product]) ? null : $product;
+    }
+
+    /**
+     * @param array<array-key, ProductInterface> $products
+     *
+     * @return array<int, int>
+     */
+    private function availableIdsAmong(array $products): array
+    {
+        if ([] === $products) {
+            return [];
+        }
+
+        /** @var list<array{id: int}> $rows */
+        $rows = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->andWhere('o IN (:products)')
+            ->andWhere(self::AVAILABLE_VARIANT_EXISTS)
+            ->setParameter('products', $products)
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_column($rows, 'id', 'id');
     }
 }

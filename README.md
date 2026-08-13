@@ -87,6 +87,46 @@ Pokrywa to `e2e/shop-product-without-variants.spec.ts` — zakłada taki produkt
 200 na sklepie i 404 na karcie, i sprząta po sobie w `afterEach`, żeby nieudany przebieg nie zostawiał
 śmieci w katalogu.
 
+## Wyprzedane warianty
+
+Sylius domyślnie preselekcjonuje **pierwszy włączony** wariant, nie pierwszy dostępny. Przy voucherze,
+któremu skończył się zapas na najmniejszej kwocie, klient wchodził na stronę produktu z już wybranym
+wyprzedanym wariantem, klikał *Dodaj do koszyka* i dostawał `nie posiada wystarczających zapasów
+produktu` — bez podpowiedzi, że wystarczy zmienić kwotę. Trzy zmiany naprawiają cały ten scenariusz:
+
+| Element | Rola |
+|---|---|
+| `src/Product/VariantAvailability.php` | jedno miejsce z regułą „da się kupić": wariant włączony i `AvailabilityChecker` mówi, że stan wystarcza |
+| `src/Product/AvailableProductVariantResolver.php` | resolver z tagiem `sylius.product_variant_resolver`, oddaje pierwszy **dostępny** wariant |
+| `src/Form/Extension/SoldOutOptionValueFormExtension.php` | tryb *Dopasowywanie opcji* — wyprzedana wartość opcji dostaje dopisek i `disabled` |
+| `src/Form/Extension/SoldOutVariantFormExtension.php` | to samo dla trybu *Wybór wariantu* (radio w tabeli) |
+| `templates/bundles/SyliusShopBundle/.../variants/table/body/name.html.twig` | dopisek w tabeli wariantów, bo nazwę renderuje komórka, a nie etykieta pola |
+| `src/Repository/ProductRepository.php` | produkt bez ani jednego dostępnego wariantu wypada ze sklepu |
+
+Resolver **nie zastępuje** domyślnego Syliusa, tylko wchodzi przed nim (`CompositeProductVariantResolver`
+iteruje po priorytecie i bierze pierwszy niepusty wynik). Gdy nic nie jest dostępne, zwraca `null`
+i decyzja wraca do `sylius.resolver.product_variant.default` — nie tracimy zachowania na wypadek, gdyby
+produkt miał się gdzieś pokazać mimo braku stanu. Trafia to zarówno w preselekcję formularza
+(`CartItemFactory::createForProduct` woła ten sam resolver), jak i w cenę na karcie produktu i kafelku.
+
+> **To zmiana polityki, nie tylko voucherów.** Wcześniej wyprzedany produkt wisiał w sklepie z
+> komunikatem `Brak na stanie`. Teraz **każdy** produkt bez dostępnego wariantu — również prosty,
+> jednowariantowy — znika z listingu i oddaje 404 na karcie. Komunikat `Brak na stanie` jest przez to
+> nieosiągalny. Jeśli wyprzedane produkty mają zostać widoczne, regułę trzeba zawęzić do produktów
+> wielowariantowych albo cofnąć filtr w repozytorium.
+
+Reguła dostępności żyje w dwóch reprezentacjach: PHP (`VariantAvailability`, dla formularzy i
+resolvera) i DQL (`ProductRepository::AVAILABLE_VARIANT_EXISTS`, dla listingów). Obie mówią to samo —
+`enabled AND (NOT tracked OR onHand - onHold > 0)`. Pierwsza jest przetestowana jednostkowo, druga
+przez E2E.
+
+Pokrywa to `e2e/shop-sold-out-variants.spec.ts` (oba tryby wyboru, dopisek, `disabled`, przeskok
+preselekcji, zniknięcie produktu) oraz `tests/Product/` (reguła dostępności i kolejność resolvera).
+
+**Panel nie pozwala ustawić stanu równego rezerwacji** — Sylius waliduje `onHand > onHold`
+(„Ilość dostępnych produktów musi być większa od ilości produktów oczekujących"). Stan „0 dostępnych"
+powstaje więc tylko przez zakup ostatniej sztuki, nie przez wpisanie liczby w formularzu.
+
 ## Kolejki i promocje z datami
 
 Transporty messengera idą na **RabbitMQ na obu środowiskach** (`symfony/amqp-messenger`, rozszerzenie

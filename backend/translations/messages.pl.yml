@@ -83,6 +83,8 @@ oma:
     pricing:
         gross: 'brutto (VAT %rate%%)'
         net: 'netto (VAT %rate%%)'
+    product:
+        sold_out_option: '%value% (wyprzedany)'
     apple_pay:
         button: 'Zapłać przez Apple Pay'
         hint: 'Adres i dane kontaktowe pobierzemy z Apple Pay — nie musisz nic wpisywać.'

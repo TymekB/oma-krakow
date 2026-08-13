@@ -1,0 +1,18 @@
+{% set variant = hookable_metadata.context.variant %}
+{% set product = hookable_metadata.context.product %}
+{% set name = variant.name|default(variant.descriptor) %}
+
+<td>
+    <div class="fw-semibold">
+        {{- oma_variant_sold_out(variant) ? 'oma.product.sold_out_option'|trans({'%value%': name}) : name -}}
+    </div>
+    {% if product.hasOptions() %}
+        <div>
+            {% for option_value in variant.optionValues %}
+                <span class="badge text-bg-light text-muted">
+                    {{ option_value.value }}
+                </span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</td>
