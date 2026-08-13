@@ -49,13 +49,14 @@ async function createProductWithVariants(page: Page): Promise<Product> {
   }
 
   await page.getByRole('button', { name: 'Generuj' }).click();
-  await expect(page.locator('body')).toContainText(code);
+  await expect(page, 'generowanie kończy się powrotem na listę wariantów').toHaveURL(/\/variants\/$/);
 
   return created;
 }
 
 async function variantEditPaths(page: Page, productId: string): Promise<string[]> {
   await page.goto(`/admin/products/${productId}/variants/`);
+  await expect(page.locator('a[href*="/variants/"][href$="/edit"]').first()).toBeVisible();
 
   return page.evaluate(() =>
     Array.from(document.querySelectorAll('a[href*="/variants/"][href$="/edit"]')).map((el) => el.getAttribute('href')!),
