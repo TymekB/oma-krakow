@@ -66,6 +66,27 @@ asercja na atrybucie nie wystarcza — trzeba odczekać, aż zniknie klasa `coll
 
 **Yarn w `backend/`.** Rootowy `package.json` (Angular) deklaruje `packageManager: npm`, przez co yarn wychodził w górę drzewa i odmawiał startu — dlatego `backend/package.json` ma własne `packageManager: yarn@1.22.22`. Przy Node 23 instaluj z `--ignore-engines`.
 
+**Produkt bez wariantów wywracał cały sklep.** Utworzenie produktu konfigurowalnego w panelu daje
+produkt **włączony, w kanale, w kategorii i z zerem wariantów** — Sylius nie wymaga wariantu przy
+zapisie, dodajesz go osobnym krokiem. W tym stanie `CardComponent::getProductVariant()` rzucał
+`InvalidArgumentException('Product has no variants')`, co wywalało **500 na stronie głównej sklepu i na
+każdym listingu kategorii**, nie tylko na karcie tego produktu. Wystarczyło, że ktoś zaczął dodawać
+produkt i przerwał.
+
+`App\Repository\ProductRepository` (podstawiony przez `sylius_product.resources.product.classes.repository`)
+odsiewa takie produkty z trzech ścieżek czytania w sklepie: `createShopListQueryBuilder` (listing),
+`findLatestByChannel` (strona główna) i `findOneByChannelAndSlug` (karta produktu → 404 zamiast 500).
+Produkt bez wariantu nie jest kupowalny, więc nie ma go po co pokazywać. **W panelu jest widoczny
+normalnie** — `createListQueryBuilder` zostaje nietknięty, żeby dało się dokończyć robotę.
+
+Klasa nie deklaruje `@extends` z parametrem generycznym, bo hierarchia repozytoriów Syliusa ma
+sprzeczne deklaracje `@template` i PHPStan sypie wtedy 31 błędami `generics.interfaceConflict`
+pochodzącymi z `vendor/`. Zamiast tego jest jeden wąski `@phpstan-ignore missingType.generics`.
+
+Pokrywa to `e2e/shop-product-without-variants.spec.ts` — zakłada taki produkt przez panel, sprawdza
+200 na sklepie i 404 na karcie, i sprząta po sobie w `afterEach`, żeby nieudany przebieg nie zostawiał
+śmieci w katalogu.
+
 ## Kolejki i promocje z datami
 
 Transporty messengera idą na **RabbitMQ na obu środowiskach** (`symfony/amqp-messenger`, rozszerzenie
