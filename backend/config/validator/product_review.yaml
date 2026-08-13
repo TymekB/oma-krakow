@@ -1,0 +1,20 @@
+Sylius\Component\Review\Model\Review:
+    properties:
+        title:
+            - Regex:
+                  pattern: '/<\s*\/?\s*[a-z!]|javascript\s*:/i'
+                  match: false
+                  message: 'oma.review.no_markup'
+                  groups: [sylius]
+        comment:
+            - Length:
+                  min: 20
+                  max: 1500
+                  minMessage: 'oma.review.comment.min_length'
+                  maxMessage: 'oma.review.comment.max_length'
+                  groups: [sylius]
+            - Regex:
+                  pattern: '/<\s*\/?\s*[a-z!]|javascript\s*:/i'
+                  match: false
+                  message: 'oma.review.no_markup'
+                  groups: [sylius]

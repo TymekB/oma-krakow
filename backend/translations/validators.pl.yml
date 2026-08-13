@@ -1,0 +1,6 @@
+oma:
+    review:
+        no_markup: 'Opinia nie może zawierać kodu HTML ani skryptów — napisz zwykłym tekstem.'
+        comment:
+            min_length: 'Opinia musi mieć co najmniej {{ limit }} znaków — napisz kilka słów o produkcie.'
+            max_length: 'Opinia nie może być dłuższa niż {{ limit }} znaków.'
