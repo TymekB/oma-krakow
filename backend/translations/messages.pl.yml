@@ -76,6 +76,7 @@ oma:
     review:
         confirmed_by_purchase: 'Zweryfikowano zakupem'
         login_to_add: 'Zaloguj się, aby dodać opinię'
+        form_has_errors: 'Nie udało się dodać opinii — popraw poniższe pola:'
     google_login:
         button: 'Kontynuuj z Google'
         or: 'albo'

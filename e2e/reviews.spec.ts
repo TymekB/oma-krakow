@@ -87,8 +87,23 @@ test.describe('Walidacja treści opinii', () => {
 
       await expect(page, 'formularz zostaje z błędem, opinia nie wchodzi').toHaveURL(/recenzje\/nowa/);
       await expect(page.locator('.invalid-feedback').first()).toBeVisible();
+      await expect(page.locator('[data-oma-review-errors]'), 'podsumowanie błędów nad formularzem').toBeVisible();
     });
   }
+
+  test('brak oceny mówi wprost, czego brakuje', async ({ page }) => {
+    await registerVerifiedCustomer(page, uniqueEmail('bez-oceny'));
+
+    await page.goto(`/sklep/produkty/${PRODUCT_SLUG}/recenzje/nowa`);
+    await page.fill('[name="sylius_shop_product_review[title]"]', 'Tytuł opinii');
+    await page.fill('[name="sylius_shop_product_review[comment]"]', 'Treść opinii wystarczająco długa, żeby przejść walidację.');
+    await page.locator('button[type="submit"], input[type="submit"]').last().click();
+
+    const summary = page.locator('[data-oma-review-errors]');
+    await expect(summary).toBeVisible();
+    await expect(summary).toContainText('oceny');
+    await expect(page.locator('.invalid-feedback').first(), 'i przy samym polu oceny').toBeVisible();
+  });
 
   test('przyjmuje zwykłą opinię tekstową', async ({ page }) => {
     await registerVerifiedCustomer(page, uniqueEmail('walidacja-ok'));

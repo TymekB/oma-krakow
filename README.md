@@ -513,6 +513,13 @@ autoescaping zostaje drugą linią obrony.
 Reguła celuje w `<` z literą lub `!` oraz w `javascript:`, więc zwykły tekst z „mniejsze niż 50"
 przechodzi — blokowane jest to, co wygląda jak znacznik.
 
+**Błędy formularza mają podsumowanie na górze.** Sylius renderuje komunikat przy polu, a przy ocenie
+to mały, wyblakły tekst pod gwiazdkami — łatwo go przegapić i nie wiedzieć, dlaczego „Dodaj" nic nie
+robi. Nadpisany `product_review/create/content/main/form.html.twig` zbiera rekurencyjnie błędy
+całego formularza i wypisuje je w `alert-danger` **nad** polami (`[data-oma-review-errors]`), zostawiając
+komunikaty przy polach. Formularz ma `novalidate`, a radia oceny są `display: none` i bez `required`,
+więc submit zawsze idzie na serwer — nie ma tu cichej blokady walidacji HTML5.
+
 Testy: `e2e/reviews.spec.ts` — gość odbity na logowanie, zalogowany dodaje opinię bez pola e-mail,
 badge pojawia się po opłaconym zamówieniu i nie pojawia się bez zakupu, oraz pięć odrzuconych treści
 (za krótka, skrypt, atrybut zdarzenia, `javascript:` i znacznik w tytule) obok jednej przyjętej.
