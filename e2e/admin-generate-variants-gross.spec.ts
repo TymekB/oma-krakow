@@ -49,7 +49,7 @@ async function deleteProduct(page: Page, code: string): Promise<void> {
   await expect(page.locator('tbody')).not.toContainText(code);
 }
 
-test.describe('Ceny brutto przy generowaniu wariantów', () => {
+test.describe('Lustro ceny przy generowaniu wariantów', () => {
   test.afterEach(async ({ page }) => {
     if (null !== created) {
       await deleteProduct(page, created.code);
@@ -57,7 +57,7 @@ test.describe('Ceny brutto przy generowaniu wariantów', () => {
     }
   });
 
-  test('każde pole ceny w każdym wariancie dostaje lustro brutto', async ({ page }) => {
+  test('każde pole ceny w każdym wariancie dostaje lustro netto', async ({ page }) => {
     const { id } = await createProductWithOption(page);
     await page.goto(`/admin/products/${id}/variants/generate`);
 
@@ -66,30 +66,30 @@ test.describe('Ceny brutto przy generowaniu wariantów', () => {
     const mirrors = page.locator('.oma-price-mirror');
 
     await expect(containers.first()).toHaveAttribute('data-rate', '0.23');
-    await expect(containers.first()).toHaveAttribute('data-included', '0');
-    await expect(containers.first()).toHaveAttribute('data-mirror-label', 'brutto (VAT 23%)');
+    await expect(containers.first()).toHaveAttribute('data-included', '1');
+    await expect(containers.first()).toHaveAttribute('data-mirror-label', 'netto (VAT 23%)');
 
     expect(await containers.count(), 'jeden kontener na wariant').toBe(3);
     expect(await mirrors.count(), 'lustro pod każdym polem ceny').toBe(await priceFields.count());
   });
 
-  test('netto i brutto przeliczają się w obie strony', async ({ page }) => {
+  test('brutto i netto przeliczają się w obie strony', async ({ page }) => {
     const { id } = await createProductWithOption(page);
     await page.goto(`/admin/products/${id}/variants/generate`);
 
-    const net = page.locator('input[id$="_price"]').first();
-    const gross = page.locator('.oma-price-mirror input').first();
-
-    await net.fill('');
-    await net.type('50');
-    await expect(gross).toHaveValue('61,50');
+    const gross = page.locator('input[id$="_price"]').first();
+    const net = page.locator('.oma-price-mirror input').first();
 
     await gross.fill('');
     await gross.type('123');
     await expect(net).toHaveValue('100,00');
 
     await net.fill('');
-    await expect(gross, 'puste pole nie pokazuje zera').toHaveValue('');
+    await net.type('100');
+    await expect(gross).toHaveValue('123,00');
+
+    await gross.fill('');
+    await expect(net, 'puste pole nie pokazuje zera').toHaveValue('');
   });
 
   test('lustro nie psuje zapisu — Generuj tworzy warianty z wpisanymi cenami', async ({ page }) => {

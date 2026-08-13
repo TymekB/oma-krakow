@@ -20,31 +20,19 @@ test.describe('Konfigurator cen netto i brutto', () => {
     const container = page.locator('[data-oma-price-tax]').first();
     await expect(container).toHaveAttribute('data-rate', '0.23');
 
-    // included=0 znaczy, ze w bazie siedzi netto, wiec lustro liczy brutto
-    await expect(container).toHaveAttribute('data-included', '0');
-    await expect(container).toHaveAttribute('data-mirror-label', 'brutto (VAT 23%)');
+    // included=1 znaczy, ze w bazie siedzi brutto, wiec lustro liczy netto
+    await expect(container).toHaveAttribute('data-included', '1');
+    await expect(container).toHaveAttribute('data-mirror-label', 'netto (VAT 23%)');
 
     // Cena, Cena wyjsciowa, Cena minimalna
     await expect(page.locator('.oma-price-mirror')).toHaveCount(3);
   });
 
-  test('netto wpisane w polu formularza przelicza sie na brutto', async ({ page }) => {
+  test('brutto wpisane w polu formularza przelicza sie na netto', async ({ page }) => {
     await openPricingTab(page);
 
-    const net = page.locator('input[id$="_price"]').first();
-    const gross = page.locator('.oma-price-mirror input').first();
-
-    await net.fill('');
-    await net.type('100');
-
-    await expect(gross).toHaveValue('123,00');
-  });
-
-  test('brutto wpisane w lustrze przelicza sie na netto w zapisywanym polu', async ({ page }) => {
-    await openPricingTab(page);
-
-    const net = page.locator('input[id$="_price"]').first();
-    const gross = page.locator('.oma-price-mirror input').first();
+    const gross = page.locator('input[id$="_price"]').first();
+    const net = page.locator('.oma-price-mirror input').first();
 
     await gross.fill('');
     await gross.type('123');
@@ -52,26 +40,38 @@ test.describe('Konfigurator cen netto i brutto', () => {
     await expect(net).toHaveValue('100,00');
   });
 
-  test('brutto z groszami zaokragla netto do dwoch miejsc', async ({ page }) => {
+  test('netto wpisane w lustrze przelicza sie na brutto w zapisywanym polu', async ({ page }) => {
     await openPricingTab(page);
 
-    const net = page.locator('input[id$="_price"]').first();
-    const gross = page.locator('.oma-price-mirror input').first();
+    const gross = page.locator('input[id$="_price"]').first();
+    const net = page.locator('.oma-price-mirror input').first();
 
-    await gross.fill('');
-    await gross.type('119,00');
+    await net.fill('');
+    await net.type('100');
 
-    await expect(net).toHaveValue('96,75');
+    await expect(gross).toHaveValue('123,00');
+  });
+
+  test('netto z groszami zaokragla brutto do dwoch miejsc', async ({ page }) => {
+    await openPricingTab(page);
+
+    const gross = page.locator('input[id$="_price"]').first();
+    const net = page.locator('.oma-price-mirror input').first();
+
+    await net.fill('');
+    await net.type('96,75');
+
+    await expect(gross).toHaveValue('119,00');
   });
 
   test('puste pole nie pokazuje zera w lustrze', async ({ page }) => {
     await openPricingTab(page);
 
-    const net = page.locator('input[id$="_price"]').first();
-    const gross = page.locator('.oma-price-mirror input').first();
+    const gross = page.locator('input[id$="_price"]').first();
+    const net = page.locator('.oma-price-mirror input').first();
 
-    await net.fill('');
+    await gross.fill('');
 
-    await expect(gross).toHaveValue('');
+    await expect(net).toHaveValue('');
   });
 });

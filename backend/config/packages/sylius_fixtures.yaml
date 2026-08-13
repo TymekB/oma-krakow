@@ -78,12 +78,14 @@ sylius_fixtures:
                                 zone: 'PL'
                                 category: 'standard'
                                 amount: 0.23
+                                included_in_price: true
                             vat_services:
                                 code: 'vat_services'
                                 name: 'VAT 23% (usługi)'
                                 zone: 'PL'
                                 category: 'services'
                                 amount: 0.23
+                                included_in_price: true
 
                 channel:
                     options:

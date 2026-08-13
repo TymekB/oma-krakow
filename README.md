@@ -387,14 +387,24 @@ z widoku zamówienia też działa mimo wyłączonego zdarzenia — to jawna decy
 
 ## Ceny netto i brutto w panelu
 
-> **Uwaga na konfigurację podatków.** Obie stawki VAT w bazie mają `included_in_price = 0`, czyli
-> **cena wpisana w panelu jest ceną netto**, a 23% dolicza się dopiero w koszyku. Produkt z ceną
-> `39,00` kosztuje klienta `47,97` i taką kwotę widać dopiero w podsumowaniu koszyka — na karcie
-> produktu i liście widnieje `39,00`. Dla sklepu B2C w Polsce to najpewniej nie jest to, o co chodzi
-> (konsument ma widzieć cenę końcową), ale zmiana tego to decyzja biznesowa, nie techniczna:
-> przestawienie `included_in_price` na `1` **nie przelicza istniejących cen**, tylko zmienia ich
-> znaczenie, więc `39,00` z dnia na dzień stanie się ceną brutto i przychód spadnie o 23%. Jeśli
-> ceny mają zostać takie, jakie klient płaci dziś, trzeba je najpierw przemnożyć przez `1,23`.
+> **Ceny w panelu są brutto.** Obie stawki VAT mają `included_in_price = 1`, czyli kwota wpisana
+> w panelu jest tym, co płaci klient — produkt z ceną `39,00` kosztuje w koszyku `39,00`, a VAT jest
+> w tym zawarty. Tak jest na produkcji i tak samo ustawiają to fixtures dla devu.
+
+**Ta flaga to dane, nie kod — nie jedzie z deployem.** Siedzi w `sylius_tax_rate.included_in_price`
+i każde środowisko ma swoją. Dev długo miał `0` (ceny netto, VAT doliczany w koszyku), bo fixtures
+tego pola nie ustawiały, a Sylius domyślnie daje `false` — stąd panel na localhoście pokazywał pod
+ceną `BRUTTO (VAT 23%)`, a na produkcji `NETTO (VAT 23%)`. Fixtures ustawiają teraz `included_in_price: true`
+na `vat_23` i `vat_services`, więc świeża baza dev wstaje zgodnie z produkcją.
+
+Zmiana ręczna: panel → **Konfiguracja → Stawki podatkowe** → edycja stawki → checkbox
+**„Wliczony w cenę?"** (`#sylius_admin_tax_rate_includedInPrice`). Trzeba na **obu** stawkach,
+inaczej usługi liczyłyby się inaczej niż produkty.
+
+> **Przestawienie flagi nie przelicza istniejących cen** — tylko zmienia ich znaczenie. Ta sama
+> liczba `39,00` przy `0` znaczy „klient zapłaci 47,97", a przy `1` „klient zapłaci 39,00". Jeśli
+> kiedyś wrócicie na `0`, a ceny końcowe mają zostać bez zmian, trzeba najpierw podzielić wszystkie
+> ceny w `sylius_channel_pricing` przez `1,23`.
 
 Póki co panel pomaga w tym żyć: pod **każdym** polem ceny (*Cena*, *Cena wyjściowa*, *Cena
 minimalna*) — w zakładce **Ceny** produktu, w formularzu wariantu i na stronie **Generuj warianty** —
