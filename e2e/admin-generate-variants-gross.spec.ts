@@ -1,38 +1,43 @@
 import { expect, test } from '@playwright/test';
 import { loginToAdmin } from './helpers';
 
-const CODE = `E2E_BRUTTO_${Date.now()}`;
-
-const SLUG = CODE.toLowerCase().replace(/_/g, '-');
-
 const OPTION_NAME = 'Voucher';
 
 type Page = import('@playwright/test').Page;
 
-async function createProductWithOption(page: Page): Promise<string> {
+type Product = { id: string; code: string };
+
+let created: Product | null = null;
+
+async function createProductWithOption(page: Page): Promise<Product> {
+  const code = `E2E_BRUTTO_${Date.now()}`;
+  const slug = code.toLowerCase().replace(/_/g, '-');
+
   await loginToAdmin(page);
   await page.goto('/admin/products/new');
 
-  await page.fill('#sylius_admin_product_code', CODE);
+  await page.fill('#sylius_admin_product_code', code);
 
   await page.locator('#sylius_admin_product_options-ts-control').click();
   await page.keyboard.type(OPTION_NAME);
   await page.locator(`.ts-dropdown .option:has-text("${OPTION_NAME}")`).first().click();
 
   await page.locator('[data-bs-target="#product-translations"]').first().click();
-  await page.fill('#sylius_admin_product_translations_pl_PL_name', CODE);
-  await page.fill('#sylius_admin_product_translations_pl_PL_slug', SLUG);
+  await page.fill('#sylius_admin_product_translations_pl_PL_name', code);
+  await page.fill('#sylius_admin_product_translations_pl_PL_slug', slug);
 
   await page.getByRole('button', { name: 'Utwórz' }).click();
   await expect(page).toHaveURL(/\/admin\/products\/\d+\/edit/);
 
-  return page.url().match(/\/products\/(\d+)\/edit/)![1];
+  created = { id: page.url().match(/\/products\/(\d+)\/edit/)![1], code };
+
+  return created;
 }
 
-async function deleteProduct(page: Page): Promise<void> {
+async function deleteProduct(page: Page, code: string): Promise<void> {
   await page.goto('/admin/products/');
 
-  const row = page.locator('tr', { hasText: CODE }).first();
+  const row = page.locator('tr', { hasText: code }).first();
 
   if (0 === (await row.count())) {
     return;
@@ -41,16 +46,19 @@ async function deleteProduct(page: Page): Promise<void> {
   await row.locator('button[data-bs-target^="#delete-modal-"]').click();
   await page.locator('.modal.show form button[type="submit"]').click();
 
-  await expect(page.locator('tbody')).not.toContainText(CODE);
+  await expect(page.locator('tbody')).not.toContainText(code);
 }
 
 test.describe('Ceny brutto przy generowaniu wariantów', () => {
   test.afterEach(async ({ page }) => {
-    await deleteProduct(page);
+    if (null !== created) {
+      await deleteProduct(page, created.code);
+      created = null;
+    }
   });
 
   test('każde pole ceny w każdym wariancie dostaje lustro brutto', async ({ page }) => {
-    const id = await createProductWithOption(page);
+    const { id } = await createProductWithOption(page);
     await page.goto(`/admin/products/${id}/variants/generate`);
 
     const containers = page.locator('[data-oma-price-tax]');
@@ -66,7 +74,7 @@ test.describe('Ceny brutto przy generowaniu wariantów', () => {
   });
 
   test('netto i brutto przeliczają się w obie strony', async ({ page }) => {
-    const id = await createProductWithOption(page);
+    const { id } = await createProductWithOption(page);
     await page.goto(`/admin/products/${id}/variants/generate`);
 
     const net = page.locator('input[id$="_price"]').first();
@@ -82,5 +90,25 @@ test.describe('Ceny brutto przy generowaniu wariantów', () => {
 
     await net.fill('');
     await expect(gross, 'puste pole nie pokazuje zera').toHaveValue('');
+  });
+
+  test('lustro nie psuje zapisu — Generuj tworzy warianty z wpisanymi cenami', async ({ page }) => {
+    const { id, code } = await createProductWithOption(page);
+    await page.goto(`/admin/products/${id}/variants/generate`);
+
+    const codes = page.locator('input[id$="_code"]');
+    const prices = page.locator('input[id$="_price"]');
+    const rows = await codes.count();
+
+    for (let i = 0; i < rows; i++) {
+      await codes.nth(i).fill(`${code}-${i}`);
+      await prices.nth(i).fill('50');
+    }
+
+    await page.getByRole('button', { name: 'Generuj' }).click();
+    await expect(page, 'formularz przechodzi, nie wraca z błędem walidacji').toHaveURL(/\/variants\/$/);
+
+    const variantRows = page.locator('tbody tr', { hasText: code });
+    await expect(variantRows).toHaveCount(rows);
   });
 });

@@ -385,12 +385,23 @@ Lustro wstrzykuje JS, a nie Twig, bo trzy pola cen renderuje hook (`body` przeka
 więc nadpisywanie pojedynczych pól w makrze byłoby martwym kodem. Stąd też `MutationObserver` —
 formularz produktu to Live Component i po każdym przerysowaniu lustro trzeba wstawić od nowa.
 
+> **Nie dopisuj atrybutów do pól, które renderuje Live Component.** Skrypt pilnował się przed
+> podwójnym bindowaniem znacznikiem `field.dataset.omaPriceMirror = '1'` — czyli mutował atrybut
+> `input`-a należącego do komponentu. Na formularzu produktu przechodziło to bez śladu, ale na
+> **Generuj warianty** kończyło się cicho: przy przerysowaniu komponentu Symfony UX kasowało wartość
+> ostatnio wpisanej ceny, submit wracał z 422 i „Należy zdefiniować cenę", a warianty nie powstawały.
+> Bez żadnego błędu w logu, bo formularz idzie przez Live Component. Znacznik siedzi teraz w `WeakSet`
+> po stronie JS-u i nie dotyka DOM-u. Pilnuje tego test „lustro nie psuje zapisu" — z powrotem
+> wstawionym `dataset` pada 5/5, z `WeakSet` przechodzi 5/5 (jeden przebieg to za mało, to wyścig
+> i zależy od tego, ile przerysowań zdąży wejść).
+
 Stawka pochodzi z **zapisanej** kategorii podatkowej wariantu. Jeśli zmienisz ją w zakładce
 *Podatki* i jeszcze nie zapiszesz, lustro liczy po staremu aż do zapisu.
 
 Pokrywa to `e2e/admin-price-net-gross.spec.ts` (oba kierunki, zaokrąglanie groszy, puste pole),
-`e2e/admin-generate-variants-gross.spec.ts` (lustro pod każdą ceną każdego generowanego wariantu)
-oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki, kierunek, formatowanie procentu).
+`e2e/admin-generate-variants-gross.spec.ts` (lustro pod każdą ceną każdego generowanego wariantu
+i to, że nie psuje zapisu) oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki,
+kierunek, formatowanie procentu).
 
 ### Domyślna kategoria podatkowa
 
