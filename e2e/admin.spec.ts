@@ -90,6 +90,14 @@ test.describe('Panel admina', () => {
     expect(orderNumbers.length, 'lista zamówień nie jest pusta').toBeGreaterThan(0);
     expect(orderNumbers[0], 'zamówienia sprzed zmiany zachowują stare, 9-cyfrowe numery').toHaveLength(4);
   });
+
+  test('nowy produkt ma domyślnie kategorię podatkową VAT 23%', async ({ page }) => {
+    await page.goto('/admin/products/new/simple');
+
+    const taxCategory = page.locator('select[id$="_taxCategory"]').first();
+
+    await expect(taxCategory.locator('option:checked')).toHaveText('VAT 23%');
+  });
 });
 
 test.describe('Jeden kanał', () => {

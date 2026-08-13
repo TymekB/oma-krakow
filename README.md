@@ -363,6 +363,24 @@ Stawka pochodzi z **zapisanej** kategorii podatkowej wariantu. Jeśli zmienisz j
 Pokrywa to `e2e/admin-price-net-gross.spec.ts` (oba kierunki, zaokrąglanie groszy, puste pole)
 oraz `tests/Twig/PriceTaxExtensionTest.php` (rozwiązywanie stawki, kierunek, formatowanie procentu).
 
+### Domyślna kategoria podatkowa
+
+Każdy nowy wariant startuje z kategorią **VAT 23%** (kod `standard`), więc zakładka *Podatki*
+w formularzu produktu jest wypełniona od pierwszego wejścia i nikt nie zapisze produktu bez stawki.
+Robi to dekorator fabryki wariantów (`App\Factory\DefaultTaxCategoryProductVariantFactory` na
+`sylius.factory.product_variant`), a nie rozszerzenie formularza — fabryka leży na ścieżce **każdego**
+sposobu tworzenia wariantu: prosty produkt z panelu (`createWithVariant`), generator wariantów
+produktu konfigurowalnego (`createForProduct`), API i fixtures. Rozszerzenie formularza łapałoby
+tylko panel.
+
+Kod kategorii siedzi w parametrze `app.default_tax_category_code`. Gdy kategorii o tym kodzie nie ma
+w bazie, wariant dostaje puste pole zamiast wyjątku — brak seeda nie może wywrócić tworzenia produktu.
+Kategoria już ustawiona (np. przez import) zostaje nietknięta. Warianty sprzed zmiany uzupełnia
+migracja `Version20260813104500`.
+
+Pokrywa to `tests/Factory/DefaultTaxCategoryProductVariantFactoryTest.php` oraz test
+„nowy produkt ma domyślnie kategorię podatkową VAT 23%" w `e2e/admin.spec.ts`.
+
 ## Zweryfikowane opinie
 
 Opinię o produkcie może wystawić **tylko zalogowany klient**, a opinia autora, który ten produkt
