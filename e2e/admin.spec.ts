@@ -54,6 +54,8 @@ test.describe('Panel admina', () => {
         brandRight: Math.round(brand.getBoundingClientRect().right),
         searchRight: Math.round(search.getBoundingClientRect().right),
         headerLeft: Math.round(header.getBoundingClientRect().left),
+        headerBackground: getComputedStyle(header).backgroundColor,
+        headerContentLeft: Math.round(header.querySelector('.container-xl')!.getBoundingClientRect().left),
       };
     });
 
@@ -63,7 +65,9 @@ test.describe('Panel admina', () => {
     expect(metrics.scrollable, 'sidebar nadal daje się przewijać').toBe(true);
     expect(metrics.brandRight, 'nagłówek sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
     expect(metrics.searchRight, 'wyszukiwarka sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
-    expect(metrics.headerLeft, 'biały pasek styka się z sidebarem bez szczeliny').toBe(metrics.asideRight);
+    expect(metrics.headerLeft, 'biały pasek podchodzi pod sidebar, więc tło strony nie prześwituje').toBe(0);
+    expect(metrics.headerBackground, 'pasek ma pełne białe tło').toBe('rgb(255, 255, 255)');
+    expect(metrics.headerContentLeft, 'treść paska startuje przy krawędzi sidebara').toBe(metrics.asideRight);
   });
 
   test('górny pasek zostaje przypięty po scrollu, a menu użytkownika dostępne', async ({ page }) => {
@@ -74,16 +78,19 @@ test.describe('Panel admina', () => {
     const metrics = await page.evaluate(() => {
       const header = document.querySelector('header.navbar') as HTMLElement;
       const pageHeader = document.querySelector('.page-header') as HTMLElement;
+      const title = (pageHeader.querySelector('h1, .page-title') ?? pageHeader) as HTMLElement;
+      const card = document.querySelector('.page-body .card') as HTMLElement | null;
       const hr = header.getBoundingClientRect();
-      const pr = pageHeader.getBoundingClientRect();
+      const tr = title.getBoundingClientRect();
+      const cr = card?.getBoundingClientRect();
       const userControl = document.querySelector('header.navbar [data-bs-toggle="dropdown"], header.navbar a[href*="logout"], header.navbar .nav-link');
       const ur = userControl?.getBoundingClientRect();
 
       return {
         headerPosition: getComputedStyle(header).position,
         headerTop: Math.round(hr.top),
-        pageHeaderTop: Math.round(pr.top),
-        headerBottom: Math.round(hr.bottom),
+        pageHeaderPosition: getComputedStyle(pageHeader).position,
+        titleOverlapsCard: !!cr && tr.bottom > cr.top && tr.top < cr.bottom && tr.right > cr.left && tr.left < cr.right,
         userVisible: !!ur && ur.top >= 0 && ur.top < window.innerHeight && ur.height > 0,
       };
     });
@@ -91,7 +98,8 @@ test.describe('Panel admina', () => {
     expect(metrics.headerPosition, 'górny pasek jest sticky').toBe('sticky');
     expect(metrics.headerTop, 'górny pasek przypięty do góry po scrollu').toBe(0);
     expect(metrics.userVisible, 'menu użytkownika (wylogowanie) dostępne po scrollu').toBe(true);
-    expect(metrics.pageHeaderTop, 'nagłówek strony nie nachodzi na górny pasek').toBeGreaterThanOrEqual(metrics.headerBottom - 2);
+    expect(metrics.pageHeaderPosition, 'tytuł strony nie przykleja się przy scrollu').toBe('static');
+    expect(metrics.titleOverlapsCard, 'tytuł strony nie nachodzi na karty').toBe(false);
   });
 
   test('drzewo kategorii nie dubluje się po wejściu w edycję', async ({ page }) => {

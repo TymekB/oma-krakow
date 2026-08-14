@@ -278,8 +278,15 @@ header.navbar {
   background-color: #fff;
 }
 
+@media (min-width: 1200px) {
+  header.navbar {
+    margin-left: 0 !important;
+    padding-left: 15rem;
+  }
+}
+
 .page-wrapper .page-header {
-  top: 55px;
+  position: static;
 }
 
 .row-cards > [class*='col-'],
