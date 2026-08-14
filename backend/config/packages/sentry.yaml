@@ -9,3 +9,6 @@ when@prod:
                 - 'Symfony\Component\Debug\Exception\FatalErrorException'
                 - 'Symfony\Component\HttpKernel\Exception\NotFoundHttpException'
                 - 'Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException'
+                # Gosc wchodzacy na /sklep/account/* dostaje przekierowanie na logowanie,
+                # a nie awarie — Symfony rzuca to zanim ExceptionListener zamieni je na redirect.
+                - 'Symfony\Component\Security\Core\Exception\AccessDeniedException'

@@ -506,6 +506,12 @@ Odtworzone: `/sklep/account/dashboard` daje `200`, po podmianie hasha w `sylius_
 żądanie daje `302` na logowanie. Dlatego wszystko, co dotyka hasła przy logowaniu (np. rotacja
 `plainPassword` w logowaniu Google), grozi wylogowaniem przy następnym kliknięciu.
 
+`AccessDeniedException` z bezpieczeństwa jest w `sentry.yaml` na liście `ignore_exceptions`. Gość
+wchodzący na `/sklep/account/*` dostaje przekierowanie na logowanie, ale Symfony rzuca ten wyjątek
+zanim `ExceptionListener` zamieni go na redirect — Sentry raportował to jako „Unhandled" i zasypywał
+listę błędów przy każdym takim wejściu. Kosztem jest to, że **nie zobaczysz w Sentry**, gdy zalogowany
+użytkownik trafi na zabronioną sekcję; nadal dostanie stronę 403, więc sygnał nie ginie całkiem.
+
 `App\Security\TokenDeauthenticationLogger` loguje takie unieważnienie na poziomie **error** —
 świadomie, nie `warning`, bo prod ma `fingers_crossed` z `action_level: error` i ostrzeżenia
 przepadają w buforze. W logu ląduje identyfikator użytkownika, klasa tokenu, role, prefiks hasha
