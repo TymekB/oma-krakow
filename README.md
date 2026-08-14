@@ -393,6 +393,14 @@ je nasz kod, czy Sylius. Świadomie **nie da się wyłączyć** maili od resetu 
 wyłączenie ich zablokowałoby rejestrację i odzyskiwanie dostępu. Ręczne „wyślij ponownie"
 z widoku zamówienia też działa mimo wyłączonego zdarzenia — to jawna decyzja obsługi, nie automat.
 
+### Bez namawiania na aktualizację Syliusa
+
+Dzwonek w panelu pokazywał „Dostępna jest nowa wersja systemu" — to `HubNotificationProvider`, który
+odpytuje hub Syliusa. Wyłącza go `sylius_admin.notifications.hub_enabled: false`
+(`config/packages/oma_admin_notifications.yaml`). **Nie** `notifications.enabled: false`, bo to ukrywa
+cały dzwonek: szablon Syliusa owija go w `{% if notifications_enabled %}`. Gasimy więc tylko providera
+huba, a sam dzwonek zostaje wolny pod nasze powiadomienia.
+
 ## Ceny netto i brutto w panelu
 
 > **Ceny w panelu są brutto.** Obie stawki VAT mają `included_in_price = 1`, czyli kwota wpisana

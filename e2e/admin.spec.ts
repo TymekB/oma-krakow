@@ -91,6 +91,14 @@ test.describe('Panel admina', () => {
     expect(orderNumbers[0], 'zamówienia sprzed zmiany zachowują stare, 9-cyfrowe numery').toHaveLength(4);
   });
 
+  test('panel nie namawia na aktualizację Syliusa', async ({ page }) => {
+    const bell = page.locator('[data-test-notifications-icon]');
+
+    await expect(bell, 'dzwonek zostaje pod nasze powiadomienia').toHaveCount(1);
+    await expect(bell.locator('.badge.bg-red'), 'brak kropki „nowe"').toHaveCount(0);
+    await expect(page.locator('body')).not.toContainText('nowa wersja systemu');
+  });
+
   test('długa nazwa produktu nie wychodzi poza kartę w widoku opinii', async ({ page }) => {
     await page.goto('/admin/product-reviews/');
 
