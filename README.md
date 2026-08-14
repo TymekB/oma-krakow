@@ -494,6 +494,12 @@ Pokrywa to `tests/Factory/DefaultTaxCategoryProductVariantFactoryTest.php` oraz 
 `_security_admin` i `_security_shop`. Sprawdzone: zalogowany admin + zalogowany klient = panel `200`
 i `/sklep/account/dashboard` `200` w tym samym czasie.
 
+**Do panelu wchodzi się tylko przez `/admin/login`.** Formularz sklepu przyjmuje wyłącznie konta
+klientów — dane administratora kończą się na „Nieprawidłowe dane". Wcześniej `AdminLoginThroughShopListener`
+rozpoznawał dane admina wysłane na `/sklep/login-check` i logował go do firewalla `admin`,
+przekierowując na pulpit; ten listener został usunięty. Pilnuje tego test „dane admina w formularzu
+sklepu nie otwierają panelu" w `e2e/admin.spec.ts`.
+
 Zalogowanie do panelu **nie** otwiera konta w sklepie i nie powinno. `AdminUser` ma w Syliusie role
 `["ROLE_ADMINISTRATION_ACCESS"]` — **bez `ROLE_USER`** — a `access_control` wymaga na `/sklep/account`
 właśnie `ROLE_USER`. Stąd w Sentry `AccessDeniedException: The user doesn't have ROLE_USER` przy wejściu

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { loginToAdmin } from './helpers';
+import { ADMIN, loginToAdmin } from './helpers';
 
 test.describe('Panel admina', () => {
   test.beforeEach(async ({ page }) => {
@@ -190,6 +190,21 @@ test.describe('Panel admina', () => {
     const taxCategory = page.locator('select[id$="_taxCategory"]').first();
 
     await expect(taxCategory.locator('option:checked')).toHaveText('VAT 23%');
+  });
+});
+
+test.describe('Panel tylko przez /admin/login', () => {
+  test('dane admina w formularzu sklepu nie otwierają panelu', async ({ page }) => {
+    await page.goto('/sklep/login');
+    await page.locator('input[name="_username"]').fill(ADMIN.username);
+    await page.locator('input[name="_password"]').fill(ADMIN.password);
+    await page.locator('form[action*="login"] button[type="submit"]').last().click();
+
+    await expect(page, 'zostajemy na logowaniu sklepu').toHaveURL(/\/sklep\/login/);
+
+    const panel = await page.request.get('/admin/', { maxRedirects: 0 });
+    expect(panel.status(), 'panel nadal wymaga logowania').toBe(302);
+    expect(panel.headers()['location'], 'i odsyła na własne logowanie').toContain('/admin/login');
   });
 });
 
