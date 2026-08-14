@@ -31,6 +31,27 @@ test.describe('Panel admina', () => {
     expect(response.status(), 'plik tekstury jest serwowany, a nie 404').toBe(200);
   });
 
+  test('nagłówek i wyszukiwarka sidebara wypełniają całą szerokość', async ({ page }) => {
+    const metrics = await page.evaluate(() => {
+      const aside = document.querySelector('aside.navbar-vertical') as HTMLElement;
+      const brand = document.querySelector('.navbar-vertical .navbar-brand') as HTMLElement;
+      const search = document.querySelector('.navbar-vertical .menu-search') as HTMLElement;
+
+      return {
+        overflowY: getComputedStyle(aside).overflowY,
+        reservedGutter: aside.offsetWidth - aside.clientWidth,
+        asideRight: Math.round(aside.getBoundingClientRect().right),
+        brandRight: Math.round(brand.getBoundingClientRect().right),
+        searchRight: Math.round(search.getBoundingClientRect().right),
+      };
+    });
+
+    expect(metrics.overflowY, 'sidebar nie rezerwuje stałego paska przewijania').not.toBe('scroll');
+    expect(metrics.reservedGutter, 'brak zarezerwowanego gutteru scrollbara').toBe(0);
+    expect(metrics.brandRight, 'nagłówek sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
+    expect(metrics.searchRight, 'wyszukiwarka sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
+  });
+
   test('drzewo kategorii nie dubluje się po wejściu w edycję', async ({ page }) => {
     await page.goto('/admin/taxons/');
     await page.waitForLoadState('networkidle');
