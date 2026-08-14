@@ -487,6 +487,30 @@ migracja `Version20260813104500`.
 Pokrywa to `tests/Factory/DefaultTaxCategoryProductVariantFactoryTest.php` oraz test
 „nowy produkt ma domyślnie kategorię podatkową VAT 23%" w `e2e/admin.spec.ts`.
 
+## Sesja klienta i admina
+
+**To są dwa niezależne konta i mogą być zalogowane jednocześnie.** Firewalle mają osobne konteksty
+(`context: admin` i `context: shop`), więc w jednej sesji przeglądarki siedzą obok siebie klucze
+`_security_admin` i `_security_shop`. Sprawdzone: zalogowany admin + zalogowany klient = panel `200`
+i `/sklep/account/dashboard` `200` w tym samym czasie.
+
+Zalogowanie do panelu **nie** otwiera konta w sklepie i nie powinno. `AdminUser` ma w Syliusie role
+`["ROLE_ADMINISTRATION_ACCESS"]` — **bez `ROLE_USER`** — a `access_control` wymaga na `/sklep/account`
+właśnie `ROLE_USER`. Stąd w Sentry `AccessDeniedException: The user doesn't have ROLE_USER` przy wejściu
+na konto klienta z samą sesją panelu. Ten wyjątek jest obsłużony (kończy się przekierowaniem na
+logowanie), ale Sentry raportuje go jako „Unhandled".
+
+**Zmiana hasła w bazie wyrzuca z sesji natychmiast.** `ContextListener::hasUserChanged()` porównuje
+hash hasła z sesji z tym z bazy i przy różnicy unieważnia token — bez żadnego wygaśnięcia sesji.
+Odtworzone: `/sklep/account/dashboard` daje `200`, po podmianie hasha w `sylius_shop_user` to samo
+żądanie daje `302` na logowanie. Dlatego wszystko, co dotyka hasła przy logowaniu (np. rotacja
+`plainPassword` w logowaniu Google), grozi wylogowaniem przy następnym kliknięciu.
+
+`App\Security\TokenDeauthenticationLogger` loguje takie unieważnienie na poziomie **error** —
+świadomie, nie `warning`, bo prod ma `fingers_crossed` z `action_level: error` i ostrzeżenia
+przepadają w buforze. W logu ląduje identyfikator użytkownika, klasa tokenu, role, prefiks hasha
+i ścieżka, więc następne wystąpienie da się przypisać do konkretnego konta.
+
 ## Zweryfikowane opinie
 
 Opinię o produkcie może wystawić **tylko zalogowany klient**, a opinia autora, który ten produkt

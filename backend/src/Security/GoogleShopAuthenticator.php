@@ -107,7 +107,7 @@ final class GoogleShopAuthenticator extends OAuth2Authenticator
 
         $canonicalEmail = $this->canonicalizer->canonicalize($email) ?? $email;
 
-        $existingUser = $this->shopUserRepository->findOneBy(['username' => $canonicalEmail]);
+        $existingUser = $this->shopUserRepository->findOneBy(['usernameCanonical' => $canonicalEmail]);
 
         if ($existingUser instanceof ShopUserInterface) {
             $this->activateUnverifiedUser($existingUser, $googleUser);
