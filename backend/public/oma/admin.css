@@ -283,6 +283,17 @@
   border-color: rgba(250, 246, 241, 0.15);
 }
 
+header.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1010;
+  background-color: #fff;
+}
+
+.page-wrapper .page-header {
+  top: 55px;
+}
+
 .row-cards > [class*='col-'],
 .container-xl .row > .col-sm-6.col-lg-3 {
   display: flex;

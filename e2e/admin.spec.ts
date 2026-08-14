@@ -52,6 +52,34 @@ test.describe('Panel admina', () => {
     expect(metrics.searchRight, 'wyszukiwarka sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
   });
 
+  test('górny pasek zostaje przypięty po scrollu, a menu użytkownika dostępne', async ({ page }) => {
+    await page.goto('/admin/');
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await page.waitForTimeout(200);
+
+    const metrics = await page.evaluate(() => {
+      const header = document.querySelector('header.navbar') as HTMLElement;
+      const pageHeader = document.querySelector('.page-header') as HTMLElement;
+      const hr = header.getBoundingClientRect();
+      const pr = pageHeader.getBoundingClientRect();
+      const userControl = document.querySelector('header.navbar [data-bs-toggle="dropdown"], header.navbar a[href*="logout"], header.navbar .nav-link');
+      const ur = userControl?.getBoundingClientRect();
+
+      return {
+        headerPosition: getComputedStyle(header).position,
+        headerTop: Math.round(hr.top),
+        pageHeaderTop: Math.round(pr.top),
+        headerBottom: Math.round(hr.bottom),
+        userVisible: !!ur && ur.top >= 0 && ur.top < window.innerHeight && ur.height > 0,
+      };
+    });
+
+    expect(metrics.headerPosition, 'górny pasek jest sticky').toBe('sticky');
+    expect(metrics.headerTop, 'górny pasek przypięty do góry po scrollu').toBe(0);
+    expect(metrics.userVisible, 'menu użytkownika (wylogowanie) dostępne po scrollu').toBe(true);
+    expect(metrics.pageHeaderTop, 'nagłówek strony nie nachodzi na górny pasek').toBeGreaterThanOrEqual(metrics.headerBottom - 2);
+  });
+
   test('drzewo kategorii nie dubluje się po wejściu w edycję', async ({ page }) => {
     await page.goto('/admin/taxons/');
     await page.waitForLoadState('networkidle');
