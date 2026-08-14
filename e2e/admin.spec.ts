@@ -32,24 +32,38 @@ test.describe('Panel admina', () => {
   });
 
   test('nagłówek i wyszukiwarka sidebara wypełniają całą szerokość', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 620 });
+
     const metrics = await page.evaluate(() => {
       const aside = document.querySelector('aside.navbar-vertical') as HTMLElement;
       const brand = document.querySelector('.navbar-vertical .navbar-brand') as HTMLElement;
       const search = document.querySelector('.navbar-vertical .menu-search') as HTMLElement;
+      const header = document.querySelector('header.navbar') as HTMLElement;
+
+      const scrollTopBefore = aside.scrollTop;
+      aside.scrollTop = 120;
+      const scrollable = aside.scrollTop > 0;
+      aside.scrollTop = scrollTopBefore;
 
       return {
         overflowY: getComputedStyle(aside).overflowY,
+        overflows: aside.scrollHeight > aside.clientHeight,
+        scrollable,
         reservedGutter: aside.offsetWidth - aside.clientWidth,
         asideRight: Math.round(aside.getBoundingClientRect().right),
         brandRight: Math.round(brand.getBoundingClientRect().right),
         searchRight: Math.round(search.getBoundingClientRect().right),
+        headerLeft: Math.round(header.getBoundingClientRect().left),
       };
     });
 
+    expect(metrics.overflows, 'przy niskim oknie menu sidebara się przewija').toBe(true);
     expect(metrics.overflowY, 'sidebar nie rezerwuje stałego paska przewijania').not.toBe('scroll');
-    expect(metrics.reservedGutter, 'brak zarezerwowanego gutteru scrollbara').toBe(0);
+    expect(metrics.reservedGutter, 'przewijany sidebar nie rezerwuje miejsca na pasek').toBe(0);
+    expect(metrics.scrollable, 'sidebar nadal daje się przewijać').toBe(true);
     expect(metrics.brandRight, 'nagłówek sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
     expect(metrics.searchRight, 'wyszukiwarka sięga prawej krawędzi sidebara').toBe(metrics.asideRight);
+    expect(metrics.headerLeft, 'biały pasek styka się z sidebarem bez szczeliny').toBe(metrics.asideRight);
   });
 
   test('górny pasek zostaje przypięty po scrollu, a menu użytkownika dostępne', async ({ page }) => {

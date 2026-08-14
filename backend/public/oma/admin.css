@@ -166,25 +166,13 @@
 .navbar-vertical,
 .navbar-vertical.navbar-expand-lg {
   overflow-y: auto !important;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(250, 246, 241, 0.28) transparent;
+  box-shadow: none !important;
+  scrollbar-width: none;
 }
 
 .navbar-vertical::-webkit-scrollbar {
-  width: 8px;
-}
-
-.navbar-vertical::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.navbar-vertical::-webkit-scrollbar-thumb {
-  background-color: rgba(250, 246, 241, 0.28);
-  border-radius: 4px;
-}
-
-.navbar-vertical::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(250, 246, 241, 0.45);
+  width: 0;
+  height: 0;
 }
 
 .navbar-vertical a:hover,
