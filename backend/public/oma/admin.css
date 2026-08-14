@@ -424,3 +424,12 @@ body.antialiased,
   box-shadow: 0 0 0 0.2rem rgba(90, 31, 44, 0.15);
   color: inherit;
 }
+
+.thumbnail-box {
+  min-width: 0;
+}
+
+.thumbnail-box-content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

@@ -91,6 +91,28 @@ test.describe('Panel admina', () => {
     expect(orderNumbers[0], 'zamówienia sprzed zmiany zachowują stare, 9-cyfrowe numery').toHaveLength(4);
   });
 
+  test('długa nazwa produktu nie wychodzi poza kartę w widoku opinii', async ({ page }) => {
+    await page.goto('/admin/product-reviews/');
+
+    const firstReview = page.locator('a[href*="/admin/product-reviews/"][href$="/edit"]').first();
+    await expect(firstReview).toBeVisible();
+    await firstReview.click();
+
+    const overflow = await page.evaluate(() => {
+      const box = document.querySelector('.thumbnail-box') as HTMLElement | null;
+      const card = box?.closest('.card') as HTMLElement | null;
+
+      if (null === box || null === card) {
+        return null;
+      }
+
+      return Math.round(box.getBoundingClientRect().right - card.getBoundingClientRect().right);
+    });
+
+    expect(overflow, 'karta produktu istnieje w widoku opinii').not.toBeNull();
+    expect(overflow, 'nazwa zawija się w karcie, nie wystaje poza nią').toBeLessThanOrEqual(0);
+  });
+
   test('nowy produkt ma domyślnie kategorię podatkową VAT 23%', async ({ page }) => {
     await page.goto('/admin/products/new/simple');
 

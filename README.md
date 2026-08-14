@@ -66,6 +66,14 @@ asercja na atrybucie nie wystarcza — trzeba odczekać, aż zniknie klasa `coll
 
 **Yarn w `backend/`.** Rootowy `package.json` (Angular) deklaruje `packageManager: npm`, przez co yarn wychodził w górę drzewa i odmawiał startu — dlatego `backend/package.json` ma własne `packageManager: yarn@1.22.22`. Przy Node 23 instaluj z `--ignore-engines`.
 
+**`min-width: 20rem` Syliusa rozpychało karty w panelu.** `.thumbnail-box` (miniatura + nazwa
+produktu) ma w stylach Syliusa `min-width: 20rem`, więc w wąskiej kolumnie — na przykład w karcie
+*Produkt* na widoku opinii — nie mieściło się i **nazwa wychodziła poza kartę** (zmierzone: 71 px za
+prawą krawędzią przy szerokości okna 1400). `public/oma/admin.css` zeruje `min-width` na boxie i jego
+zawartości oraz dodaje `overflow-wrap: anywhere`, żeby długa nazwa się zawijała. Lista produktów
+z tego nie korzysta (ma osobną kolumnę obrazka), więc nie ucierpiała. Pilnuje tego test „długa nazwa
+produktu nie wychodzi poza kartę w widoku opinii" w `e2e/admin.spec.ts`.
+
 **Produkt bez wariantów wywracał cały sklep.** Utworzenie produktu konfigurowalnego w panelu daje
 produkt **włączony, w kanale, w kategorii i z zerem wariantów** — Sylius nie wymaga wariantu przy
 zapisie, dodajesz go osobnym krokiem. W tym stanie `CardComponent::getProductVariant()` rzucał
