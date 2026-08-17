@@ -39,6 +39,7 @@ security:
             logout:
                 path: sylius_admin_logout
                 target: sylius_admin_login
+                invalidate_session: false
 
         api_admin:
             pattern: "%sylius.security.api_admin_regex%/.*"

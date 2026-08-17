@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ADMIN, loginToAdmin } from './helpers';
+import { ADMIN, loginToAdmin, registerVerifiedCustomer, uniqueEmail } from './helpers';
 
 test.describe('Panel admina', () => {
   test.beforeEach(async ({ page }) => {
@@ -213,6 +213,37 @@ test.describe('Panel tylko przez /admin/login', () => {
     const panel = await page.request.get('/admin/', { maxRedirects: 0 });
     expect(panel.status(), 'panel nadal wymaga logowania').toBe(302);
     expect(panel.headers()['location'], 'i odsyła na własne logowanie').toContain('/admin/login');
+  });
+});
+
+test.describe('Rozdzielone sesje panelu i sklepu', () => {
+  test('wylogowanie z panelu nie rusza sesji sklepu', async ({ page }) => {
+    await loginToAdmin(page);
+    await registerVerifiedCustomer(page, uniqueEmail('dwie-sesje'));
+
+    expect((await page.request.get('/sklep/account/dashboard', { maxRedirects: 0 })).status()).toBe(200);
+    expect((await page.request.get('/admin/', { maxRedirects: 0 })).status()).toBe(200);
+
+    await page.goto('/admin/logout');
+
+    expect((await page.request.get('/admin/', { maxRedirects: 0 })).status(), 'panel wylogowany').toBe(302);
+    expect(
+      (await page.request.get('/sklep/account/dashboard', { maxRedirects: 0 })).status(),
+      'konto klienta zostaje zalogowane',
+    ).toBe(200);
+  });
+
+  test('wylogowanie ze sklepu nie rusza sesji panelu', async ({ page }) => {
+    await loginToAdmin(page);
+    await registerVerifiedCustomer(page, uniqueEmail('dwie-sesje'));
+
+    await page.goto('/sklep/logout');
+
+    expect(
+      (await page.request.get('/sklep/account/dashboard', { maxRedirects: 0 })).status(),
+      'klient wylogowany',
+    ).toBe(302);
+    expect((await page.request.get('/admin/', { maxRedirects: 0 })).status(), 'panel zostaje zalogowany').toBe(200);
   });
 });
 

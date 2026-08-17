@@ -494,6 +494,14 @@ Pokrywa to `tests/Factory/DefaultTaxCategoryProductVariantFactoryTest.php` oraz 
 `_security_admin` i `_security_shop`. Sprawdzone: zalogowany admin + zalogowany klient = panel `200`
 i `/sklep/account/dashboard` `200` w tym samym czasie.
 
+**Oba wylogowania mają `invalidate_session: false`.** Sklep i panel dzielą jedną sesję PHP, a Symfony
+domyślnie **niszczy całą sesję** przy wylogowaniu — więc „Wyloguj" w panelu zabierało ze sobą token
+sklepu i klient wylatywał razem z adminem. Sklep miał ten flagę od początku, panel jej nie miał; teraz
+mają ją oba i każde wylogowanie czyści tylko własny firewall. Sprawdzone w obie strony: po wylogowaniu
+z panelu konto klienta odpowiada `200`, a po wylogowaniu ze sklepu panel odpowiada `200`. Bez tej linii
+pierwszy przypadek daje `302`. Pilnują tego dwa testy w sekcji „Rozdzielone sesje panelu i sklepu"
+w `e2e/admin.spec.ts`.
+
 **Do panelu wchodzi się tylko przez `/admin/login`.** Formularz sklepu przyjmuje wyłącznie konta
 klientów — dane administratora kończą się na „Nieprawidłowe dane". Wcześniej `AdminLoginThroughShopListener`
 rozpoznawał dane admina wysłane na `/sklep/login-check` i logował go do firewalla `admin`,
